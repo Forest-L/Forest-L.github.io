@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on 主打Kubernetes及开源组件</title>
+    <title>Posts on 一切皆有可能</title>
     <link>https://Forest-L.github.io/post/</link>
-    <description>Recent content in Posts on 主打Kubernetes及开源组件</description>
+    <description>Recent content in Posts on 一切皆有可能</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
@@ -247,36 +247,61 @@ Propoetides &lt;strong&gt;parte&lt;/strong&gt;.&lt;/p&gt;
     </item>
     
     <item>
-      <title>Emoji Support</title>
-      <link>https://Forest-L.github.io/post/emoji-support/</link>
+      <title>asciinema</title>
+      <link>https://Forest-L.github.io/post/asciinema/</link>
       <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/emoji-support/</guid>
-      <description>&lt;p&gt;Emoji can be enabled in a Hugo project in a number of ways.&lt;/p&gt;
-&lt;p&gt;The &lt;a href=&#34;https://gohugo.io/functions/emojify/&#34;&gt;&lt;code&gt;emojify&lt;/code&gt;&lt;/a&gt; function can be called directly in templates or &lt;a href=&#34;https://gohugo.io/templates/shortcode-templates/#inline-shortcodes&#34;&gt;Inline Shortcodes&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;To enable emoji globally, set &lt;code&gt;enableEmoji&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in your site’s &lt;a href=&#34;https://gohugo.io/getting-started/configuration/&#34;&gt;configuration&lt;/a&gt; and then you can type emoji shorthand codes directly in content files; e.g.&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;nowrap&#34;&gt;&lt;span class=&#34;emojify&#34;&gt;🙈&lt;/span&gt; &lt;code&gt;:see_no_evil:&lt;/code&gt;&lt;/span&gt;  &lt;span class=&#34;nowrap&#34;&gt;&lt;span class=&#34;emojify&#34;&gt;🙉&lt;/span&gt; &lt;code&gt;:hear_no_evil:&lt;/code&gt;&lt;/span&gt;  &lt;span class=&#34;nowrap&#34;&gt;&lt;span class=&#34;emojify&#34;&gt;🙊&lt;/span&gt; &lt;code&gt;:speak_no_evil:&lt;/code&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;br&gt;
-&lt;p&gt;The &lt;a href=&#34;http://www.emoji-cheat-sheet.com/&#34;&gt;Emoji cheat sheet&lt;/a&gt; is a useful reference for emoji shorthand codes.&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;N.B.&lt;/strong&gt; The above steps enable Unicode Standard emoji characters and sequences in Hugo, however the rendering of these glyphs depends on the browser and the platform. To style the emoji you can either use a third party emoji font or a font stack; e.g.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;.emoji {
-font-family: Apple Color Emoji,Segoe UI Emoji,NotoColorEmoji,Segoe UI Symbol,Android Emoji,EmojiSymbols;
-}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+      <guid>https://Forest-L.github.io/post/asciinema/</guid>
+      <description>&lt;h1 id=&#34;1-asciinema-终端录屏&#34;&gt;1. asciinema 终端录屏&lt;/h1&gt;
+&lt;p&gt;asciinema是一个在终端下非常棒的录制分享软件，基于文本的录屏工具，对终端输入输出进行捕捉， 然后以文本的形式来记录和回放！对多种系统都支持。&lt;/p&gt;
+&lt;h2 id=&#34;2-asciinema安装&#34;&gt;2. asciinema安装&lt;/h2&gt;
+&lt;p&gt;各种安装方法如连接，以下按centos为例进行：
+&lt;a href=&#34;https://asciinema.org/docs/installation&#34;&gt;https://asciinema.org/docs/installation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;yum install -y epel-release &lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;yum install -y asciinema&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;检查是否成功，看asciinema版本&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;asciinema --version&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;3-指令及常见用法&#34;&gt;3. 指令及常见用法&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;[root@i-cvswezkk ~]# asciinema --help
+usage: asciinema [-h] [--version] {rec,play,upload,auth} ...
 
-&lt;style&gt;
-.emojify {
-	font-family: Apple Color Emoji,Segoe UI Emoji,NotoColorEmoji,Segoe UI Symbol,Android Emoji,EmojiSymbols;
-	font-size: 2rem;
-	vertical-align: middle;
-}
-@media screen and (max-width:650px) {
-    .nowrap {
-	display: block;
-	margin: 25px 0;
-}
-}
-&lt;/style&gt;</description>
+Record and share your terminal sessions, the right way.
+
+positional arguments:
+  {rec,play,upload,auth}
+    rec         Record terminal session                                 # 记录终端会话
+    play        Replay terminal session                                 # 播放重播终端会话
+    upload      Upload locally saved terminal session to asciinema.org  #上传本地保存的终端会话到asciinema.org
+    auth                Manage recordings on asciinema.org account      # 管理asciinema.org帐户上的记录
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program&#39;s version number and exit
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;31-各个指令具体含义&#34;&gt;3.1 各个指令具体含义：&lt;/h3&gt;
+&lt;p&gt;.cast和.json文件是一样的，注册asciinema就需要邮箱即可，然后邮箱认证即可，可能收到邮箱的时间长点。
+记录终端并将其上传到asciinema.org
+&lt;code&gt;asciinema rec&lt;/code&gt;
+将终端记录到本地文件
+&lt;code&gt;asciinema rec demo.cast&lt;/code&gt;
+记录终端并将其上传到asciinema.org，指定标题：&amp;ldquo;my aslog1&amp;rdquo;
+&lt;code&gt;asciinema rec -t &amp;quot;my aslog1&amp;quot;&lt;/code&gt;
+将终端记录到本地文件，将空闲时间限制到最大2.5秒
+&lt;code&gt;asciinema rec -i 2.5 demo.cast&lt;/code&gt;
+从本地文件重放终端记录
+&lt;code&gt;asciinema play demo.cast&lt;/code&gt;
+asciinema还提供了一个可以管理asciinema个人账户所拥有的会话文件的功能, 命令为
+&lt;code&gt;asciinema auth&lt;/code&gt;
+执行命令&amp;quot;asciinema auth&amp;quot;命令后, 会返回一个网络地址, 点击这个地址就会打开asciinema个人账号注册界面
+本地修改记录文件
+&lt;code&gt;vi demo.cast&lt;/code&gt;
+本地修改记录文件再重新上传至asciinema.org，&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# asciinema upload /root/260132.json
+View the recording at:
+
+    https://asciinema.org/a/M1K9rrUHl5D0q3TOVDhtRcJIn
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;4浏览器访问效果&#34;&gt;4.浏览器访问效果&lt;/h2&gt;
+&lt;p&gt;双击对应的一个录屏，有share  download settings，且settings可以设置参数
+&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1g5jeey8ujlj30xe0m83yk.jpg&#34; alt=&#34;asciinema-demo效果图&#34; title=&#34;asciinema-demo效果图&#34;&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

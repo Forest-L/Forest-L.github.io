@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>一切皆有可能  | themes</title>
+	<title>一切皆有可能  | asciinema</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -26,9 +26,6 @@
 
 	
 
-	
-	<link rel="alternate" href="/categories/themes/index.xml" type="application/rss+xml" title="一切皆有可能">
-	<link rel="feed" href="/categories/themes/index.xml" type="application/rss+xml" title="一切皆有可能">
 	
 	
 	
@@ -139,17 +136,112 @@ onload='renderMathInElement(document.body);'></script>
 		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
 			<div
 				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
-					<div class="pb-4">
-		<h1 >
-			<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
-		</h1>
-	</div>
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">asciinema</h1>
+
+<h3 class="text-java-700 font-normal leading-relaxed pt-2">终端录屏软件</h3>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/asciinema'>asciinema</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-03-05T00:00:00Z">2019-3-5 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h1 id="1-asciinema-终端录屏">1. asciinema 终端录屏</h1>
+<p>asciinema是一个在终端下非常棒的录制分享软件，基于文本的录屏工具，对终端输入输出进行捕捉， 然后以文本的形式来记录和回放！对多种系统都支持。</p>
+<h2 id="2-asciinema安装">2. asciinema安装</h2>
+<p>各种安装方法如连接，以下按centos为例进行：
+<a href="https://asciinema.org/docs/installation">https://asciinema.org/docs/installation</a></p>
+<p><code>yum install -y epel-release </code></p>
+<p><code>yum install -y asciinema</code></p>
+<p>检查是否成功，看asciinema版本</p>
+<p><code>asciinema --version</code></p>
+<h3 id="3-指令及常见用法">3. 指令及常见用法</h3>
+<pre><code>[root@i-cvswezkk ~]# asciinema --help
+usage: asciinema [-h] [--version] {rec,play,upload,auth} ...
+
+Record and share your terminal sessions, the right way.
+
+positional arguments:
+  {rec,play,upload,auth}
+    rec         Record terminal session                                 # 记录终端会话
+    play        Replay terminal session                                 # 播放重播终端会话
+    upload      Upload locally saved terminal session to asciinema.org  #上传本地保存的终端会话到asciinema.org
+    auth                Manage recordings on asciinema.org account      # 管理asciinema.org帐户上的记录
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+</code></pre><h3 id="31-各个指令具体含义">3.1 各个指令具体含义：</h3>
+<p>.cast和.json文件是一样的，注册asciinema就需要邮箱即可，然后邮箱认证即可，可能收到邮箱的时间长点。
+记录终端并将其上传到asciinema.org
+<code>asciinema rec</code>
+将终端记录到本地文件
+<code>asciinema rec demo.cast</code>
+记录终端并将其上传到asciinema.org，指定标题：&ldquo;my aslog1&rdquo;
+<code>asciinema rec -t &quot;my aslog1&quot;</code>
+将终端记录到本地文件，将空闲时间限制到最大2.5秒
+<code>asciinema rec -i 2.5 demo.cast</code>
+从本地文件重放终端记录
+<code>asciinema play demo.cast</code>
+asciinema还提供了一个可以管理asciinema个人账户所拥有的会话文件的功能, 命令为
+<code>asciinema auth</code>
+执行命令&quot;asciinema auth&quot;命令后, 会返回一个网络地址, 点击这个地址就会打开asciinema个人账号注册界面
+本地修改记录文件
+<code>vi demo.cast</code>
+本地修改记录文件再重新上传至asciinema.org，</p>
+<pre><code># asciinema upload /root/260132.json
+View the recording at:
+
+    https://asciinema.org/a/M1K9rrUHl5D0q3TOVDhtRcJIn
+</code></pre><h2 id="4浏览器访问效果">4.浏览器访问效果</h2>
+<p>双击对应的一个录屏，有share  download settings，且settings可以设置参数
+<img src="http://ww1.sinaimg.cn/large/006bbiLEgy1g5jeey8ujlj30xe0m83yk.jpg" alt="asciinema-demo效果图" title="asciinema-demo效果图"></p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
 	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
 	
 	
 	<li class="px-1 md:px-0">
-		<a href="/categories/" title="分类 page" 
-			class="font-medium text-medium-red-violet-600 hover:text-medium-red-violet-400" >
+		<a href="/categories/" title="分类 page" >
 			分类
 		</a>
 	</li>
@@ -167,10 +259,6 @@ onload='renderMathInElement(document.body);'></script>
 	</li>
 	
 	
-	<li>
-		<a href='/categories/themes/index.xml'>RSS</a>
-	</li>
-	
 	
 	
 	<div id="fastSearch" class="m-0">
@@ -183,127 +271,6 @@ onload='renderMathInElement(document.body);'></script>
 	</div>
 	
 </ul>
-			</div>
-		</header>
-		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
-			
-<h1 class="pb-4">
-	themes
-</h1>
-<div>
-	<section>
-		
-		<div>
-			<div class="pb-8">
-	<div class="font-serif font-medium text-xl">
-		<a href="https://Forest-L.github.io/post/markdown-syntax/">
-			Markdown Syntax Guide
-		</a>
-	</div>
-	
-	
-	
-	
-	<div class="font-serif text-gray-600 font-light pt-1">
-		Sample article showcasing basic Markdown syntax and formatting for HTML elements.</div>
-
-	
-	<div class="flex flex-wrap justify-between pt-1"><div class="md:flex-grow-0 font-light">
-	
-	
-	
-	
-	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
-		href='/categories/themes'>themes</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
-		href='/categories/syntax'>syntax</a>
-	
-	
-	
-
-	
-	&nbsp;&nbsp;
-	
-
-	
-	
-	
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/markdown'>markdown</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/css'>css</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/html'>html</a>&nbsp;&#47;
-	
-	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/themes'>themes</a>
-	
-	
-	
-</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light"
-			datetime="2019-03-11T00:00:00Z">2019-3-11 00:00</time>
-	</div>
-</div>
-		</div>
-		
-	</section>
-</div>
-
-		</main>
-		<aside role="contentinfo"
-			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
-			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
-				
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="md:max-w-xs  flex flex-col md:items-end pt-2">
 	
 
 <div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
@@ -336,25 +303,47 @@ onload='renderMathInElement(document.body);'></script>
 	</a>
 	
 </div>
-	<div class="a-gray text-sm text-gray-500 leading-tight">
+	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a 
-			href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>.
-			<br />
-			22 pages, 1681 words in total.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 688 words in this page.
 	</div>
 </div>
+
 			</div>
 		</aside>
 		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
 			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/about/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        About
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/math-typesetting/">
+        Math Typesetting
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
 
 
 
-
-
-
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
 
 		</footer>
 		
