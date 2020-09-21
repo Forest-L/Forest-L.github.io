@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | iptables指令将容器内部端口映射到外部宿主机端口指南</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">iptables指令将容器内部端口映射到外部宿主机端口指南</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h1 id="kubesphere21-ha环境一个master或者两个master宕机恢复">kubesphere2.1-HA环境，一个master或者两个master宕机恢复</h1>
+<p>kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而很多事情都有意外，当其中一个master或者两个master卡住了，或者重启都不能自动恢复的情况下，那么怎么恢复呢，以下分一个master宕机和两个master宕机的恢复方法。</p>
+<h3 id="验证环境信息">验证环境信息</h3>
+<pre><code>os: centos7.5
+master1: 192.168.11.6
+master2: 192.168.11.8
+master3: 192.168.11.13
+node1: 192.168.11.14
+lb: 192.168.11.253
+nfs服务端: 192.168.11.14
+</code></pre><h2 id="一个master宕机的模拟及恢复方法">一个master宕机的模拟及恢复方法</h2>
+<ul>
+<li>正常的环境：nodes都running，etcd服务都正常。</li>
+</ul>
+<pre><code>kubectl get nodes
+NAME      STATUS   ROLES    AGE   VERSION
+master1   Ready    master   19m   v1.15.5
+master2   Ready    master   16m   v1.15.5
+master3   Ready    master   16m   v1.15.5
+node1     Ready    worker   14m   v1.15.5
+
+export ETCDCTL_API=3
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 3.8 MB, true, 5, 4434
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 3.8 MB, false, 5, 4434
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 3.8 MB, false, 5, 4434
+</code></pre><ul>
+<li>一个master宕机情况，把master2重置，看nodes和etcd情况。还需在界面创建一些带有存储的pod用例。</li>
+</ul>
+<pre><code>kubectl get nodes   
+NAME      STATUS     ROLES    AGE   VERSION
+master1   Ready      master   57m   v1.15.5
+master2   NotReady   master   55m   v1.15.5
+master3   Ready      master   55m   v1.15.5
+node1     Ready      worker   52m   v1.15.5
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 5, 14953
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 5, 14972
+</code></pre><ul>
+<li>恢复方法：修改脚本中hosts.ini文件，需要注意顺序
+在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面,然后在另一个终端机器上重新执行安装脚本。以下恢复情况，etcd正常，nodes也正常，业务数据存在且业务pod没有中断正常使用。</li>
+</ul>
+<pre><code>kubectl get nodes
+NAME      STATUS     ROLES    AGE   VERSION
+master1   Ready      master   83m   v1.15.5
+master2   Ready      master   80m   v1.15.5
+master3   Ready      master   80m   v1.15.5
+node1     Ready      worker   78m   v1.15.5
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 11, 20292
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 11 MB, false, 11, 20297
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 11, 20298
+
+docker ps | grep tomcat
+6863620b07cf        882487b8be1d                                     &quot;catalina.sh run&quot;        17 minutes ago       Up 17 minutes                           k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
+</code></pre><h2 id="两个master宕机的模拟及恢复方法">两个master宕机的模拟及恢复方法</h2>
+<ul>
+<li>两个master宕机情况，把master2和master3重置，看nodes和etcd情况，nodes不正常，etcd两个不正常。</li>
+</ul>
+<pre><code>kubectl get nodes
+Unable to connect to the server: EOF
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
+Failed to get the status of endpoint 192.168.11.13:2379 (context deadline exceeded)
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, false, 12, 27944
+</code></pre><ul>
+<li>恢复方法：
+1、同样需要在host.ini文件修改master的顺序，由于我们重置2和3，所有此处不用修改顺序；
+2、在已解压的安装介质目录下，进入k8s/roles/kubernetes/preinstall/tasks/main.yml文件，用#注释如下内容，重跑安装脚本，作用说明：在重置的master2和master3机器上安装docker和etcd，但整个集群还需修复。。</li>
+</ul>
+<pre><code>#- import_tasks: 0020-verify-settings.yml
+#  when:
+#    - not dns_late
+#  tags:
+#    - asserts
+</code></pre><p>3、在master2机器上，临时修复master2节点的etcd服务，执行如下指令：</p>
+<pre><code>停止etcd：systemctl stop etcd
+备份etcd数据：mv /var/lib/etcd /var/lib/etcd-bak
+从master1的/var/backups/kube_etcd/备份目录下拷贝最近时间的snapshot.db至master2机器上
+在master2先转为版本3指令令：export ETCDCTL_API=3
+在master2恢复指令：etcdctl snapshot restore /root/snapshot.db    --endpoints=192.168.11.8:2379    --cert=/etc/ssl/etcd/ssl/node-master2.pem    --key=/etc/ssl/etcd/ssl/node-master2-key.pem    --cacert=/etc/ssl/etcd/ssl/ca.pem --data-dir=/var/lib/etcd
+重启etcd: systemctl restart etcd
+</code></pre><p>4、修改host.ini文件master2和master3顺序，把[all][kube-master][etcd]三个组的master3放在最后面，再次跑安装脚本。其中的host.ini文件为</p>
+<pre><code>[all]
+master1 ansible_connection=local  ip=192.168.11.6
+master2  ansible_host=192.168.11.8  ip=192.168.11.8  ansible_ssh_pass=
+master3  ansible_host=192.168.11.13  ip=192.168.11.13  ansible_ssh_pass=
+node1    ansible_host=192.168.11.14  ip=192.168.11.14  ansible_ssh_pass=
+
+[kube-master]
+master1
+master2
+master3
+
+[kube-node]
+node1
+
+[etcd]
+master1
+master2
+master3
+
+[k8s-cluster:children]
+kube-node
+kube-master 
+</code></pre><p>5、由第四步只是临时修复master2的etcd，并不完全修复，先全部修复作如下处理：</p>
+<pre><code>第四步执行过程中，z在“wait for etcd up”会报错，先ctrl +c 终止脚本；
+在master2机器上，停止etcd服务：systemctl stop etcd
+在master2机器上，删除etcd数据：rm -rf /var/lib/etcd
+再次修改host.ini文件，master2和master3顺序，把[all][kube-master][etcd]三个组的master2放在最后面，再次跑安装脚本即可。
+</code></pre><h2 id="验证结果">验证结果</h2>
+<ul>
+<li>集群中的nodes、etcd和带有存储数据的业务pod情况：</li>
+<li>集群中的nodes、etcd和带有存储数据的业务pod情况,nodes恢复正常，etcd服务也回复正常，带有存储的pod一直运行，集群恢复成功：</li>
+</ul>
+<pre><code>[root@master1 ~]# kubectl get nodes
+NAME      STATUS   ROLES    AGE     VERSION
+master1   Ready    master   4h56m   v1.15.5
+master2   Ready    master   4h53m   v1.15.5
+master3   Ready    master   4h53m   v1.15.5
+node1     Ready    worker   4h51m   v1.15.5
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 12 MB, false, 1372, 32116
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 12 MB, true, 1372, 32116
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 12 MB, false, 1372, 32116
+
+docker ps | grep tomcat
+6863620b07cf        882487b8be1d                                     &quot;catalina.sh run&quot;        4 hours ago         Up 4 hours                              k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
+</code></pre></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1747 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/kubernetes%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A4%E8%AF%81%E7%9A%84%E6%8F%90%E4%BA%A4%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/kubekey%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tcpdump%E6%8A%93%E5%8C%85%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%B7%BB%E5%8A%A0%E5%85%AC%E7%BD%91ip%E5%88%B0kubernetes%E7%9A%84apiserver%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubernetes%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A4%E8%AF%81%E7%9A%84%E6%8F%90%E4%BA%A4%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E5%9F%BA%E4%BA%8Ekeepalived-haproxy%E9%83%A8%E7%BD%B2kubesphere%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp%E8%81%94%E5%90%88k8s%E5%9C%A8kubesphere%E5%BA%94%E7%94%A8/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere%E5%9F%BA%E4%BA%8Evelero%E5%81%9A%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BF%81%E7%A7%BB/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%B5%8B%E9%87%8F%E7%BD%91%E7%BB%9C%E9%80%9F%E5%BA%A6%E5%B7%A5%E5%85%B7%E4%B9%8Biperf%E8%AE%A4%E7%9F%A5/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-%E5%AD%98%E5%82%A8%E5%9C%A8-kubesphere-%E4%B8%8A%E7%9A%84%E5%AE%9E%E8%B7%B5/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/terrform%E5%AF%B9%E6%8E%A5qingcloud%E5%AE%89%E8%A3%85k8s/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%8E%92%E6%9F%A5linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%B7%A5%E5%85%B7/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s%E4%B9%8Bhelm%E9%83%A8%E7%BD%B2%E5%8F%8A%E7%94%A8%E6%B3%95/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%9E%84%E5%BB%BAarm-x86%E6%9E%B6%E6%9E%84%E7%9A%84docker-image%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

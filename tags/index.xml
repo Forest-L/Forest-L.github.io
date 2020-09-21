@@ -7,10 +7,100 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Mon, 11 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 11 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CKA</title>
+      <link>https://Forest-L.github.io/tags/cka/</link>
+      <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/cka/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>K8s</title>
+      <link>https://Forest-L.github.io/tags/k8s/</link>
+      <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>iptables</title>
+      <link>https://Forest-L.github.io/tags/iptables/</link>
+      <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/iptables/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux tools</title>
+      <link>https://Forest-L.github.io/tags/linux-tools/</link>
+      <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/linux-tools/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>chart</title>
+      <link>https://Forest-L.github.io/tags/chart/</link>
+      <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/chart/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>helm</title>
+      <link>https://Forest-L.github.io/tags/helm/</link>
+      <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/helm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>apt-get</title>
+      <link>https://Forest-L.github.io/tags/apt-get/</link>
+      <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/apt-get/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>yum</title>
+      <link>https://Forest-L.github.io/tags/yum/</link>
+      <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/yum/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>centos</title>
+      <link>https://Forest-L.github.io/tags/centos/</link>
+      <pubDate>Sun, 22 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/centos/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mysql</title>
+      <link>https://Forest-L.github.io/tags/mysql/</link>
+      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/mysql/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>css</title>
@@ -49,29 +139,11 @@
     </item>
     
     <item>
-      <title>text</title>
-      <link>https://Forest-L.github.io/tags/text/</link>
-      <pubDate>Sat, 09 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/tags/text/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>asciinema</title>
       <link>https://Forest-L.github.io/tags/asciinema/</link>
       <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/tags/asciinema/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Linux tools</title>
-      <link>https://Forest-L.github.io/tags/linux-tools/</link>
-      <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/tags/linux-tools/</guid>
       <description></description>
     </item>
     

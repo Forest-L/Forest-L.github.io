@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>K8s on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/k8s/</link>
+    <description>Recent content in K8s on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Sat, 11 Jul 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>CkA考试经验</title>
+      <link>https://Forest-L.github.io/post/cka-test-experience/</link>
+      <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/cka-test-experience/</guid>
+      <description>&lt;h1 id=&#34;cka考试经验&#34;&gt;CKA考试经验&lt;/h1&gt;
+&lt;p&gt;CKA: Kubernetes管理员认证（CKA）旨在确保认证持有者具备履行Kubernetes管理员职责的技能，知识和能力。如果企业想要申请 KCSP ，条件之一是：至少需要三名员工拥有CKA认证。
+&lt;img src=&#34;https://Forest-L.github.io/img/cka.jpg&#34; alt=&#34;CKA图片.jpg&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;1-考试报名&#34;&gt;1. 考试报名&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;%5Bhttps://www.cncf.io/certification/cka/%5D&#34;&gt;CKA报名地址&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;注意事项：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;1、报名成功之后，可在12个月之内进行考试，考试不过有一次补考机会。&lt;/p&gt;
+&lt;p&gt;2、CKA：74分或以上可以获得证书。&lt;/p&gt;
+&lt;p&gt;3、每年Cyber Monday（网络星期一，也就是黑五后的第一个星期一）有优惠或者某些辅导架构有优惠券。&lt;/p&gt;
+&lt;h2 id=&#34;2-备考&#34;&gt;2. 备考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;考试时你可以打开两个浏览器Tab，一个是考试窗口，一个用来查阅官方文档（仅允许访问https://kubernetes.io/docs/、https://github.com/kubernetes/ 和https://kubernetes.io/blog/ ）&lt;/li&gt;
+&lt;li&gt;查询文档的浏览器Tab可以弄成标签。&lt;/li&gt;
+&lt;li&gt;考试前一周看下官网k8s版本，然后部署一个同样版本的K8s练习。&lt;/li&gt;
+&lt;li&gt;可以参考考试大纲复习。&lt;/li&gt;
+&lt;li&gt;怎么复习，可以在自己搭建的环境下，操作指令，生成对应的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;3-考前检查及考试环境&#34;&gt;3. 考前检查及考试环境&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;考试形式: 在线监控，需要共享桌面和摄像头&lt;/li&gt;
+&lt;li&gt;考试环境: 在一个密闭空间，例如书房、卧室、会议室等，电脑屏幕不能对着窗户，房间里除了考生不能存在第二个人，考试的桌面不能放其它东西，水杯也不行&lt;/li&gt;
+&lt;li&gt;考试时间及题目: CKA-3小时-24道题&lt;/li&gt;
+&lt;li&gt;选择考试时间: 报名成功之后可以在12个月之内进行考试，考试之前需要选择考试时间，选择考试时间的时候记得先选择北京时区，默认是0时区时间。&lt;/li&gt;
+&lt;li&gt;电脑要求: 可以在这里WebDelivery Compatibility Check检测自己的电脑环境和网络速度等&lt;/li&gt;
+&lt;li&gt;选择的是Linux-Foundation&amp;mdash;&amp;gt;CKA-English&lt;/li&gt;
+&lt;li&gt;考试前考官检查:
+考试可以提前15分钟进入考试界面
+考官会以发消息的方式和你交流（没有语音交流）
+看不懂考官发的英文怎么办：可以在chrome浏览器右键翻译
+考官会让你共享摄像头，共享桌面 考官会让你出示能确认你身份ID的证件，我当时用的是罗技C310摄像头，无法对焦，护照看上去模糊到不行，后来考官又叫我给护照打光还是不行，后面又叫我打开我的手机，用手机相机当作放大镜用，这样才能看清楚。（我考CKAD的时候，我护照还没举稳，考官就说可以了，应该是考过CKA，他们系统里面已经有我的信息了，就随便瞄了一眼而已）
+考官会让你用摄像头环视房间一周，确认你的考试环境（当时我房间门开了一个小缝也要求我去把门关好，还是比较严格）
+考官会让你用摄像头看你的整个桌面和桌子底下
+考官会让你打开任务管理器，点击左下角简略信息，是否已关闭了其它后台服务。
+考官会让你再次点一下桌面共享，然后你叫你点击取消，然后就开始进入考试了&lt;/li&gt;
+&lt;li&gt;考试的界面:
+左边是题目
+右边是终端
+终端上面是共享摄像头、共享屏幕、考试信息等按钮（可以唤出记事本）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;4-考试心得&#34;&gt;4. 考试心得&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;有Notepad记事本，可以记录下自己环境信息，哪道题还没做，题目中的信息等。&lt;/li&gt;
+&lt;li&gt;一定要记得用鼠标，拷贝和粘贴特别方便。&lt;/li&gt;
+&lt;li&gt;尽量在官网中拷贝yaml文件到答题环境中。&lt;/li&gt;
+&lt;li&gt;很多指令记得不清楚，请使用-h，比如etcdctl,node不能调度等。&lt;/li&gt;
+&lt;li&gt;特别重要，根据个人考试，然后在浏览器中收藏的记录为：
+&lt;img src=&#34;https://Forest-L.github.io/img/content.png&#34; alt=&#34;CKA考试相关内容.png&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>K8s1.16在centos安装</title>
+      <link>https://Forest-L.github.io/post/k8s1.16-installed-on-centos-system/</link>
+      <pubDate>Sun, 22 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s1.16-installed-on-centos-system/</guid>
+      <description>&lt;h1 id=&#34;centos系统k8s-116版本安装&#34;&gt;centos系统k8s-1.16版本安装&lt;/h1&gt;
+&lt;p&gt;k8s1.16版本相对之前版本变化不小，亮点和升级参看&lt;a href=&#34;http://k8smeetup.com/article/N1lqGc0i8v&#34;&gt;v1.16说明&lt;/a&gt;。相关联的镜像和v1.16二进制包上传至百度云上，链接如下&lt;a href=&#34;https://pan.baidu.com/s/19khl0Hn5ZnZ8TvbO5HZVww&#34;&gt;k8s1.16介质，ftq5&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;1准备&#34;&gt;1.准备&lt;/h2&gt;
+&lt;h3 id=&#34;11系统准备&#34;&gt;1.1系统准备&lt;/h3&gt;
+&lt;p&gt;需要将主机ip和主机名放在每台机器的&lt;code&gt;vi /etc/hosts&lt;/code&gt;下&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;192.168.11.21 i-fahx5c7k&lt;/code&gt;
+&lt;code&gt;192.168.11.22 i-ouaaujhz&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;如果各个主机启用了防火墙，需要开启各个组件所需要的端口，可以查看https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+这里各个节点禁用防火墙&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;systemctl stop firewalld&lt;/code&gt;
+&lt;code&gt;systemctl disable firewalld&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;禁用selinux&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;setenforce 0&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;vi /etc/selinux/config
+SELINUX=disabled
+创建vi /etc/sysctl.d/k8s.conf文件，添加如下内容：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;net.bridge.bridge-nf-call-ip6tables = 1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;net.bridge.bridge-nf-call-iptables = 1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;net.ipv4.ip_forward = 1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;执行命令使修改生效&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;modprobe br_netfilter&lt;/code&gt;
+&lt;code&gt;sysctl -p /etc/sysctl.d/k8s.conf&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;12-kube-proxy开启ipvs的前置条件&#34;&gt;1.2 kube-proxy开启ipvs的前置条件&lt;/h3&gt;
+&lt;p&gt;在所有的节点上执行如下脚本：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt; /etc/sysconfig/modules/ipvs.modules &amp;lt;&amp;lt;EOF
+#!/bin/bash
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack_ipv4
+EOF
+chmod 755 /etc/sysconfig/modules/ipvs.modules &amp;amp;&amp;amp; bash /etc/sysconfig/modules/ipvs.modules &amp;amp;&amp;amp; lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+
+各个节点需要安装 ipset ipvsadm
+yum install ipset ipvsadm -y
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;13-docker安装&#34;&gt;1.3 docker安装&lt;/h3&gt;
+&lt;p&gt;安装docker的yum源,国内寻找清华源&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;yum install wget -y
+yum install -y yum-utils device-mapper-persistent-data lvm2
+wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo
+sed -i &#39;s+download.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+&#39; /etc/yum.repos.d/docker-ce.repo
+yum makecache fast
+yum install docker-ce -y
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;重启docker：systemctl enable docker;systemctl restart docker
+修改docker cgroup driver为systemd
+创建或修改&lt;code&gt;vi /etc/docker/daemon.json&lt;/code&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;exec-opts&amp;quot;: [&amp;quot;native.cgroupdriver=systemd&amp;quot;]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;重启docker:&lt;code&gt;systemctl restart docker&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;2-使用kubeadm部署kubernetes&#34;&gt;2. 使用kubeadm部署kubernetes&lt;/h2&gt;
+&lt;h3 id=&#34;21-安装kubeadm和kubelet&#34;&gt;2.1 安装kubeadm和kubelet&lt;/h3&gt;
+&lt;p&gt;下面在各节点安装kubeadm和kubelet和kubectl，请在百度云上面下载rpm包，在k8s116目录下执行如下指令：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;yum install -y cri-tools-1.13.0-0.x86_64.rpm cni-0.7.5-0.x86_64.rpm kubelet-1.16.0-0.x86_64.rpm kubectl-1.16.0-0.x86_64.rpm kubeadm-1.16.0-0.x86_64.rpm &lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;k8s 1.8开始要求关闭系统的swap,不关闭，kubelet将无法启动，执行指令方法：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;swapoff -a&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;修改 /etc/fstab 文件，注释掉 SWAP 的自动挂载，使用free -m确认swap已经关闭。 swappiness参数调整，修改&lt;code&gt;vi /etc/sysctl.d/k8s.conf&lt;/code&gt;添加下面一行：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vm.swappiness=0&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;执行&lt;code&gt;sysctl -p /etc/sysctl.d/k8s.conf&lt;/code&gt;使修改生效。
+因为这里本次测试主机上还运行其他服务，关闭swap可能会对其他服务产生影响，所以这里修改kubelet的配置去掉这个限制。
+修改&lt;code&gt;vi /etc/sysconfig/kubelet&lt;/code&gt;，加入：&lt;code&gt;KUBELET_EXTRA_ARGS=--fail-swap-on=false&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;22-使用kubeadm-init初始化集群&#34;&gt;2.2 使用kubeadm init初始化集群&lt;/h3&gt;
+&lt;p&gt;在各节点开机启动kubelet服务：&lt;code&gt;systemctl enable kubelet&lt;/code&gt;
+使用&lt;code&gt;kubeadm config print init-defaults&lt;/code&gt;可以打印集群初始化默认的使用的配置:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: kubeadm.k8s.io/v1beta2
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 1.2.3.4
+  bindPort: 6443
+nodeRegistration:
+  criSocket: /var/run/dockershim.sock
+  name: node1
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta2
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: v1.14.0
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+scheduler: {}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;从默认的配置中可以看到，可以使用imageRepository定制在集群初始化时拉取k8s所需镜像的地址。advertiseAddress的ip替换本机，基于默认配置定制出本次使用kubeadm初始化集群所需的配置文件且在11.21机器上&lt;code&gt;vi kubeadm.yaml&lt;/code&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 192.168.11.21
+  bindPort: 6443
+nodeRegistration:
+  taints:
+  - effect: PreferNoSchedule
+    key: node-role.kubernetes.io/master
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v1.16.0
+networking:
+  podSubnet: 10.244.0.0/16
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;font color=#DC143C &gt;说 明 : &lt;/font&gt;
+使用kubeadm默认配置初始化的集群，会在master节点打上node-role.kubernetes.io/master:NoSchedule的污点，阻止master节点接受调度运行工作负载。这里测试环境只有两个节点，所以将这个taint修改为node-role.kubernetes.io/master:PreferNoSchedule。&lt;/p&gt;
+&lt;p&gt;在开始初始化集群之前，kubeadm config images pull查看需要哪些镜像,需要从百度云上面下载tar包镜像下来，tar通过scp分别传到各个节点执行docker load -i解压，
+镜像列表:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;k8s.gcr.io/kube-apiserver            v1.16.0             b305571ca60a        42 hours ago        217MB
+k8s.gcr.io/kube-proxy                v1.16.0             c21b0c7400f9        42 hours ago        86.1MB
+k8s.gcr.io/kube-controller-manager   v1.16.0             06a629a7e51c        42 hours ago        163MB
+k8s.gcr.io/kube-scheduler            v1.16.0             301ddc62b80b        42 hours ago        87.3MB
+k8s.gcr.io/etcd                      3.3.15-0            b2756210eeab        2 weeks ago         247MB
+k8s.gcr.io/coredns                   1.6.2               bf261d157914        5 weeks ago         44.1MB
+gcr.io/kubernetes-helm/tiller        v2.14.1             ac22eb1f780e        3 months ago        94.2MB
+quay.io/coreos/flannel               v0.11.0-amd64       ff281650a721        7 months ago        52.6MB
+k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        21 months ago       742kB
+radial/busyboxplus                   curl                71fa7369f437        5 years ago         4.23MB
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;接下来使用kubeadm初始化集群，选择node1作为Master Node，在node1上执行下面的命令：
+&lt;code&gt;kubeadm init --config kubeadm.yaml --ignore-preflight-errors=Swap&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubeadm join 192.168.11.21:6443 --token k6s0kn.nyao1ulwwmlm2org \ --discovery-token-ca-cert-hash sha256:b721d25356668f921c90bf5f554836cb346b827a62b78797d0bcbcba24214725 &lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;其中关键步骤：
+* [kubelet-start] 生成kubelet的配置文件”/var/lib/kubelet/config.yaml”
+* [certs]生成相关的各种证书
+* [kubeconfig]生成相关的kubeconfig文件
+* [control-plane]使用/etc/kubernetes/manifests目录中的yaml文件创建apiserver、controller-manager、scheduler的静态pod
+* [bootstraptoken]生成token记录下来，后边使用kubeadm join往集群中添加节点时会用到
+* 下面的命令是配置常规用户如何使用kubectl访问集群：
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+* 最后给出了将节点加入集群的命令kubeadm join 192.168.99.11:6443 –token 4qcl2f.gtl3h8e5kjltuo0r \ –discovery-token-ca-cert-hash sha256:7ed5404175cc0bf18dbfe53f19d4a35b1e3d40c19b10924275868ebf2a3bbe6e
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;需要在11.21机器上执行：
+&lt;code&gt;mkdir -p $HOME/.kube&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo chown $(id -u):$(id -g) $HOME/.kube/config&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;查看集群状态，确认组件都处于healthy状态：
+&lt;code&gt;kubectl get cs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;集群初始化如果遇到问题，可以使用下面的命令进行清理：
+&lt;code&gt;kubeadm reset&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;23-安装pod-network&#34;&gt;2.3 安装Pod Network&lt;/h3&gt;
+&lt;p&gt;接下来安装flannel network add-on：
+&lt;code&gt;mkdir -p ~/k8s/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cd ~/k8s&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl -O https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubectl apply -f  kube-flannel.yml&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这里注意kube-flannel.yml这个文件里的flannel的镜像是0.11.0，quay.io/coreos/flannel:v0.11.0-amd64
+注意需要在vi /var/lib/kubelet/kubeadm-flags.env文件配置中去掉&amp;ndash;network-plugin=cni,然后重启kubelet,&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;systemctl daemon-reload
+systemctl restart kubelet
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;如果Node有多个网卡的话，参考https://github.com/kubernetes/kubernetes/issues/39701，
+目前需要在kube-flannel.yml中使用–iface参数指定集群主机内网网卡的名称，否则可能会出现dns无法解析。需要将kube-flannel.yml下载到本地，flanneld启动参数加上–iface=&lt;iface-name&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;containers:
+      - name: kube-flannel
+        image: quay.io/coreos/flannel:v0.11.0-amd64
+        command:
+        - /opt/bin/flanneld
+        args:
+        - --ip-masq
+        - --kube-subnet-mgr
+        - --iface=eth1
+......
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;使用&lt;code&gt;kubectl get pods –-all-namespaces -o wide&lt;/code&gt;确保所有的Pod都处于Running状态。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;kube-flannel.yml
+[root@i-fahx5c7k k8s]# kubectl get pods --all-namespaces -o wide
+NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE     IP              NODE         NOMINATED NODE   READINESS GATES
+kube-system   coredns-5c98db65d4-nbb4w             1/1     Running   0          6m29s   10.244.0.2      i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   coredns-5c98db65d4-wtm58             1/1     Running   0          6m29s   10.244.0.3      i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   etcd-i-fahx5c7k                      1/1     Running   0          5m26s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   kube-apiserver-i-fahx5c7k            1/1     Running   0          5m37s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   kube-controller-manager-i-fahx5c7k   1/1     Running   0          5m45s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   kube-flannel-ds-amd64-bqswg          1/1     Running   0          58s     192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   kube-proxy-zhzxj                     1/1     Running   0          6m29s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+kube-system   kube-scheduler-i-fahx5c7k            1/1     Running   0          5m20s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;24-测试集群dns是否可用&#34;&gt;2.4 测试集群DNS是否可用&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;kubectl run curl --image=radial/busyboxplus:curl -it&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;进入后执行&lt;code&gt;nslookup kubernetes.default&lt;/code&gt;确认解析正常:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[ root@curl-6bf6db5c4f-f8jjn:/ ]$ nslookup kubernetes.default
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      kubernetes.default
+Address 1: 10.96.0.1 kubernetes.default.svc.cluster.local
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;25-向kubernetes集群中添加node节点&#34;&gt;2.5 向Kubernetes集群中添加Node节点&lt;/h3&gt;
+&lt;p&gt;下面将11.22这个主机添加到Kubernetes集群中，在11.22机器上执行:
+&lt;code&gt;kubeadm join 192.168.11.21:6443 --token k6s0kn.nyao1ulwwmlm2org \ --discovery-token-ca-cert-hash sha256:b721d25356668f921c90bf5f554836cb346b827a62b78797d0bcbcba24214725&lt;/code&gt;
+11.22加入集群很是顺利，下面在master节点上执行命令查看集群中的节点：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@i-fahx5c7k k8s]# kubectl get nodes
+NAME         STATUS   ROLES    AGE   VERSION
+i-fahx5c7k   Ready    master   13m   v1.15.1
+i-ouaaujhz   Ready    &amp;lt;none&amp;gt;   50s   v1.15.1
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;251-如何从集群中移除node&#34;&gt;2.5.1 如何从集群中移除Node&lt;/h4&gt;
+&lt;p&gt;如果需要从集群中移除11.22这个Node执行下面的命令：
+在master节点上执行：
+&lt;code&gt;kubectl drain i-ouaaujhz --delete-local-data --force --ignore-daemonsets&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubectl delete node i-ouaaujhz&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;在11.22上执行：
+&lt;code&gt;kubeadm reset&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;kube-proxy开启ipvs&#34;&gt;kube-proxy开启ipvs&lt;/h3&gt;
+&lt;p&gt;修改ConfigMap的kube-system/kube-proxy中的config.conf，mode: “ipvs”&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubectl edit cm kube-proxy -n kube-system&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;之后重启各个节点上的kube-proxy pod：
+&lt;code&gt;kubectl get pod -n kube-system | grep kube-proxy | awk &#39;{system(&amp;quot;kubectl delete pod &amp;quot;$1&amp;quot; -n kube-system&amp;quot;)}&#39;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;日志查看：&lt;code&gt;kubectl logs kube-proxy-62ntf  -n kube-system&lt;/code&gt;出现ipvs即开启。&lt;/p&gt;
+&lt;h2 id=&#34;3kubernetes常用组件部署&#34;&gt;3.Kubernetes常用组件部署&lt;/h2&gt;
+&lt;p&gt;使用Helm这个Kubernetes的包管理器，这里也将使用Helm安装Kubernetes的常用组件。&lt;/p&gt;
+&lt;h3 id=&#34;31-helm的安装&#34;&gt;3.1 Helm的安装&lt;/h3&gt;
+&lt;p&gt;Helm由客户端命helm令行工具和服务端tiller组成，Helm的安装十分简单。 下载helm命令行工具到master节点node1的/usr/local/bin下，这里下载的2.14.1版本：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl -O https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz&lt;/code&gt;
+&lt;code&gt;tar -zxvf helm-v2.14.1-linux-amd64.tar.gz&lt;/code&gt;
+&lt;code&gt;cd linux-amd64/&lt;/code&gt;
+&lt;code&gt;cp helm /usr/local/bin/&lt;/code&gt;
+为了安装服务端tiller，还需要在这台机器上配置好kubectl工具和kubeconfig文件，确保kubectl工具可以在这台机器上访问apiserver且正常使用。 这里的11.21节点已经配置好了kubectl。
+&lt;code&gt;helm init --output yaml &amp;gt; tiller.yaml&lt;/code&gt;
+更新 tiller.yaml 两处：apiVersion 版本;增加选择器&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: apps/v1
+kind: Deployment
+...
+spec:
+  replicas: 1
+  strategy: {}
+  selector:
+    matchLabels:
+      app: helm
+      name: tiller
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;创建：&lt;code&gt;kubectl create -f tiller.yaml&lt;/code&gt;
+因为Kubernetes APIServer开启了RBAC访问控制，所以需要创建tiller使用的service account: tiller并分配合适的角色给它。这里简单起见直接分配cluster-admin这个集群内置的ClusterRole给它。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p &#39;{&amp;quot;spec&amp;quot;:{&amp;quot;template&amp;quot;:{&amp;quot;spec&amp;quot;:{&amp;quot;serviceAccount&amp;quot;:&amp;quot;tiller&amp;quot;}}}}&#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;检查helm是否安装成功&lt;code&gt;helm list&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;安装k8s116脚本的安装&#34;&gt;安装k8s1.16脚本的安装&lt;/h3&gt;
+&lt;p&gt;解压包，然后执行脚本install-k8s.sh
+&lt;code&gt;tar -xzvf k8s116.tar.gz&lt;/code&gt;
+&lt;code&gt;./install-k8s.sh&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://kubernetes.io/zh/docs/&#34;&gt;kubeadm安装&lt;/a&gt;
+&lt;a href=&#34;https://kubernetes.io/zh/docs/setup/independent/create-cluster-kubeadm/&#34;&gt;kubeadm创建集群&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

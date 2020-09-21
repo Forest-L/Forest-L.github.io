@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>helm on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/helm/</link>
+    <description>Recent content in helm on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Wed, 15 Apr 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/helm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>chart包实践开发指南</title>
+      <link>https://Forest-L.github.io/post/chart-package-practice-development-guide/</link>
+      <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/chart-package-practice-development-guide/</guid>
+      <description>&lt;h2 id=&#34;chart包文件结构以wordpress包为例&#34;&gt;chart包文件结构，以wordpress包为例&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;wordpress/
+  Chart.yaml          # 包含有关chart信息的YAML文件
+  LICENSE             # OPTIONAL: 包含chart许可证的纯文本文件
+  README.md           # OPTIONAL: 一个可读的README文件
+  requirements.yaml   # OPTIONAL: 一个YAML文件，列出了chart的依赖关系
+  values.yaml         # 该chart的默认配置值
+  charts/             # OPTIONAL: 包含此chart所依赖的任何chart的目录。
+  templates/          # OPTIONAL: 一个模板目录，当与values相结合时，
+                      # 将生成有效的Kubernetes清单文件
+  templates/NOTES.txt # OPTIONAL: 包含简短使用说明的纯文本文件
+  templates/_helpers.tpl # OPTIONAL:通过define 函数定义命名模板
+  crds/               # OPTIONAL: 自定义资源
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;以下说明chart包内容&#34;&gt;以下说明chart包内容&lt;/h3&gt;
+&lt;h2 id=&#34;chartyaml文件内容格式&#34;&gt;Chart.yaml文件内容格式&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;name: chart的名称 (required)
+version: 一个SemVer 2(语义化版本)版本(required)
+description: 这个项目的单句描述 (optional)
+keywords:
+  - 关于此项目的关键字列表 (optional)
+home: 该项目主页的URL(optional)
+sources:
+  - 此项目的源代码URL列表 (optional)
+dependencies: chart依赖关系 (optional)
+  - name: chart名字 (nginx)
+    version: chart版本 (&amp;quot;1.2.3&amp;quot;)
+    repository: url仓库 (&amp;quot;https://example.com/charts&amp;quot;) 
+    condition: (optional) 布尔值的yaml路径，用于启用/禁用图表 
+maintainers: # (optional)
+  - name: 维护者的名称 (每个维护者都需要)
+    email: 维护者的email (optional for each maintainer)
+    url: 维护者的url (optional for each maintainer)
+engine: gotpl＃模板引擎的名称（可选，默认为gotpl）
+icon: 要用作图标的SVG或PNG图像的URL (optional)
+appVersion: 包含的应用程序版本（可选）这个不一定是SemVer
+deprecated: 此chart是否已被弃用（可选，布尔型）
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;readmemd内容&#34;&gt;README.md内容&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Introduction&lt;/li&gt;
+&lt;li&gt;Prerequisites&lt;/li&gt;
+&lt;li&gt;Installing the Chart&lt;/li&gt;
+&lt;li&gt;Uninstalling the Chart&lt;/li&gt;
+&lt;li&gt;Configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;requirementsyaml介绍&#34;&gt;requirements.yaml介绍&lt;/h2&gt;
+&lt;p&gt;在Helm中，一个chart可能取决于任何数量的其他chart。 这些依赖关系可以通过requirements.yaml文件动态链接，或者引入charts/目录并手动管理。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dependencies:
+  - name: apache
+    version: 1.2.3
+    repository: http://example.com/charts
+    alias: new-subchart-1
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;Name: 你想要的chart的名称。&lt;/li&gt;
+&lt;li&gt;Version: 你想要的chart的版本。&lt;/li&gt;
+&lt;li&gt;repository字段是图表存储库的完整URL。 请注意，您还必须使用helm repo add在本地添加该repository。&lt;/li&gt;
+&lt;li&gt;alias：别名。
+一旦有一个依赖关系文件，可以运行helm dependency update，它会使用你的依赖关系文件为你下载所有指定的chart到你的charts/目录中。
+可以在values.yaml定义true/false判断依赖包是否被启用，如&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apache:
+  enabled: true
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;依赖关系可以是chart压缩包（foo-1.2.3.tgz），也可以是未打包的chart目录。
+依赖执行顺序：参考k8s负载自启动原理，所以我们可以不关心执行顺利。实际上交叉执行。&lt;/p&gt;
+&lt;h4 id=&#34;说明helm2是通过requirementsyaml文件描述依赖关系helm3直接在chartyaml描述&#34;&gt;说明：helm2是通过requirements.yaml文件描述依赖关系，helm3直接在Chart.yaml描述。&lt;/h4&gt;
+&lt;h2 id=&#34;templatesk8s资源&#34;&gt;templates/k8s资源&lt;/h2&gt;
+&lt;p&gt;templates下有多个deployment对象，可以命名不同名字。
+执行顺序：参考k8s负载自启动原理，所以我们可以不关心执行顺利。
+实际执行顺序为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;var InstallOrder KindSortOrder = []string{
+    &amp;quot;Namespace&amp;quot;,
+    &amp;quot;NetworkPolicy&amp;quot;,
+    &amp;quot;ResourceQuota&amp;quot;,
+    &amp;quot;LimitRange&amp;quot;,
+    &amp;quot;PodSecurityPolicy&amp;quot;,
+    &amp;quot;PodDisruptionBudget&amp;quot;,
+    &amp;quot;Secret&amp;quot;,
+    &amp;quot;ConfigMap&amp;quot;,
+    &amp;quot;StorageClass&amp;quot;,
+    &amp;quot;PersistentVolume&amp;quot;,
+    &amp;quot;PersistentVolumeClaim&amp;quot;,
+    &amp;quot;ServiceAccount&amp;quot;,
+    &amp;quot;CustomResourceDefinition&amp;quot;,
+    &amp;quot;ClusterRole&amp;quot;,
+    &amp;quot;ClusterRoleList&amp;quot;,
+    &amp;quot;ClusterRoleBinding&amp;quot;,
+    &amp;quot;ClusterRoleBindingList&amp;quot;,
+    &amp;quot;Role&amp;quot;,
+    &amp;quot;RoleList&amp;quot;,
+    &amp;quot;RoleBinding&amp;quot;,
+    &amp;quot;RoleBindingList&amp;quot;,
+    &amp;quot;Service&amp;quot;,
+    &amp;quot;DaemonSet&amp;quot;,
+    &amp;quot;Pod&amp;quot;,
+    &amp;quot;ReplicationController&amp;quot;,
+    &amp;quot;ReplicaSet&amp;quot;,
+    &amp;quot;Deployment&amp;quot;,
+    &amp;quot;HorizontalPodAutoscaler&amp;quot;,
+    &amp;quot;StatefulSet&amp;quot;,
+    &amp;quot;Job&amp;quot;,
+    &amp;quot;CronJob&amp;quot;,
+    &amp;quot;Ingress&amp;quot;,
+    &amp;quot;APIService&amp;quot;,
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;两种方式可以提前执行,一种设置pre-install,另一种是设置权重：
+pre-install hooks，如：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: foo
+  annotations:
+    &amp;quot;helm.sh/hook&amp;quot;: &amp;quot;pre-install&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;定义权重，如：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;annotations:
+    &amp;quot;helm.sh/hook-weight&amp;quot;: &amp;quot;5&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;valuesyaml&#34;&gt;values.yaml&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Release.Name: release的名称(不是chart的名称！)&lt;/li&gt;
+&lt;li&gt;Release.Namespace: chart release的名称空间。&lt;/li&gt;
+&lt;li&gt;Release.Service: 进行release的服务。 通常这是Tiller。&lt;/li&gt;
+&lt;li&gt;chart版本可以作为Chart.Version获得。Chart：Chart.yaml 的内容。&lt;/li&gt;
+&lt;li&gt;templates下有多个deployment对象，可以命名不同名字，然后在values.yaml以不同名字打头定义值。，如以下格式定义：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;mysql:
+  name: 
+  image:
+    repository: 
+    tag: 
+    pullPolicy:
+
+redis:
+  name: 
+  image:
+    repository: 
+    tag: 
+    pullPolicy:
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;helm模板&#34;&gt;helm模板&lt;/h2&gt;
+&lt;p&gt;helm模板语法嵌套在{{和}}之间，有三个常见的&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;.Values.*
+从value.yaml文件中读取或者--set获取（--set优先级最大）。
+.Release.*
+从运行Release的元数据读取,每次安装均会生成一个新的release
+template * .
+从_helpers.tpl文件中读取，通过define 函数定义命名模板
+.Chart.*
+从Chart.yaml文件中读取
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;模板函数和管道&#34;&gt;模板函数和管道&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;* | 管道，类似linux下的管道，以下实例效果是一样的。
+{{ quote .Values.favorite.drink }}与 {{ .Values.favorite.drink | quote }}
+* default制定默认值
+drink: {{ .Values.favorite.drink | default “tea” | quote }}
+* indent 模板函数，对左空出空格，左边空出两个空格
+{{ include &amp;quot;mychart_app&amp;quot; . | indent 2 }}
+include 函数，与 template 类似功能
+如实例，在_helpers.tpl中define模板，在资源对象中引用。
+
+
+{{- define &amp;quot;mychart.labels&amp;quot; }}
+  labels:
+    generator: helm
+    date: {{ now | htmlDate }}
+{{- end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  {{- template &amp;quot;mychart.labels&amp;quot; }}
+data:
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;在模板中使用文件&#34;&gt;在模板中使用文件&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conf
+data:
+{{ (.Files.Glob &amp;quot;foo/*&amp;quot;).AsConfig | indent 2 }}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;chart根目录下foo目录的所有文件配置为configmap的内容&lt;/p&gt;
+&lt;h2 id=&#34;模板流程控制&#34;&gt;模板流程控制&lt;/h2&gt;
+&lt;p&gt;常用的有
+if/else 条件控制
+with 范围控制
+range 循环控制
+如：values.yaml中定义变量，ConfigMap中.Values.favorite循环控制参数。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;favorite:
+  drink: coffee
+  food: pizza
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: &amp;quot;Hello World&amp;quot;
+  {{- range $key, $val := .Values.favorite }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end}}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;在deployment.yaml文件中使用if/else语法，如：- end结束标志，双括号都有“-”。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{{- if .Values.image.repository -}}
+image: {.Values.image.repository}
+{{- else -}}
+image: &amp;quot;***/{{ .Release.Name }}:{{ .Values.image.version }}&amp;quot;
+{{- end -}}
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

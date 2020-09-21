@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>apt-get on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/apt-get/</link>
+    <description>Recent content in apt-get on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Thu, 10 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/apt-get/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>centos、ubuntu和pip离线依赖包的制作和使用方法</title>
+      <link>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
+      <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</guid>
+      <description>&lt;p&gt;*介绍centos、ubuntu和pip三大核心系统的离线依赖源的制作方法及制作完成之后如何使用&lt;/p&gt;
+&lt;h2 id=&#34;1pip安装离线本地包pip版本1923&#34;&gt;1、pip安装离线本地包,pip版本（19.2.3）&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;导出本地已有的依赖包,需要创建一个空的requirements.txt文件。
+&lt;code&gt;pip freeze &amp;gt; requirements.txt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;下载到某个目录下（提前创建目录/packs），指定pip源。
+&lt;code&gt;pip download -r requirements.txt -d /packs -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;安装requirements.txt依赖,可以通过pip &amp;ndash;help获取相关指令。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;在线安装：
+pip install -r requirements.txt
+离线安装：
+将/packs目录下的包拷贝到离线环境的机器某目录上（/packs），
+pip install --no-index --find-links=&amp;quot;/packs&amp;quot; -r requirements.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2centos安装离线本地包&#34;&gt;2、centos安装离线本地包&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;制作离线包&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;新的机器上需要在/etc/yum.conf下打开缓存，keepcache=1;
+新建目录存放rpm包，如mkdir -p /root/centos-repo;
+安装单个工具，yum install -y iotop --downloaddir=/root/centos-repo;
+创建本地源，createrepo /root/centos-repo;
+制作iso包：mkisofs -r -o /root/centos-7.5-amd64.iso /root/centos-repo/
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3ubuntu安装离线本地包&#34;&gt;3、ubuntu安装离线本地包&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;制作离线包&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;创建存放目录：mkdir -p /home/ubuntu/packs；
+安装软件包dpkg-dev:apt-get install dpkg-dev
+拷贝dep包至存放目录：sudo cp -r /var/cache/apt/archives/* /home/ubuntu/packs；
+进入packs目录下，生成包的依赖信息：dpkg-scanpackages packs /dev/null |gzip &amp;gt; packs/Packages.gz
+制作iso包：mkisofs -r -o /home/ubuntu/ubuntu-16.04.5-amd64.iso /home/ubunut/packs
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;使用离线包,如Ubuntu16.04.5&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;创建目录：mkdir  -p /kubeinstaller/apt_repo/16.04.5/iso
+挂载至/etc/fstab下在iso包目录下：sh -c &amp;quot;echo &#39;ubuntu-16.04.5-server-amd64.iso /kubeinstaller/apt_repo/16.04.5/iso iso9660 loop 0  0&#39; &amp;gt;&amp;gt; /etc/fstab&amp;quot;
+备份之前源：mv -f /etc/apt/sources.list /etc/apt/sources.list-bak
+添加新的源：sh -c &amp;quot;echo &#39;deb [trusted=yes]  file:///kubeinstaller/apt_repo/16.04.5/iso/  /&#39; &amp;gt; /etc/apt/sources.list&amp;quot;
+挂载生效：mount -a
+
+# clean the process using apt or dpkg
+    apt_process=`ps -aux | grep -E &#39;apt|dpkg&#39; | grep -v &#39;grep&#39; | awk &#39;{print $2}&#39;`
+    for process in ${apt_process}
+    do
+        kill -9 $process
+    done
+    # remove the apt lock
+    sudo rm -f /var/lib/apt/lists/lock
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;参考文献&#34;&gt;参考文献&lt;/h4&gt;
+&lt;p&gt;pip: &lt;a href=&#34;https://www.cnblogs.com/zengchunyun/p/9344664.html&#34;&gt;https://www.cnblogs.com/zengchunyun/p/9344664.html&lt;/a&gt;
+centos: &lt;a href=&#34;https://blog.csdn.net/hao_rh/article/details/73275071&#34;&gt;https://blog.csdn.net/hao_rh/article/details/73275071&lt;/a&gt;
+ubuntu: &lt;a href=&#34;https://www.cnblogs.com/gzxbkk/p/7809296.html&#34;&gt;https://www.cnblogs.com/gzxbkk/p/7809296.html&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

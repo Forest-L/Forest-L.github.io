@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CKA on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/cka/</link>
+    <description>Recent content in CKA on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Sat, 11 Jul 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/cka/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>CkA考试经验</title>
+      <link>https://Forest-L.github.io/post/cka-test-experience/</link>
+      <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/cka-test-experience/</guid>
+      <description>&lt;h1 id=&#34;cka考试经验&#34;&gt;CKA考试经验&lt;/h1&gt;
+&lt;p&gt;CKA: Kubernetes管理员认证（CKA）旨在确保认证持有者具备履行Kubernetes管理员职责的技能，知识和能力。如果企业想要申请 KCSP ，条件之一是：至少需要三名员工拥有CKA认证。
+&lt;img src=&#34;https://Forest-L.github.io/img/cka.jpg&#34; alt=&#34;CKA图片.jpg&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;1-考试报名&#34;&gt;1. 考试报名&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;%5Bhttps://www.cncf.io/certification/cka/%5D&#34;&gt;CKA报名地址&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;注意事项：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;1、报名成功之后，可在12个月之内进行考试，考试不过有一次补考机会。&lt;/p&gt;
+&lt;p&gt;2、CKA：74分或以上可以获得证书。&lt;/p&gt;
+&lt;p&gt;3、每年Cyber Monday（网络星期一，也就是黑五后的第一个星期一）有优惠或者某些辅导架构有优惠券。&lt;/p&gt;
+&lt;h2 id=&#34;2-备考&#34;&gt;2. 备考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;考试时你可以打开两个浏览器Tab，一个是考试窗口，一个用来查阅官方文档（仅允许访问https://kubernetes.io/docs/、https://github.com/kubernetes/ 和https://kubernetes.io/blog/ ）&lt;/li&gt;
+&lt;li&gt;查询文档的浏览器Tab可以弄成标签。&lt;/li&gt;
+&lt;li&gt;考试前一周看下官网k8s版本，然后部署一个同样版本的K8s练习。&lt;/li&gt;
+&lt;li&gt;可以参考考试大纲复习。&lt;/li&gt;
+&lt;li&gt;怎么复习，可以在自己搭建的环境下，操作指令，生成对应的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;3-考前检查及考试环境&#34;&gt;3. 考前检查及考试环境&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;考试形式: 在线监控，需要共享桌面和摄像头&lt;/li&gt;
+&lt;li&gt;考试环境: 在一个密闭空间，例如书房、卧室、会议室等，电脑屏幕不能对着窗户，房间里除了考生不能存在第二个人，考试的桌面不能放其它东西，水杯也不行&lt;/li&gt;
+&lt;li&gt;考试时间及题目: CKA-3小时-24道题&lt;/li&gt;
+&lt;li&gt;选择考试时间: 报名成功之后可以在12个月之内进行考试，考试之前需要选择考试时间，选择考试时间的时候记得先选择北京时区，默认是0时区时间。&lt;/li&gt;
+&lt;li&gt;电脑要求: 可以在这里WebDelivery Compatibility Check检测自己的电脑环境和网络速度等&lt;/li&gt;
+&lt;li&gt;选择的是Linux-Foundation&amp;mdash;&amp;gt;CKA-English&lt;/li&gt;
+&lt;li&gt;考试前考官检查:
+考试可以提前15分钟进入考试界面
+考官会以发消息的方式和你交流（没有语音交流）
+看不懂考官发的英文怎么办：可以在chrome浏览器右键翻译
+考官会让你共享摄像头，共享桌面 考官会让你出示能确认你身份ID的证件，我当时用的是罗技C310摄像头，无法对焦，护照看上去模糊到不行，后来考官又叫我给护照打光还是不行，后面又叫我打开我的手机，用手机相机当作放大镜用，这样才能看清楚。（我考CKAD的时候，我护照还没举稳，考官就说可以了，应该是考过CKA，他们系统里面已经有我的信息了，就随便瞄了一眼而已）
+考官会让你用摄像头环视房间一周，确认你的考试环境（当时我房间门开了一个小缝也要求我去把门关好，还是比较严格）
+考官会让你用摄像头看你的整个桌面和桌子底下
+考官会让你打开任务管理器，点击左下角简略信息，是否已关闭了其它后台服务。
+考官会让你再次点一下桌面共享，然后你叫你点击取消，然后就开始进入考试了&lt;/li&gt;
+&lt;li&gt;考试的界面:
+左边是题目
+右边是终端
+终端上面是共享摄像头、共享屏幕、考试信息等按钮（可以唤出记事本）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;4-考试心得&#34;&gt;4. 考试心得&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;有Notepad记事本，可以记录下自己环境信息，哪道题还没做，题目中的信息等。&lt;/li&gt;
+&lt;li&gt;一定要记得用鼠标，拷贝和粘贴特别方便。&lt;/li&gt;
+&lt;li&gt;尽量在官网中拷贝yaml文件到答题环境中。&lt;/li&gt;
+&lt;li&gt;很多指令记得不清楚，请使用-h，比如etcdctl,node不能调度等。&lt;/li&gt;
+&lt;li&gt;特别重要，根据个人考试，然后在浏览器中收藏的记录为：
+&lt;img src=&#34;https://Forest-L.github.io/img/content.png&#34; alt=&#34;CKA考试相关内容.png&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

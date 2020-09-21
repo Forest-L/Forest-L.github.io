@@ -3,13 +3,238 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://Forest-L.github.io/archives/</loc>
-    <lastmod>2019-05-28T00:00:00+00:00</lastmod>
+    <loc>https://Forest-L.github.io/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
+    <loc>https://Forest-L.github.io/tags/cka/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/cka-test-experience/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/k8s/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/</loc>
+    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/iptables/</loc>
+    <lastmod>2020-07-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/iptables%E6%8C%87%E4%BB%A4%E5%B0%86%E5%AE%B9%E5%99%A8%E5%86%85%E9%83%A8%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%88%B0%E5%A4%96%E9%83%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%AB%AF%E5%8F%A3%E6%8C%87%E5%8D%97/</loc>
+    <lastmod>2020-07-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/linux-tools/</loc>
+    <lastmod>2020-07-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/chart/</loc>
+    <lastmod>2020-04-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/chart-package-practice-development-guide/</loc>
+    <lastmod>2020-04-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/helm/</loc>
+    <lastmod>2020-04-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/ipv6%E5%9C%B0%E5%9D%80%E6%90%AD%E5%BB%BAk8s/</loc>
+    <lastmod>2020-01-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s1-15%E5%AE%89%E8%A3%85/</loc>
+    <lastmod>2019-11-04T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/apt-get/</loc>
+    <lastmod>2019-10-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</loc>
+    <lastmod>2019-10-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/yum/</loc>
+    <lastmod>2019-10-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s%E4%B9%8Betcd%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D-1/</loc>
+    <lastmod>2019-10-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/centos/</loc>
+    <lastmod>2019-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s1.16-installed-on-centos-system/</loc>
+    <lastmod>2019-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s1-15-3%E5%9C%A8ubuntu%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/</loc>
+    <lastmod>2019-09-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/docker-deploy-mysql5-7/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s%E4%B9%8Bhelm%E9%83%A8%E7%BD%B2%E5%8F%8A%E7%94%A8%E6%B3%95/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/kubekey%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/kubernetes%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A4%E8%AF%81%E7%9A%84%E6%8F%90%E4%BA%A4%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E4%B8%80%E4%B8%AAmaster%E6%88%96%E8%80%85%E4%B8%A4%E4%B8%AAmaster%E5%AE%95%E6%9C%BA%E6%81%A2%E5%A4%8D/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/kubesphere%E5%9F%BA%E4%BA%8Evelero%E5%81%9A%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BF%81%E7%A7%BB/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/linux-nfs-%E6%90%AD%E5%BB%BA/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/netapp-%E5%AD%98%E5%82%A8%E5%9C%A8-kubesphere-%E4%B8%8A%E7%9A%84%E5%AE%9E%E8%B7%B5/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/netapp%E8%81%94%E5%90%88k8s%E5%9C%A8kubesphere%E5%BA%94%E7%94%A8/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/tcpdump%E6%8A%93%E5%8C%85%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/terrform%E5%AF%B9%E6%8E%A5qingcloud%E5%AE%89%E8%A3%85k8s/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/ubuntu%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85wecenter/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/ubuntu%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BAvmware-workstation/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E5%9F%BA%E4%BA%8Ekeepalived-haproxy%E9%83%A8%E7%BD%B2kubesphere%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E6%8E%92%E6%9F%A5linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E6%9E%84%E5%BB%BAarm-x86%E6%9E%B6%E6%9E%84%E7%9A%84docker-image%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E6%B5%8B%E9%87%8F%E7%BD%91%E7%BB%9C%E9%80%9F%E5%BA%A6%E5%B7%A5%E5%85%B7%E4%B9%8Biperf%E8%AE%A4%E7%9F%A5/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E6%B7%BB%E5%8A%A0%E5%85%AC%E7%BD%91ip%E5%88%B0kubernetes%E7%9A%84apiserver%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/%E8%84%9A%E6%9C%AC%E5%8C%96%E8%A7%A6%E5%8F%91kubernetes%E9%9B%86%E7%BE%A4%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%B7%A5%E5%85%B7-shell-operator/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/mysql/</loc>
+    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s-ceph%E6%90%AD%E5%BB%BA/</loc>
+    <lastmod>2019-08-04T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s-service-%E8%AE%A4%E7%9F%A5/</loc>
+    <lastmod>2019-07-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s-configmap%E8%AE%A4%E7%9F%A5/</loc>
+    <lastmod>2019-07-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/archives/</loc>
+    <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -38,22 +263,12 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/series/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://Forest-L.github.io/categories/syntax/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/tags/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -73,21 +288,6 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/placeholder-text/</loc>
-    <lastmod>2019-03-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/tags/text/</loc>
-    <lastmod>2019-03-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/post/math-typesetting/</loc>
-    <lastmod>2019-03-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/tags/asciinema/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url>
@@ -98,17 +298,16 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/tags/linux-tools/</loc>
-    <lastmod>2019-03-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/about/</loc>
     <lastmod>2019-02-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://Forest-L.github.io/tags/index/</loc>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s-default-storage-class%E6%90%AD%E5%BB%BA/</loc>
   </url>
   
 </urlset>

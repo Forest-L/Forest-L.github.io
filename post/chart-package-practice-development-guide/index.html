@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | chart包实践开发指南</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">chart包实践开发指南</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/helm'>helm</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/chart'>chart</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2020-04-15T00:00:00Z">2020-4-15 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h2 id="chart包文件结构以wordpress包为例">chart包文件结构，以wordpress包为例</h2>
+<pre><code>wordpress/
+  Chart.yaml          # 包含有关chart信息的YAML文件
+  LICENSE             # OPTIONAL: 包含chart许可证的纯文本文件
+  README.md           # OPTIONAL: 一个可读的README文件
+  requirements.yaml   # OPTIONAL: 一个YAML文件，列出了chart的依赖关系
+  values.yaml         # 该chart的默认配置值
+  charts/             # OPTIONAL: 包含此chart所依赖的任何chart的目录。
+  templates/          # OPTIONAL: 一个模板目录，当与values相结合时，
+                      # 将生成有效的Kubernetes清单文件
+  templates/NOTES.txt # OPTIONAL: 包含简短使用说明的纯文本文件
+  templates/_helpers.tpl # OPTIONAL:通过define 函数定义命名模板
+  crds/               # OPTIONAL: 自定义资源
+</code></pre><h3 id="以下说明chart包内容">以下说明chart包内容</h3>
+<h2 id="chartyaml文件内容格式">Chart.yaml文件内容格式</h2>
+<pre><code>name: chart的名称 (required)
+version: 一个SemVer 2(语义化版本)版本(required)
+description: 这个项目的单句描述 (optional)
+keywords:
+  - 关于此项目的关键字列表 (optional)
+home: 该项目主页的URL(optional)
+sources:
+  - 此项目的源代码URL列表 (optional)
+dependencies: chart依赖关系 (optional)
+  - name: chart名字 (nginx)
+    version: chart版本 (&quot;1.2.3&quot;)
+    repository: url仓库 (&quot;https://example.com/charts&quot;) 
+    condition: (optional) 布尔值的yaml路径，用于启用/禁用图表 
+maintainers: # (optional)
+  - name: 维护者的名称 (每个维护者都需要)
+    email: 维护者的email (optional for each maintainer)
+    url: 维护者的url (optional for each maintainer)
+engine: gotpl＃模板引擎的名称（可选，默认为gotpl）
+icon: 要用作图标的SVG或PNG图像的URL (optional)
+appVersion: 包含的应用程序版本（可选）这个不一定是SemVer
+deprecated: 此chart是否已被弃用（可选，布尔型）
+</code></pre><h2 id="readmemd内容">README.md内容</h2>
+<ul>
+<li>Introduction</li>
+<li>Prerequisites</li>
+<li>Installing the Chart</li>
+<li>Uninstalling the Chart</li>
+<li>Configuration</li>
+</ul>
+<h2 id="requirementsyaml介绍">requirements.yaml介绍</h2>
+<p>在Helm中，一个chart可能取决于任何数量的其他chart。 这些依赖关系可以通过requirements.yaml文件动态链接，或者引入charts/目录并手动管理。</p>
+<pre><code>dependencies:
+  - name: apache
+    version: 1.2.3
+    repository: http://example.com/charts
+    alias: new-subchart-1
+</code></pre><ul>
+<li>Name: 你想要的chart的名称。</li>
+<li>Version: 你想要的chart的版本。</li>
+<li>repository字段是图表存储库的完整URL。 请注意，您还必须使用helm repo add在本地添加该repository。</li>
+<li>alias：别名。
+一旦有一个依赖关系文件，可以运行helm dependency update，它会使用你的依赖关系文件为你下载所有指定的chart到你的charts/目录中。
+可以在values.yaml定义true/false判断依赖包是否被启用，如</li>
+</ul>
+<pre><code>apache:
+  enabled: true
+</code></pre><p>依赖关系可以是chart压缩包（foo-1.2.3.tgz），也可以是未打包的chart目录。
+依赖执行顺序：参考k8s负载自启动原理，所以我们可以不关心执行顺利。实际上交叉执行。</p>
+<h4 id="说明helm2是通过requirementsyaml文件描述依赖关系helm3直接在chartyaml描述">说明：helm2是通过requirements.yaml文件描述依赖关系，helm3直接在Chart.yaml描述。</h4>
+<h2 id="templatesk8s资源">templates/k8s资源</h2>
+<p>templates下有多个deployment对象，可以命名不同名字。
+执行顺序：参考k8s负载自启动原理，所以我们可以不关心执行顺利。
+实际执行顺序为：</p>
+<pre><code>var InstallOrder KindSortOrder = []string{
+    &quot;Namespace&quot;,
+    &quot;NetworkPolicy&quot;,
+    &quot;ResourceQuota&quot;,
+    &quot;LimitRange&quot;,
+    &quot;PodSecurityPolicy&quot;,
+    &quot;PodDisruptionBudget&quot;,
+    &quot;Secret&quot;,
+    &quot;ConfigMap&quot;,
+    &quot;StorageClass&quot;,
+    &quot;PersistentVolume&quot;,
+    &quot;PersistentVolumeClaim&quot;,
+    &quot;ServiceAccount&quot;,
+    &quot;CustomResourceDefinition&quot;,
+    &quot;ClusterRole&quot;,
+    &quot;ClusterRoleList&quot;,
+    &quot;ClusterRoleBinding&quot;,
+    &quot;ClusterRoleBindingList&quot;,
+    &quot;Role&quot;,
+    &quot;RoleList&quot;,
+    &quot;RoleBinding&quot;,
+    &quot;RoleBindingList&quot;,
+    &quot;Service&quot;,
+    &quot;DaemonSet&quot;,
+    &quot;Pod&quot;,
+    &quot;ReplicationController&quot;,
+    &quot;ReplicaSet&quot;,
+    &quot;Deployment&quot;,
+    &quot;HorizontalPodAutoscaler&quot;,
+    &quot;StatefulSet&quot;,
+    &quot;Job&quot;,
+    &quot;CronJob&quot;,
+    &quot;Ingress&quot;,
+    &quot;APIService&quot;,
+}
+</code></pre><ul>
+<li>两种方式可以提前执行,一种设置pre-install,另一种是设置权重：
+pre-install hooks，如：</li>
+</ul>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: foo
+  annotations:
+    &quot;helm.sh/hook&quot;: &quot;pre-install&quot;
+</code></pre><ul>
+<li>定义权重，如：</li>
+</ul>
+<pre><code>annotations:
+    &quot;helm.sh/hook-weight&quot;: &quot;5&quot;
+</code></pre><h2 id="valuesyaml">values.yaml</h2>
+<ul>
+<li>Release.Name: release的名称(不是chart的名称！)</li>
+<li>Release.Namespace: chart release的名称空间。</li>
+<li>Release.Service: 进行release的服务。 通常这是Tiller。</li>
+<li>chart版本可以作为Chart.Version获得。Chart：Chart.yaml 的内容。</li>
+<li>templates下有多个deployment对象，可以命名不同名字，然后在values.yaml以不同名字打头定义值。，如以下格式定义：</li>
+</ul>
+<pre><code>mysql:
+  name: 
+  image:
+    repository: 
+    tag: 
+    pullPolicy:
+
+redis:
+  name: 
+  image:
+    repository: 
+    tag: 
+    pullPolicy:
+</code></pre><h2 id="helm模板">helm模板</h2>
+<p>helm模板语法嵌套在{{和}}之间，有三个常见的</p>
+<pre><code>.Values.*
+从value.yaml文件中读取或者--set获取（--set优先级最大）。
+.Release.*
+从运行Release的元数据读取,每次安装均会生成一个新的release
+template * .
+从_helpers.tpl文件中读取，通过define 函数定义命名模板
+.Chart.*
+从Chart.yaml文件中读取
+</code></pre><h2 id="模板函数和管道">模板函数和管道</h2>
+<pre><code>* | 管道，类似linux下的管道，以下实例效果是一样的。
+{{ quote .Values.favorite.drink }}与 {{ .Values.favorite.drink | quote }}
+* default制定默认值
+drink: {{ .Values.favorite.drink | default “tea” | quote }}
+* indent 模板函数，对左空出空格，左边空出两个空格
+{{ include &quot;mychart_app&quot; . | indent 2 }}
+include 函数，与 template 类似功能
+如实例，在_helpers.tpl中define模板，在资源对象中引用。
+
+
+{{- define &quot;mychart.labels&quot; }}
+  labels:
+    generator: helm
+    date: {{ now | htmlDate }}
+{{- end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  {{- template &quot;mychart.labels&quot; }}
+data:
+</code></pre><h2 id="在模板中使用文件">在模板中使用文件</h2>
+<pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conf
+data:
+{{ (.Files.Glob &quot;foo/*&quot;).AsConfig | indent 2 }}
+</code></pre><p>chart根目录下foo目录的所有文件配置为configmap的内容</p>
+<h2 id="模板流程控制">模板流程控制</h2>
+<p>常用的有
+if/else 条件控制
+with 范围控制
+range 循环控制
+如：values.yaml中定义变量，ConfigMap中.Values.favorite循环控制参数。</p>
+<pre><code>favorite:
+  drink: coffee
+  food: pizza
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: &quot;Hello World&quot;
+  {{- range $key, $val := .Values.favorite }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end}}
+</code></pre><p>在deployment.yaml文件中使用if/else语法，如：- end结束标志，双括号都有“-”。</p>
+<pre><code>{{- if .Values.image.repository -}}
+image: {.Values.image.repository}
+{{- else -}}
+image: &quot;***/{{ .Release.Name }}:{{ .Values.image.version }}&quot;
+{{- end -}}
+</code></pre></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2021 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/ipv6%E5%9C%B0%E5%9D%80%E6%90%AD%E5%BB%BAk8s/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/iptables%E6%8C%87%E4%BB%A4%E5%B0%86%E5%AE%B9%E5%99%A8%E5%86%85%E9%83%A8%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%88%B0%E5%A4%96%E9%83%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%AB%AF%E5%8F%A3%E6%8C%87%E5%8D%97/">
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

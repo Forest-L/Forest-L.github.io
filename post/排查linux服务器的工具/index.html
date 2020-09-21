@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | iptables指令将容器内部端口映射到外部宿主机端口指南</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">iptables指令将容器内部端口映射到外部宿主机端口指南</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>当服务器遇到问题，或者提前查看服务器质量怎么样，一般可以通过以下几点分析：服务器整体情况，CPU使用情况，内存，磁盘，磁盘io，网络io等。</p>
+<h3 id="不同环境插件安装">不同环境插件安装</h3>
+<ul>
+<li>centos</li>
+</ul>
+<p><code>yum install sysstat -y</code></p>
+<ul>
+<li>ubuntu</li>
+</ul>
+<p><code>apt install sysstat -y</code></p>
+<h3 id="1整体分析之top">1、整体分析之top</h3>
+<ul>
+<li>执行top指令</li>
+</ul>
+<pre><code>root@master2:~# top
+top - 10:41:30 up 6 days, 11:23,  1 user,  load average: 0.98, 0.66, 0.57
+Tasks: 304 total,   1 running, 200 sleeping,   0 stopped,   2 zombie
+%Cpu(s):  3.1 us,  0.7 sy,  0.0 ni, 95.5 id,  0.6 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem : 32937840 total, 25930000 free,  2666144 used,  4341696 buff/cache
+KiB Swap:        0 total,        0 free,        0 used. 30586896 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+28484 root      20   0 1468632 1.280g  68832 S  39.1  4.1 260:25.96 kube-apiserver
+25442 root      20   0 10.277g 308160  80692 S   9.3  0.9 166:39.40 etcd
+</code></pre><ul>
+<li>第 1 行：系统时间、运行时间、登录终端数、系统负载（三个数值分别为1分钟、5分钟、15分钟内的平均值，数值越小意味着负载越低）。</li>
+<li>第 2 行：进程总数、运行中的进程数、睡眠中的进程数、停止的进程数、僵死的进程数。一般情况下，只要没有僵死的进程，就没啥大问题。</li>
+<li>第 3 行：用户占用资源百分比、系统内核占用资源百分比、改变过优先级的进程资源百分比、空闲的资源百分比等。</li>
+<li>第 4 行：物理内存总量、内存空闲量、内存使用量、作为内核缓存的内存量。</li>
+<li>第 5 行：虚拟内存总量、虚拟内存空闲量、虚拟内存使用量、已被提前加载的内存量。</li>
+<li>第 6 行里面主要看 PID 和 COMMAND 这两个参数，其中 PID 就是进程 ID ， COMMAND 就是执行的命令，能够看到比较靠前的两个进程都是k8s进程。</li>
+<li>干掉僵尸进程的指令，<code>ps -A -ostat,ppid | grep -e '^[Zz]' | awk '{print $2}' | xargs kill -HUP &gt; /dev/null 2&gt;&amp;1</code></li>
+<li>在当前这个界面，按下数字键盘 1 能够看到各个 CPU 的详细利用率</li>
+</ul>
+<pre><code>top - 10:46:53 up 6 days, 11:29,  1 user,  load average: 0.15, 0.53, 0.57
+Tasks: 303 total,   1 running, 200 sleeping,   0 stopped,   2 zombie
+%Cpu0  :  1.7 us,  1.3 sy,  0.0 ni, 96.3 id,  0.7 wa,  0.0 hi,  0.0 si,  0.0 st
+%Cpu1  :  2.0 us,  0.7 sy,  0.0 ni, 97.3 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+%Cpu2  :  0.7 us,  0.3 sy,  0.0 ni, 99.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</code></pre><h3 id="2cpu分析之vmstat">2、cpu分析之vmstat</h3>
+<p>一般 vmstat 工具的使用是通过两个数字参数来完成的，第一个参数是采样的时间间隔，单位是秒，第二个参数是采样的次数，这次的命令是：vmstat -n 3 2 意思就是隔 3 秒取样一次，一共取样 2 次。</p>
+<ul>
+<li>执行vmstat指令</li>
+</ul>
+<pre><code>root@master2:~# vmstat -n 3 2
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+0  0      0 25910152 684436 3669440    0    0     1    38    4    0  5  2 89  1  3
+3  0      0 25910008 684436 3669488    0    0     0   441 8905 15261  1  1 97  1  0
+</code></pre><h4 id="21procs">2.1、procs:</h4>
+<ul>
+<li>r ：运行和等待 CPU 时间片的进程数，一般来说整个系统的运行队列不要超过总核数的 2 倍，要不然系统压力太大了。</li>
+<li>b : 等待资源的进程数，比如正在等待磁盘 IO ，网络 IO 这种。</li>
+</ul>
+<h4 id="22cpu">2.2、cpu：</h4>
+<ul>
+<li>us  ：用户进程消耗 CPU 时间百分比， us 值高的话，说明用户进程消耗 CPU 时间比较长，如果长期大于 50% 的话，那就说明程序还有需要优化的地方。</li>
+<li>sy ：内核进程消耗的 CPU 时间百分比。</li>
+<li>us + sy 参考值为 80% ，如果大于 80% 的话，说明可能存在 CPU 不足。</li>
+</ul>
+<h3 id="3内存分析之free">3、内存分析之free</h3>
+<p>一般我们使用free -m即可</p>
+<pre><code>root@master2:~# free -m
+              total        used        free      shared  buff/cache   available
+Mem:          32165        2608       25354          13        4203       29861
+Swap:             0           0           0
+</code></pre><ul>
+<li>如果应用程序可用内存/系统物理内存大于 70% 的话，说明内存是充足的，没啥问题，但是如果小于 20% 的话，就要考虑增加内存了。</li>
+</ul>
+<h3 id="4磁盘分析之df">4、磁盘分析之df</h3>
+<p>排查磁盘问题，首先要排查磁盘空间够不够，df和du就可以。df查看磁盘使用情况；du查看目录占用磁盘情况及子文件占用情况。</p>
+<pre><code>root@master2:~# df -hT
+Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs   16G     0   16G   0% /dev
+tmpfs          tmpfs     3.2G   14M  3.2G   1% /run
+/dev/vda2      ext4       99G  9.4G   84G  11% /
+tmpfs          tmpfs      16G     0   16G   0% /dev/shm
+tmpfs          tmpfs     5.0M     0  5.0M   0% /run/lock
+tmpfs          tmpfs      16G     0   16G   0% /sys/fs/cgroup
+
+root@master2:~# du -sh
+516M    .
+root@master2:~# du -sh *
+16K     1.sh
+434M    etcd
+82M     etcd.tar.gz
+4.0K    etcd.txt
+root@master2:~# du -h --max-depth=1
+4.0K    ./.cache
+8.0K    ./.gnupg
+8.0K    ./.ansible
+434M    ./etcd
+948K    ./.kube
+8.0K    ./.ssh
+8.0K    ./.vim
+516M    .
+</code></pre><h3 id="5磁盘io分析之iostat">5、磁盘io分析之iostat</h3>
+<p>在对数据库进行操作时，第一要考虑就是磁盘io操作，因为相对来说，如果在某个时间段给磁盘进行大量的写入操作会造成程序等待时间长，导致客户端那边好久都没啥反应。</p>
+<pre><code>root@master2:~# iostat -xdk 3 2
+Linux 4.15.0-115-generic (master2)      09/11/2020      _x86_64_        (16 CPU)
+
+Device            r/s     w/s     rkB/s     wkB/s   rrqm/s   wrqm/s  %rrqm  %wrqm r_await w_await aqu-sz rareq-sz wareq-sz  svctm  %util
+loop0            0.00    0.00      0.02      0.00     0.00     0.00   0.00   0.00    1.75    0.00   0.00    18.07     0.00   0.16   0.00
+loop1            0.05    0.00      0.07      0.00     0.00     0.00   0.00   0.00    1.66    0.00   0.00     1.49     0.00   0.06   0.00
+vda              0.74   19.38     18.68    154.10     0.00    10.14   0.07  34.35    6.74   17.52   0.28    25.39     7.95   0.79   1.60
+
+Device            r/s     w/s     rkB/s     wkB/s   rrqm/s   wrqm/s  %rrqm  %wrqm r_await w_await aqu-sz rareq-sz wareq-sz  svctm  %util
+loop0            0.00    0.00      0.00      0.00     0.00     0.00   0.00   0.00    0.00    0.00   0.00     0.00     0.00   0.00   0.00
+loop1            0.00    0.00      0.00      0.00     0.00     0.00   0.00   0.00    0.00    0.00   0.00     0.00     0.00   0.00   0.00
+vda              0.00    7.00      0.00     61.33     0.00     6.00   0.00  46.15    0.00    1.33   0.00     0.00     8.76   0.00   0.00
+</code></pre><ul>
+<li>rkB/s ：每秒读取数据量 kB 。</li>
+<li>wkB/s ：每秒写入数据量 kB 。</li>
+<li>svctm ：I/O 请求的平均服务时间，单位毫秒。</li>
+<li>util ：一秒中有百分之几的时间用于 I/O 操作，如果接近 100% 说明磁盘带宽跑满了，这个时候就要优化程序或者增加磁盘了。</li>
+</ul>
+<h3 id="6网络io分析之sar">6、网络io分析之sar</h3>
+<p>网络 IO 的话，可以通过 sar -n DEV 3 2 这条命令来看，和上面的差不多，意思就是每隔 3 秒取样一次，一共取样 2 次。</p>
+<pre><code>root@master2:~# sar -n DEV 3 2
+Linux 4.15.0-115-generic (master2)      09/11/2020      _x86_64_        (16 CPU)
+
+11:06:46 AM     IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil
+11:06:49 AM      eth0    854.33    859.33    199.93    210.99      0.00      0.00      0.00      0.00
+11:06:49 AM     tunl0    113.67    108.33     10.92      9.86      0.00      0.00      0.00      0.00
+11:06:49 AM calide035c655d8     98.33    108.33     11.04     12.63      0.00      0.00      0.00      0.00
+11:06:49 AM        lo     58.00     58.00     13.18     13.18      0.00      0.00      0.00      0.00
+11:06:49 AM cali3d31c61f18c      6.00      3.33      4.41      2.08      0.00      0.00      0.00      0.00
+11:06:49 AM nodelocaldns      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+11:06:49 AM kube-ipvs0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+11:06:49 AM cali7d0b83575fc      7.00      8.00      2.46      0.81      0.00      0.00      0.00      0.00
+11:06:49 AM cali056accc6554     24.33     21.00      2.93     10.81      0.00      0.00      0.00      0.00
+11:06:49 AM   docker0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+
+11:06:49 AM     IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil
+11:06:52 AM      eth0    623.67    620.00    109.84    127.33      0.00      0.00      0.00      0.00
+11:06:52 AM     tunl0     97.33     90.00      6.64      8.74      0.00      0.00      0.00      0.00
+11:06:52 AM calide035c655d8     93.67    104.00     10.52      8.68      0.00      0.00      0.00      0.00
+11:06:52 AM        lo     65.67     65.67     11.60     11.60      0.00      0.00      0.00      0.00
+11:06:52 AM cali3d31c61f18c      6.00      3.67      5.62      2.78      0.00      0.00      0.00      0.00
+11:06:52 AM nodelocaldns      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+11:06:52 AM kube-ipvs0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+11:06:52 AM cali7d0b83575fc      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+11:06:52 AM cali056accc6554      3.67      2.33      0.24      0.39      0.00      0.00      0.00      0.00
+11:06:52 AM   docker0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+
+Average:        IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil
+Average:         eth0    739.00    739.67    154.89    169.16      0.00      0.00      0.00      0.00
+Average:        tunl0    105.50     99.17      8.78      9.30      0.00      0.00      0.00      0.00
+Average:    calide035c655d8     96.00    106.17     10.78     10.65      0.00      0.00      0.00      0.00
+Average:           lo     61.83     61.83     12.39     12.39      0.00      0.00      0.00      0.00
+Average:    cali3d31c61f18c      6.00      3.50      5.02      2.43      0.00      0.00      0.00      0.00
+Average:    nodelocaldns      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+Average:    kube-ipvs0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+Average:    cali7d0b83575fc      3.50      4.00      1.23      0.40      0.00      0.00      0.00      0.00
+Average:    cali056accc6554     14.00     11.67      1.58      5.60      0.00      0.00      0.00      0.00
+Average:      docker0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+</code></pre><ul>
+<li>IFACE ：LAN 接口</li>
+<li>rxpck/s ：每秒钟接收的数据包</li>
+<li>txpck/s ：每秒钟发送的数据包</li>
+<li>rxKB/s ：每秒接收的数据量，单位 KByte</li>
+<li>txKB/s ：每秒发出的数据量，单位 KByte</li>
+<li>rxcmp/s ：每秒钟接收的压缩数据包</li>
+<li>txcmp/s ：每秒钟发送的压缩数据包</li>
+<li>rxmcst/s：每秒钟接收的多播数据包</li>
+</ul></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2141 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/%E5%9F%BA%E4%BA%8Ekeepalived-haproxy%E9%83%A8%E7%BD%B2kubesphere%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/">
+        iptables指令将容器内部端口映射到外部宿主机端口指南
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/%E8%84%9A%E6%9C%AC%E5%8C%96%E8%A7%A6%E5%8F%91kubernetes%E9%9B%86%E7%BE%A4%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%B7%A5%E5%85%B7-shell-operator/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp%E8%81%94%E5%90%88k8s%E5%9C%A8kubesphere%E5%BA%94%E7%94%A8/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tcpdump%E6%8A%93%E5%8C%85%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubekey%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%9E%84%E5%BB%BAarm-x86%E6%9E%B6%E6%9E%84%E7%9A%84docker-image%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BAvmware-workstation/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-%E5%AD%98%E5%82%A8%E5%9C%A8-kubesphere-%E4%B8%8A%E7%9A%84%E5%AE%9E%E8%B7%B5/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E4%B8%80%E4%B8%AAmaster%E6%88%96%E8%80%85%E4%B8%A4%E4%B8%AAmaster%E5%AE%95%E6%9C%BA%E6%81%A2%E5%A4%8D/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/linux-nfs-%E6%90%AD%E5%BB%BA/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/terrform%E5%AF%B9%E6%8E%A5qingcloud%E5%AE%89%E8%A3%85k8s/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/%E6%B7%BB%E5%8A%A0%E5%85%AC%E7%BD%91ip%E5%88%B0kubernetes%E7%9A%84apiserver%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere%E5%9F%BA%E4%BA%8Evelero%E5%81%9A%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BF%81%E7%A7%BB/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85wecenter/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>
