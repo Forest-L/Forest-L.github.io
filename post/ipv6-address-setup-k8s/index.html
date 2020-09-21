@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | ipv6地址搭建K8s</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">ipv6地址搭建K8s</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2020-01-14T00:00:00Z">2020-1-14 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h1 id="ipv6地址搭建k8s">ipv6地址搭建K8s</h1>
+<h3 id="环境">环境</h3>
+<p>centos: 7.7
+k8s: v1.16.0</p>
+<h3 id="提前准备">提前准备</h3>
+<ul>
+<li>修改主机名
+<code>hostnamectl set-hostname node1</code></li>
+<li>添加ipv6地址及主机名
+<code>vi /etc/hosts</code></li>
+<li>添加操作系统的ipv6的参数，且使参数生效<code>sysctl -p</code></li>
+</ul>
+<pre><code>vi /etc/sysctl.conf
+net.ipv6.conf.all.disable_ipv6 = 0
+net.ipv6.conf.default.disable_ipv6 = 0
+net.ipv6.conf.lo.disable_ipv6 = 0
+net.ipv6.conf.all.forwarding=1
+</code></pre><ul>
+<li>开启ipv6,添加如下内容</li>
+</ul>
+<pre><code>vi /etc/sysconfig/network
+NETWORKING_IPV6=yes
+</code></pre><ul>
+<li>开启网卡的ipv6,添加如下内容，最后执行reboot生效。</li>
+</ul>
+<pre><code>vi /etc/sysconfig/network-scripts/ifcfg-eth0
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+</code></pre><ul>
+<li>关闭防火墙</li>
+</ul>
+<pre><code>systemctl stop firewalld
+systemctl disable firewalld
+setenforce 0
+vi /etc/selinux/config
+SELINUX=disabled
+</code></pre><ul>
+<li>关闭虚拟内存,添加如下内容，最后通过执行sysctl -p /etc/sysctl.d/k8s.conf生效。</li>
+</ul>
+<pre><code>swapoff -a
+vi /etc/sysctl.d/k8s.conf 添加下面一行：
+vm.swappiness=0
+</code></pre><h3 id="安装docker">安装docker</h3>
+<pre><code>yum install -y yum-utils device-mapper-persistent-data lvm2
+yum install wget -y
+wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo sed -i 's+download.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+yum makecache fast
+yum install docker-ce -y
+systemctl enable docker;systemctl restart docker
+docker的配置vi /etc/docker/daemon.json
+{
+&quot;insecure-registry&quot;:[&quot;0.0.0.0/0&quot;],
+&quot;ipv6&quot;: true,
+&quot;fixed-cidr-v6&quot;: &quot;2001:db8:1::/64&quot;,
+&quot;host&quot;:[&quot;unix:///var/run/docker.sock&quot;,&quot;tcp://:::2375&quot;],
+&quot;log-level&quot;:&quot;debug&quot;
+}
+systemctl restart docker
+echo &quot;1&quot; &gt;/proc/sys/net/bridge/bridge-nf-call-iptables
+</code></pre><h3 id="安装kubectlkubeadm和kubelet插件">安装kubectl、kubeadm和kubelet插件</h3>
+<pre><code>添加k8s下载源
+cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=http://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=http://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+        http://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+
+指定版本的安装
+yum install kubelet-1.16.0 kubeadm-1.16.0 kubectl-1.16.0 -y
+systemctl enable kubelet &amp;&amp; sudo systemctl start kubelet
+</code></pre><h3 id="初始化的准备">初始化的准备</h3>
+<ul>
+<li>查看安装过程需要哪些镜像
+<code>kubeadm config images list --kubernetes-version=v1.16.0</code></li>
+<li>通过脚本下载所需的镜像。</li>
+</ul>
+<pre><code>vi images.sh 
+#!/bin/bash
+images=(kube-proxy:v1.16.0 kube-scheduler:v1.16.0 kube-controller-manager:v1.16.0 kube-apiserver:v1.16.0 etcd:3.3.15-0 pause:3.1 coredns:1.6.2)
+for imageName in ${images[@]} ; do
+docker pull gcr.azk8s.cn/google-containers/$imageName
+docker tag gcr.azk8s.cn/google-containers/$imageName k8s.gcr.io/$imageName
+docker rmi gcr.azk8s.cn/google-containers/$imageName
+done
+</code></pre><ul>
+<li>
+<p>执行如下指令下载：<code>chmod +x images.sh &amp;&amp; ./images.sh</code></p>
+</li>
+<li>
+<p>拷贝kubeadm.yaml文件，需要注意advertiseAddress参数为本机ipv6地址</p>
+</li>
+</ul>
+<pre><code>vi kubeadm.yaml 
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: &quot;2402:e7c0:0:a00:ffff:ffff:fffe:fffb&quot;
+  bindPort: 6443
+nodeRegistration:
+  taints:
+  - effect: PreferNoSchedule
+    key: node-role.kubernetes.io/master
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v1.16.0
+networking:
+  podSubnet: 1100::/52
+  serviceSubnet: fd00:4000::/112
+</code></pre><ul>
+<li>执行如下安装指令：<code>kubeadm init --config=kubeadm.yaml</code></li>
+<li>如果使1.16.0之前版本需要安装指令后面添加如下参数执行：<code>--ignore-preflight-errors=HTTPProxy</code></li>
+<li>如果以下安装有问题，需要重置，先执行<code>kubeadm reset</code>,再执行以上<code>kubeadm init</code>指令，安装成功之后，需要做如下操作：</li>
+</ul>
+<pre><code>mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl taint node node1 node-role.kubernetes.io/master-
+</code></pre><h3 id="安装网络插件如calico">安装网络插件，如calico</h3>
+<ul>
+<li>下载calico.yaml文件</li>
+</ul>
+<pre><code>curl https://docs.projectcalico.org/v3.11/manifests/calico.yaml -O
+需要修改及添加的内容为,总共三处：
+ &quot;ipam&quot;: {
+     &quot;type&quot;: &quot;calico-ipam&quot;,
+     &quot;assign_ipv4&quot;: &quot;false&quot;,
+     &quot;assign_ipv6&quot;: &quot;true&quot;,
+     &quot;ipv4_pools&quot;: [&quot;172.16.0.0/16&quot;, &quot;default-ipv4-ippool&quot;],
+     &quot;ipv6_pools&quot;: [&quot;1100::/52&quot;, &quot;default-ipv6-ippool&quot;]
+  },
+
+- name: CALICO_IPV4POOL_CIDR
+  value: &quot;172.16.0.0/16&quot;
+- name: IP6
+  value: &quot;autodetect&quot;
+- name: CALICO_IPV6POOL_CIDR
+  value: &quot;1100::/52&quot;
+
+# Disable IPv6 on Kubernetes.
+- name: FELIX_IPV6SUPPORT
+  value: &quot;true&quot;
+</code></pre><ul>
+<li>calico的镜像,可以提前下载
+calico/cni:v3.11.1
+calico/pod2daemon-flexvol:v3.11.1
+calico/node:v3.11.1
+calico/kube-controllers:v3.11.1</li>
+<li>执行calico，<code>kubectl apply -f calico.yaml</code></li>
+</ul>
+<h3 id="验证">验证：</h3>
+<p><code>kubectl get pod --all-namespaces -o wide</code>
+<code>kubectl get nodes -o wide</code></p>
+<ul>
+<li>部署tomcat应用验证</li>
+</ul>
+<pre><code>kubectl run tomcat  --image=tomcat:8.0  --port=8080
+kubectl get pod
+kubectl expose deployment tomcat  --port=8080 --target-port=8080 --type=NodePort
+# kubectl get svc
+NAME         TYPE        CLUSTER-IP        EXTERNAL-IP   PORT(S)          AGE
+kubernetes   ClusterIP   fd00:4000::1      &lt;none&gt;        443/TCP          33m
+tomcat       NodePort    fd00:4000::bf3e   &lt;none&gt;        8080:30693/TCP   22m
+
+curl -6g [2402:e7c0:0:a00:ffff:ffff:fffe:fffb]:32012
+</code></pre><h4 id="参考">参考</h4>
+<p><a href="https://www.kubernetes.org.cn/5173.html">https://www.kubernetes.org.cn/5173.html</a></p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 870 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/k8s1-15-install/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        k8s1-15安装
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/chart-package-practice-development-guide/">
+        chart包实践开发指南
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/k8s1-15-install/">k8s1-15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/backup-and-restore-etcd-data-of-k8s/">k8s之etcd数据的备份与恢复</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-3-install-on-the-ubuntu/">k8s1-15-3在ubuntu系统部署</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/linux-nfs-install/">Linux-nfs-搭建</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp-存储在-KubeSphere-上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-system-builds-vmware-workstation/">ubuntu快速安装wecenter</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | 构建arm-x86架构的docker-image操作指南</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">构建arm-x86架构的docker-image操作指南</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h1 id="构建armx86架构的docker-image操作指南">构建arm/x86架构的docker image操作指南</h1>
+<p>由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。</p>
+<h2 id="1启动一台ubuntu的机器并安装docker-1903">1.	启动一台ubuntu的机器，并安装docker 19.03</h2>
+<p>在测试过程中发现 Centos7.5 有下面的问题，这里我们直接绕过
+<a href="https://github.com/multiarch/qemu-user-static/issues/38">issue</a>
+docker安装参考<a href="https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/">docker安装</a></p>
+<h2 id="2运行下列命令安装并测试qemu">2.	运行下列命令安装并测试qemu</h2>
+<ul>
+<li>查看机器的架构</li>
+</ul>
+<pre><code>uname -m
+x86_64
+</code></pre><ul>
+<li>正常测试docker启动一个arm镜像容器</li>
+</ul>
+<pre><code>docker run --rm -t arm64v8/ubuntu uname -m
+standard_init_linux.go:211: exec user process caused &quot;exec format error&quot;
+</code></pre><ul>
+<li>添加特权模式安装qemu，且启动一个arm镜像容器</li>
+</ul>
+<pre><code>docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker run --rm -t arm64v8/ubuntu uname -m
+aarch64
+</code></pre><h2 id="3--启用docker--buildx-命令">3.	  启用docker  buildx 命令</h2>
+<p>docker buildx 为跨平台构建 docker 镜像所使用的命令。目前为实验特性，可以设置dokcer cli的配置，将实验特性开启。</p>
+<p>将下面配置添加到CLI配置文件当中~/.docker/config.json</p>
+<pre><code>{
+  &quot;experimental&quot;: &quot;enabled&quot;
+}
+</code></pre><h2 id="4创建新的builder实例默认的docker实例不支持镜像导出">4.	创建新的builder实例（默认的docker实例不支持镜像导出）</h2>
+<p><code>docker buildx create --name ks-all</code>
+<code>docker buildx use ks-all</code>
+<code>docker buildx inspect --bootstrap</code></p>
+<p>执行下面命令可以看到 builder 已经创建好，并且支持多种平台的构建。</p>
+<pre><code>docker buildx ls
+NAME/NODE DRIVER/ENDPOINT             STATUS  PLATFORMS
+ks-all *  docker-container
+  ks-all0 unix:///var/run/docker.sock running linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+default   docker
+  default default                     running linux/amd64, linux/386
+</code></pre><h2 id="5执行构建命令以ks-installer为例">5.	执行构建命令（以ks-installer为例）</h2>
+<p>在 ks-installer目录下执行命令可以构建 arm64与amd64的镜像，并自动推送到镜像仓库中。
+<code>docker buildx build -f /root/ks-installer/Dockerfile --output=type=registry --platform linux/arm64  -t lilinlinlin/ks-installer:2.1.0-arm64 .</code></p>
+<p>(需要注意现在 ks-installer 的 Dockerfile中 go build 命令带有 GOOS GOARCH等，这些要删除)</p>
+<p>构建成功之后，可以在dockerhub下图当中可以看到是支持两种arch</p>
+<pre><code>DIGEST                       OS/ARCH                          COMPRESSED SIZE
+97dd2142cac6                 linux/amd64                       111.13 MB
+ce366ad696cb                 linux/arm64                       111.13 MB
+</code></pre><h2 id="6-构建并保存为tar-文件">6.	 构建并保存为tar 文件</h2>
+<ul>
+<li>可以参考 buildx 的官方文档
+<a href="https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue">https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue</a></li>
+</ul>
+<p><code>docker buildx build  --output=type=docker,dest=/root/ks-installer.tar --platform  linux/arm64 -t lilinlinlin/ks-installer:2.1.0-arm64 ./pkg/db/</code></p>
+<p>构建tar包时需要注意output的类型需要是docker，而不是tar</p>
+<h2 id="更多参考">更多参考</h2>
+<p><a href="https://github.com/docker/buildx">https://github.com/docker/buildx</a>
+<a href="https://github.com/multiarch/qemu-user-static">https://github.com/multiarch/qemu-user-static</a>
+<a href="https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux">https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux</a></p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 764 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/iperf-cognition-as-a-network-speed-measurement-tool/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        测量网络速度工具之iperf认知
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">
+        提前预防K8s集群资源不足的处理方式配置
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/linux-nfs-install/">Linux-nfs-搭建</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp-存储在-KubeSphere-上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-system-builds-vmware-workstation/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

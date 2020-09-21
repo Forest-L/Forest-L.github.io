@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | kubernetes一致性认证的提交操作指南</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">kubernetes一致性认证的提交操作指南</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/linux-tools'>Linux tools</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+</div>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>软件一致性尤为重要，它可以避免分裂，使众厂商将精力聚焦于共同推动软件发展而不是自成一家。2017年CNCF启动了Kubernetes一致性认证计划，CNCF提供一套测试工具，各厂商按照操作指导进行测试自身的产品，将测试报告上传给CNCF社区，CNCF审核测试报告后，会给符合条件的企业颁发一个证书。
+大致流程：<img src="https://ww1.sinaimg.cn/large/006bbiLEgy1gfsyxpcmmej30mx09zwew.jpg" alt="操作流程图.png"></p>
+<h2 id="1-环境信息">1. 环境信息</h2>
+<ul>
+<li>亚太机器ubuntu（16.04.6）两台，192.168.0.3/192.168.0.4</li>
+<li>k8s1.18.3（1master+1node）（至少两台机器）</li>
+<li>sonobuoy0.18.3</li>
+</ul>
+<h2 id="2k8s及云平台的部署">2.k8s及云平台的部署</h2>
+<ul>
+<li>参考官网链接部署<a href="https://github.com/kubesphere/kubekey">K8s及云平台的部署</a></li>
+<li>K8s版本为1.18.3及KubeSphere版本为v3.0.0，指令如下：</li>
+</ul>
+<pre><code>curl -O -k https://kubernetes.pek3b.qingstor.com/tools/kubekey/kk
+chmod +x kk
+./kk create cluster --with-kubernetes v1.18.3 --with-kubesphere
+</code></pre><h2 id="3-sonobuoy组件部署及运行">3. sonobuoy组件部署及运行</h2>
+<ul>
+<li>sonobuoy二进制文件下载</li>
+</ul>
+<pre><code>wget https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.18.3/sonobuoy_0.18.3_linux_amd64.tar.gz
+</code></pre><ul>
+<li>解压，<code>tar -xzvf sonobuoy_0.18.3_linux_amd64.tar.gz</code></li>
+<li>配置环境变量，sonobuoy执行文件拷贝到/usr/local/bin下 <code>cp sonobuoy /usr/local/bin/</code></li>
+</ul>
+<h2 id="4-sonobuoy执行及相关指令">4. sonobuoy执行及相关指令</h2>
+<ul>
+<li>在集群中部署一个sonobuoy的pod，&ndash;mode=certified-conformance参数在Kubernetesv1.16(Sonobuoy v0.16)需要添加，指令为：</li>
+</ul>
+<pre><code>sonobuoy run --mode=certified-conformance
+</code></pre><ul>
+<li>sonobuoy运行状态</li>
+</ul>
+<pre><code>sonobuoy status
+</code></pre><ul>
+<li>详细的日志</li>
+</ul>
+<pre><code>sonobuoy logs
+</code></pre><ul>
+<li>通过sonobuoy status显示“completed”，可以通过如下指令获取输出结果，需要提交的内容在plugins/e2e/results/global/{e2e.log,junit_01.xml}目录下</li>
+</ul>
+<pre><code>sonobuoy retrieve
+</code></pre><ul>
+<li>删除sonobuoy组件</li>
+</ul>
+<pre><code>sonobuoy delete
+</code></pre><h2 id="5-提交的pr包含内容">5. 提交的pr包含内容</h2>
+<ul>
+<li>5.1 fork k8s-conformance代码到你GitHub账号下，然后git clone到本地。</li>
+<li>5.2 在本地找到对应的k8s版本号，然后在里面建相关的名字即可，比如在v1.18版本下创建KubeSphere目录。</li>
+<li>5.3 自己项目目录下，需要包含以下四个文件，e2e.log、junit_01.xml、PRODUCT.yaml和README.md</li>
+<li>5.4 e2e.log和junit_01.xml两个文件是通过上面四步骤下解压的两个文件。</li>
+<li>5.5 PRODUCT.yaml包含的内容大致为：</li>
+</ul>
+<pre><code>vendor: 组织结构
+name: 项目名
+version: 版本号
+website_url: 项目官方浏览页
+repo_url: 项目官方镜像仓库地址
+documentation_url: 项目官方文档
+product_logo_url: 项目log图标
+type: 开源/非开源
+description: 项目的描述
+</code></pre><ul>
+<li>5.6 README.md包含的内容大致为：</li>
+</ul>
+<pre><code>To reproduce:
+本身项目的安装方法
+sonobuoy项目的安装方法
+</code></pre><ul>
+<li>5.7 提交代码到自己GitHub账号下，然后提pr即可。</li>
+</ul>
+<h2 id="6-参考文章">6. 参考文章</h2>
+<p><a href="https://github.com/cncf/k8s-conformance/blob/master/instructions.md">https://github.com/cncf/k8s-conformance/blob/master/instructions.md</a></p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1032 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        kubesphere2-1-HA环境，一个master或者两个master宕机恢复
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/kubekey-source-code-interpretation/">
+        kubekey源码解读
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/linux-nfs-install/">Linux-nfs-搭建</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp-存储在-KubeSphere-上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-system-builds-vmware-workstation/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/docker-image-operation-guide-for-building-arm-x86-architecture/">构建arm-x86架构的docker-image操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

@@ -14,10 +14,10 @@
     
     <item>
       <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/iptables%E6%8C%87%E4%BB%A4%E5%B0%86%E5%AE%B9%E5%99%A8%E5%86%85%E9%83%A8%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%88%B0%E5%A4%96%E9%83%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%AB%AF%E5%8F%A3%E6%8C%87%E5%8D%97/</link>
+      <link>https://Forest-L.github.io/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</link>
       <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/iptables%E6%8C%87%E4%BB%A4%E5%B0%86%E5%AE%B9%E5%99%A8%E5%86%85%E9%83%A8%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%88%B0%E5%A4%96%E9%83%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%AB%AF%E5%8F%A3%E6%8C%87%E5%8D%97/</guid>
+      <guid>https://Forest-L.github.io/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</guid>
       <description>&lt;h4 id=&#34;背景&#34;&gt;背景：&lt;/h4&gt;
 &lt;p&gt;docker run 某个容器，忘记了-p/-P 映射端口操作时，怎么把容器端口映射到主机上呢？以下描述的是如何通过iptables指令把容器端口映射到外部宿主机端口操作，防止容器重新创建。
 宿主机docker启了一个容器，在容器里面又部署了一个pod，而部署pod这个服务是后续操作的，宿主机docker启容器时没有把端口映射出来，如何通过宿主机去访问pod服务。&lt;/p&gt;
@@ -114,11 +114,11 @@ iptables -A DOCKER -j ACCEPT -p tcp --destination ${CONTAINERIP} --dport ${YOURP
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/ipv6%E5%9C%B0%E5%9D%80%E6%90%AD%E5%BB%BAk8s/</link>
+      <title>ipv6地址搭建K8s</title>
+      <link>https://Forest-L.github.io/post/ipv6-address-setup-k8s/</link>
       <pubDate>Tue, 14 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/ipv6%E5%9C%B0%E5%9D%80%E6%90%AD%E5%BB%BAk8s/</guid>
+      <guid>https://Forest-L.github.io/post/ipv6-address-setup-k8s/</guid>
       <description>&lt;h1 id=&#34;ipv6地址搭建k8s&#34;&gt;ipv6地址搭建K8s&lt;/h1&gt;
 &lt;h3 id=&#34;环境&#34;&gt;环境&lt;/h3&gt;
 &lt;p&gt;centos: 7.7
@@ -296,11 +296,11 @@ curl -6g [2402:e7c0:0:a00:ffff:ffff:fffe:fffb]:32012
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s1-15%E5%AE%89%E8%A3%85/</link>
+      <title>k8s1-15安装</title>
+      <link>https://Forest-L.github.io/post/k8s1-15-install/</link>
       <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s1-15%E5%AE%89%E8%A3%85/</guid>
+      <guid>https://Forest-L.github.io/post/k8s1-15-install/</guid>
       <description>&lt;h1 id=&#34;使用kubeadm安装k8s-115版本&#34;&gt;使用kubeadm安装k8s 1.15版本&lt;/h1&gt;
 &lt;p&gt;k8s 1.15版本中，kubeadm对HA集群的配置已经达到了beta可用，这一版本更新主要是针对稳定性的持续改善和可扩展性。其中用到的镜像和rpm包在百度云上，链接如下。
 &lt;a href=&#34;https://pan.baidu.com/s/1LoKvv86Fs5ilZ-TYQdN35A&#34;&gt;https://pan.baidu.com/s/1LoKvv86Fs5ilZ-TYQdN35A&lt;/a&gt;
@@ -619,11 +619,11 @@ ubuntu: &lt;a href=&#34;https://www.cnblogs.com/gzxbkk/p/7809296.html&#34;&gt;ht
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s%E4%B9%8Betcd%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D-1/</link>
+      <title>k8s之etcd数据的备份与恢复</title>
+      <link>https://Forest-L.github.io/post/backup-and-restore-etcd-data-of-k8s/</link>
       <pubDate>Wed, 09 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s%E4%B9%8Betcd%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D-1/</guid>
+      <guid>https://Forest-L.github.io/post/backup-and-restore-etcd-data-of-k8s/</guid>
       <description>&lt;h1 id=&#34;k8s之etcd备份与恢复&#34;&gt;k8s之etcd备份与恢复&lt;/h1&gt;
 &lt;p&gt;etcd是一款开源的分布式一致性键值存储。目前有版本为V3以上，但是它的API又有v2和v3之分，以至于操作指令也不一样。
 查看etcd版本&lt;code&gt;etcdctl --version&lt;/code&gt;&lt;/p&gt;
@@ -714,11 +714,11 @@ etcdctl snapshot restore /var/backups/kube_etcd/etcd-******/snapshot.db \
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s1-15-3%E5%9C%A8ubuntu%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/</link>
+      <title>k8s1-15-3在ubuntu系统部署</title>
+      <link>https://Forest-L.github.io/post/k8s1-15-3-install-on-the-ubuntu/</link>
       <pubDate>Mon, 02 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s1-15-3%E5%9C%A8ubuntu%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/</guid>
+      <guid>https://Forest-L.github.io/post/k8s1-15-3-install-on-the-ubuntu/</guid>
       <description>&lt;h1 id=&#34;k8s1153在ubuntu系统部署&#34;&gt;k8s1.15.3在ubuntu系统部署&lt;/h1&gt;
 &lt;p&gt;国内环境下，k8s1.15.3在ubuntu系统部署，相关的镜像以及docker的deb包和k8s核心组件的deb包在以下百度链接下。
 &lt;a href=&#34;https://pan.baidu.com/s/1FqfkBiRfa03xaKbmKnqI2w&#34;&gt;k8s介质&lt;/a&gt;
@@ -887,11 +887,11 @@ pid-file=/var/run/mariadb/mariadb.pid
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s%E4%B9%8Bhelm%E9%83%A8%E7%BD%B2%E5%8F%8A%E7%94%A8%E6%B3%95/</link>
+      <title>k8s之helm部署及用法</title>
+      <link>https://Forest-L.github.io/post/helm-deployment-and-guide/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s%E4%B9%8Bhelm%E9%83%A8%E7%BD%B2%E5%8F%8A%E7%94%A8%E6%B3%95/</guid>
+      <guid>https://Forest-L.github.io/post/helm-deployment-and-guide/</guid>
       <description>&lt;h1 id=&#34;k8s之helm部署及用法&#34;&gt;k8s之helm部署及用法&lt;/h1&gt;
 &lt;p&gt;Helm是Kubernetes的一个包管理工具，用来简化Kubernetes应用的部署和管理。可以把Helm比作CentOS的yum工具。所以可以把该包在不同环境下部署起来,前提需要部署k8s环境。&lt;/p&gt;
 &lt;h2 id=&#34;1-helm部署&#34;&gt;1. helm部署&lt;/h2&gt;
@@ -987,20 +987,20 @@ hello-test/
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/kubekey%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/</link>
+      <title>kubekey源码解读</title>
+      <link>https://Forest-L.github.io/post/kubekey-source-code-interpretation/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubekey%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/</guid>
+      <guid>https://Forest-L.github.io/post/kubekey-source-code-interpretation/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/kubernetes%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A4%E8%AF%81%E7%9A%84%E6%8F%90%E4%BA%A4%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</link>
+      <title>kubernetes一致性认证的提交操作指南</title>
+      <link>https://Forest-L.github.io/post/kubernetes-compliance-certification-submission-instructions/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubernetes%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A4%E8%AF%81%E7%9A%84%E6%8F%90%E4%BA%A4%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</guid>
+      <guid>https://Forest-L.github.io/post/kubernetes-compliance-certification-submission-instructions/</guid>
       <description>&lt;p&gt;软件一致性尤为重要，它可以避免分裂，使众厂商将精力聚焦于共同推动软件发展而不是自成一家。2017年CNCF启动了Kubernetes一致性认证计划，CNCF提供一套测试工具，各厂商按照操作指导进行测试自身的产品，将测试报告上传给CNCF社区，CNCF审核测试报告后，会给符合条件的企业颁发一个证书。
 大致流程：&lt;img src=&#34;https://ww1.sinaimg.cn/large/006bbiLEgy1gfsyxpcmmej30mx09zwew.jpg&#34; alt=&#34;操作流程图.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-环境信息&#34;&gt;1. 环境信息&lt;/h2&gt;
@@ -1078,11 +1078,11 @@ sonobuoy项目的安装方法
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E4%B8%80%E4%B8%AAmaster%E6%88%96%E8%80%85%E4%B8%A4%E4%B8%AAmaster%E5%AE%95%E6%9C%BA%E6%81%A2%E5%A4%8D/</link>
+      <title>kubesphere2-1-HA环境，一个master或者两个master宕机恢复</title>
+      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E4%B8%80%E4%B8%AAmaster%E6%88%96%E8%80%85%E4%B8%A4%E4%B8%AAmaster%E5%AE%95%E6%9C%BA%E6%81%A2%E5%A4%8D/</guid>
+      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</guid>
       <description>&lt;h1 id=&#34;kubesphere21-ha环境一个master或者两个master宕机恢复&#34;&gt;kubesphere2.1-HA环境，一个master或者两个master宕机恢复&lt;/h1&gt;
 &lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而很多事情都有意外，当其中一个master或者两个master卡住了，或者重启都不能自动恢复的情况下，那么怎么恢复呢，以下分一个master宕机和两个master宕机的恢复方法。&lt;/p&gt;
 &lt;h3 id=&#34;验证环境信息&#34;&gt;验证环境信息&lt;/h3&gt;
@@ -1224,11 +1224,11 @@ docker ps | grep tomcat
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/</link>
+      <title>kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</title>
+      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha%E7%8E%AF%E5%A2%83%E6%9F%90%E5%8F%B0master%E6%88%96%E8%80%85master%E7%9A%84etcd%E5%AE%95%E6%9C%BA%E6%96%B0%E5%8A%A0%E6%9C%BA%E5%99%A8%E6%81%A2%E5%A4%8D%E6%96%B9%E6%B3%95/</guid>
+      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</guid>
       <description>&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而在生产环境中，为了业务更正常运行，当以下两种情形发生时，告诉大家怎么恢复。第一种情形是：其中某台master机器的etcd服务不能正常提供服务，而需要在另外一台机器上部署一个etcd服务加入到现etcd集群中；第二种情形是：其中某台master宕机，需要在另外一台机器上部署master，并加入到现master集群中。&lt;/p&gt;
 &lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
 &lt;pre&gt;&lt;code&gt;os: centos7.5
@@ -1293,11 +1293,11 @@ master2的IP由原来的192.168.11.16改成192.168.11.8；在[all]组里面，ma
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/kubesphere%E5%9F%BA%E4%BA%8Evelero%E5%81%9A%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BF%81%E7%A7%BB/</link>
+      <title>Kubesphere基于Velero做集群的迁移</title>
+      <link>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere%E5%9F%BA%E4%BA%8Evelero%E5%81%9A%E9%9B%86%E7%BE%A4%E7%9A%84%E8%BF%81%E7%A7%BB/</guid>
+      <guid>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
       <description>&lt;p&gt;#Kubesphere基于Velero做集群的迁移
 使用Velero 快速完成云原生应用迁移至备份集群中。&lt;/p&gt;
 &lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
@@ -1377,11 +1377,11 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/linux-nfs-%E6%90%AD%E5%BB%BA/</link>
+      <title>Linux-nfs-搭建</title>
+      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/linux-nfs-%E6%90%AD%E5%BB%BA/</guid>
+      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
       <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
 &lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
 &lt;h2 id=&#34;演示nfs机器信息分为服务端和客户端介绍以下服务端的ip请根据自己环境来替换&#34;&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。&lt;/h2&gt;
@@ -1504,11 +1504,11 @@ fi
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/netapp-%E5%AD%98%E5%82%A8%E5%9C%A8-kubesphere-%E4%B8%8A%E7%9A%84%E5%AE%9E%E8%B7%B5/</link>
+      <title>NetApp-存储在-KubeSphere-上的实践</title>
+      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-%E5%AD%98%E5%82%A8%E5%9C%A8-kubesphere-%E4%B8%8A%E7%9A%84%E5%AE%9E%E8%B7%B5/</guid>
+      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
       <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。
 &lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
 &lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
@@ -1601,11 +1601,11 @@ EOF
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/netapp%E8%81%94%E5%90%88k8s%E5%9C%A8kubesphere%E5%BA%94%E7%94%A8/</link>
+      <title>netapp联合k8s在kubesphere应用</title>
+      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp%E8%81%94%E5%90%88k8s%E5%9C%A8kubesphere%E5%BA%94%E7%94%A8/</guid>
+      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
       <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
 &lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
 &lt;ul&gt;
@@ -1720,11 +1720,11 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/tcpdump%E6%8A%93%E5%8C%85%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/</link>
+      <title>tcpdump抓包实战教程</title>
+      <link>https://Forest-L.github.io/post/tcpdump-package-capture-tutorial/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/tcpdump%E6%8A%93%E5%8C%85%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/</guid>
+      <guid>https://Forest-L.github.io/post/tcpdump-package-capture-tutorial/</guid>
       <description>&lt;h1 id=&#34;tcpdump抓包实战教程&#34;&gt;tcpdump抓包实战教程&lt;/h1&gt;
 &lt;p&gt;做 web 开发，接口对接过程中，分析 http 请求报文数据包格式是否正确，定位问题，省去无用的甩锅过程，再比如抓取 tcp/udp 报文，分析 tcp 连接过程中的三次握手和四次挥手。windows使用wireshark工具，Linux使用的是tcpdump工具，也可以生成.pcap文件在wireshark图形化工具上分析。&lt;/p&gt;
 &lt;h3 id=&#34;命令行&#34;&gt;命令行&lt;/h3&gt;
@@ -1798,190 +1798,11 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/terrform%E5%AF%B9%E6%8E%A5qingcloud%E5%AE%89%E8%A3%85k8s/</link>
+      <title>ubuntu快速安装wecenter</title>
+      <link>https://Forest-L.github.io/post/ubuntu-quickly-installs-wecenter/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/terrform%E5%AF%B9%E6%8E%A5qingcloud%E5%AE%89%E8%A3%85k8s/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;使用Terraform作用是不需要用户在iaas平台上单独创建机器，配置好参数之后由Terraform自动创建，实现一键自动化部署。&lt;/li&gt;
-&lt;li&gt;单节点的安装主要分为三部分，var.tf、kubesphere.tf和install.sh，以下文件内容只需要修改API密钥值就可以部署Ks集群。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;执行步骤说明&#34;&gt;执行步骤说明&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;安装terraform工具&lt;/li&gt;
-&lt;li&gt;创建一个目录，把var.tf、kubesphere.tf和install.sh三个文件放到该目录下。&lt;/li&gt;
-&lt;li&gt;修改iaas的API密码&lt;/li&gt;
-&lt;li&gt;进入目录下执行&lt;code&gt;terraform init&lt;/code&gt;指令，显示成功。&lt;/li&gt;
-&lt;li&gt;init成功之后，然后执行&lt;code&gt;terraform apply&lt;/code&gt;即可就开始创建机器，安装Ks。&lt;/li&gt;
-&lt;li&gt;删除机器指令操作为&lt;code&gt;terraform destroy&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;1terraform安装单独一台机器&#34;&gt;1、terraform安装（单独一台机器）&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;以centos操作系统为例来安装，需要执行以下指令即可。&lt;/li&gt;
-&lt;li&gt;其余操作系统，参考&lt;a href=&#34;https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/aws-get-started&#34;&gt;terraform&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-sudo yum -y install terraform
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;是否安装成功及版本输出&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;terraform version&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id=&#34;2vartf文件说明&#34;&gt;2、var.tf文件说明&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;access_key和secret_key为必填项。点击iaas用户&amp;ndash;》API密钥&amp;ndash;》创建即可，然后把两个参数填入到下面的配置文件中。zone可以根据自己需求来修改，默认pek3a。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;terraform {
-  required_providers {
-    qingcloud = {
-      source = &amp;quot;shaowenchen/qingcloud&amp;quot;
-      version = &amp;quot;1.2.6&amp;quot;
-    }
-  }
-}
-
-variable &amp;quot;access_key&amp;quot; {
-  default = &amp;quot;***&amp;quot;
-}
-
-variable &amp;quot;secret_key&amp;quot; {
-  default = &amp;quot;***&amp;quot;
-}
-
-variable &amp;quot;zone&amp;quot; {
-  default = &amp;quot;pek3a&amp;quot;
-}
-
-provider &amp;quot;qingcloud&amp;quot; {
-  access_key = &amp;quot;${var.access_key}&amp;quot;
-  secret_key = &amp;quot;${var.secret_key}&amp;quot;
-  zone = &amp;quot;${var.zone}&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;3kubespheretf文件说明&#34;&gt;3、kubesphere.tf文件说明&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;resource qingcloud_eip为创建外网ip，也可以用已存在外网IP，如果用已存在外网ip，就不需要qingcloud_eip resource模块。&lt;/li&gt;
-&lt;li&gt;qingcloud_security_group为创建防火墙，也可以使用已存在防火墙，同理。&lt;/li&gt;
-&lt;li&gt;qingcloud_security_group_rule为创建防火墙开放的端口。&lt;/li&gt;
-&lt;li&gt;qingcloud_keypair为密钥创建，此处注释掉，用密码形式。&lt;/li&gt;
-&lt;li&gt;qingcloud_instance创建机器，包含名字，操作系统，内存，cpu，磁盘，密码，绑定外网IP，防火墙，子网和类型等。&lt;/li&gt;
-&lt;li&gt;null_resource 和install_kubesphere包含文件拷贝及执行命令。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;resource &amp;quot;qingcloud_eip&amp;quot; &amp;quot;init&amp;quot;{
-  name = &amp;quot;tf_eip&amp;quot;
-  description = &amp;quot;&amp;quot;
-  billing_mode = &amp;quot;traffic&amp;quot;
-  bandwidth = 20
-  need_icp = 0
-}
-
-resource &amp;quot;qingcloud_security_group&amp;quot; &amp;quot;basic&amp;quot;{
-  name = &amp;quot;防火墙&amp;quot;
-  description = &amp;quot;这是第一个防火墙&amp;quot;
-}
-
-resource &amp;quot;qingcloud_security_group_rule&amp;quot; &amp;quot;openport&amp;quot; {
-  security_group_id = &amp;quot;${qingcloud_security_group.basic.id}&amp;quot;
-  protocol = &amp;quot;tcp&amp;quot;
-  priority = 0
-  action = &amp;quot;accept&amp;quot;
-  direction = 0
-  from_port = 22
-  to_port = 40000
-}
-
-# qingcloud_keypair upload an SSH public key
-# In this example, upload ~/.ssh/id_rsa.pub content.
-# You may not have this file in your system, you will need to create your own SSH key.
-#resource &amp;quot;qingcloud_keypair&amp;quot; &amp;quot;arthur&amp;quot;{
-#  name = &amp;quot;arthur&amp;quot;
-#  public_key = &amp;quot;${file(&amp;quot;~/.ssh/id_rsa.pub&amp;quot;)}&amp;quot;
-#}
-
-resource &amp;quot;qingcloud_instance&amp;quot; &amp;quot;init&amp;quot;{
-  count = 1
-  name = &amp;quot;master-${count.index}&amp;quot;
-  image_id = &amp;quot;centos76x64a&amp;quot;
-  cpu = &amp;quot;16&amp;quot;
-  memory = &amp;quot;32768&amp;quot;
-  instance_class = &amp;quot;0&amp;quot;
-  managed_vxnet_id=&amp;quot;vxnet-0&amp;quot;
-#  keypair_ids = [&amp;quot;${qingcloud_keypair.arthur.id}&amp;quot;]
-  login_passwd = &amp;quot;Qcloud@123&amp;quot;
-  security_group_id =&amp;quot;${qingcloud_security_group.basic.id}&amp;quot;
-  eip_id = &amp;quot;${qingcloud_eip.init.id}&amp;quot;
-}
-
-resource &amp;quot;null_resource&amp;quot; &amp;quot;install_kubesphere&amp;quot; {
-  provisioner &amp;quot;file&amp;quot; {
-    destination = &amp;quot;./install.sh&amp;quot;
-    source      = &amp;quot;./install.sh&amp;quot;
-
-    connection {
-      type        = &amp;quot;ssh&amp;quot;
-      user        = &amp;quot;root&amp;quot;
-      host        = &amp;quot;${qingcloud_eip.init.addr}&amp;quot;
-      password    = &amp;quot;Qcloud@123&amp;quot;
-#      private_key = &amp;quot;${file(&amp;quot;~/.ssh/id_rsa&amp;quot;)}&amp;quot;
-      port        = &amp;quot;22&amp;quot;
-    }
-  }
-
-  provisioner &amp;quot;remote-exec&amp;quot; {
-    inline = [
-      &amp;quot;sh install.sh&amp;quot;
-    ]
-
-    connection {
-      type        = &amp;quot;ssh&amp;quot;
-      user        = &amp;quot;root&amp;quot;
-      host        = &amp;quot;${qingcloud_eip.init.addr}&amp;quot;
-      password    = &amp;quot;Qcloud@123&amp;quot;
- #     private_key = &amp;quot;${file(&amp;quot;~/.ssh/id_rsa&amp;quot;)}&amp;quot;
-      port        = &amp;quot;22&amp;quot;
-    }
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;4installsh文件说明&#34;&gt;4、install.sh文件说明&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;具体执行命令&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;curl -O -k https://kubernetes.pek3b.qingstor.com/tools/kubekey/kk
-chmod +x kk
-yum install -y vim openssl socat conntrack ipset
-echo -e &#39;yes\n&#39; | /root/kk create cluster --with-kubesphere
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;5执行及删除&#34;&gt;5、执行及删除&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;进入目录，执行init，出现successfully字样。&lt;/li&gt;
-&lt;li&gt;terraform apply, 输入yes开始安装。&lt;/li&gt;
-&lt;li&gt;terraform destroy&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;[root@node4 ~]# cd terraform
-[root@node4 terraform]# ls
-install.sh  kubesphere.tf  var.tf
-[root@node4 terraform]# terraform init
-
-Initializing the backend...
-
-Initializing provider plugins...
-Terraform has been successfully initialized!
-
-[root@node4 terraform]# terraform apply
-
-An execution plan has been generated and is shown below.
-Resource actions are indicated with the following symbols:
-  + create
-Enter a value: yes
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;6参考&#34;&gt;6、参考&lt;/h3&gt;
-&lt;p&gt;&lt;a href=&#34;https://github.com/yunify/terraform-provider-qingcloud&#34;&gt;https://github.com/yunify/terraform-provider-qingcloud&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/ubuntu%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85wecenter/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/ubuntu%E5%BF%AB%E9%80%9F%E5%AE%89%E8%A3%85wecenter/</guid>
+      <guid>https://Forest-L.github.io/post/ubuntu-quickly-installs-wecenter/</guid>
       <description>&lt;h1 id=&#34;ubuntu快速安装wecenter&#34;&gt;ubuntu快速安装wecenter&lt;/h1&gt;
 &lt;p&gt;以镜像的形式安装wecenter，简化了nginx和php环境的单独安装。WeCenter（wecenter.com）是一款建立知识社区的开源程序（免费版），专注于企业和行业社区内容的整理、归类、检索和分享，是知识化问答社区的首选软件。后台使用PHP开发，MVC架构，前端使用Bootstrap框架。&lt;/p&gt;
 &lt;h2 id=&#34;准备&#34;&gt;准备&lt;/h2&gt;
@@ -2003,20 +1824,20 @@ Enter a value: yes
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/ubuntu%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BAvmware-workstation/</link>
+      <title>ubuntu快速安装wecenter</title>
+      <link>https://Forest-L.github.io/post/ubuntu-system-builds-vmware-workstation/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/ubuntu%E7%B3%BB%E7%BB%9F%E6%90%AD%E5%BB%BAvmware-workstation/</guid>
+      <guid>https://Forest-L.github.io/post/ubuntu-system-builds-vmware-workstation/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E5%9F%BA%E4%BA%8Ekeepalived-haproxy%E9%83%A8%E7%BD%B2kubesphere%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/</link>
+      <title>基于keepalived-haproxy部署kubesphere高可用方案</title>
+      <link>https://Forest-L.github.io/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E5%9F%BA%E4%BA%8Ekeepalived-haproxy%E9%83%A8%E7%BD%B2kubesphere%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/</guid>
+      <guid>https://Forest-L.github.io/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</guid>
       <description>&lt;h1 id=&#34;基于keepalivedhaproxy部署kubesphere高可用方案&#34;&gt;基于keepalived+haproxy部署kubesphere高可用方案&lt;/h1&gt;
 &lt;p&gt;通过keepalived + haproxy实现的，其中keepalived提供一个VIP，通过VIP关联所有的Master节点；然后haproxy提供端口转发功能。由于VIP还是存在Master的机器上的，默认配置API Server的端口是6443，所以我们需要将另外一个端口关联到这个VIP上，一般用8443。&lt;/p&gt;
 &lt;h4 id=&#34;环境信息&#34;&gt;环境信息：&lt;/h4&gt;
@@ -2148,11 +1969,11 @@ Escape character is &#39;^]&#39;.
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E6%8E%92%E6%9F%A5linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%B7%A5%E5%85%B7/</link>
+      <title>排查linux服务器的工具</title>
+      <link>https://Forest-L.github.io/post/tools-to-troubleshoot-linux-servers/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E6%8E%92%E6%9F%A5linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%B7%A5%E5%85%B7/</guid>
+      <guid>https://Forest-L.github.io/post/tools-to-troubleshoot-linux-servers/</guid>
       <description>&lt;p&gt;当服务器遇到问题，或者提前查看服务器质量怎么样，一般可以通过以下几点分析：服务器整体情况，CPU使用情况，内存，磁盘，磁盘io，网络io等。&lt;/p&gt;
 &lt;h3 id=&#34;不同环境插件安装&#34;&gt;不同环境插件安装&lt;/h3&gt;
 &lt;ul&gt;
@@ -2322,11 +2143,11 @@ Average:      docker0      0.00      0.00      0.00      0.00      0.00      0.0
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/</link>
+      <title>提前预防K8s集群资源不足的处理方式配置</title>
+      <link>https://Forest-L.github.io/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2k8s%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE/</guid>
+      <guid>https://Forest-L.github.io/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</guid>
       <description>&lt;h1 id=&#34;提前预防k8s集群资源不足的处理方式配置&#34;&gt;提前预防K8s集群资源不足的处理方式配置&lt;/h1&gt;
 &lt;p&gt;在管理集群的时候我们常常会遇到资源不足的情况，在这种情况下我们要保证整个集群可用，并且尽可能减少应用的损失。根据该问题提出以下两种方案：一种为优化kubelet参数，另一种为脚本化诊断处理。&lt;/p&gt;
 &lt;h2 id=&#34;概念解释&#34;&gt;概念解释&lt;/h2&gt;
@@ -2525,11 +2346,11 @@ Pod 的 requests 和 limits 是如何对应到这三个 QoS 等级上的，可�
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E6%9E%84%E5%BB%BAarm-x86%E6%9E%B6%E6%9E%84%E7%9A%84docker-image%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</link>
+      <title>构建arm-x86架构的docker-image操作指南</title>
+      <link>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E6%9E%84%E5%BB%BAarm-x86%E6%9E%B6%E6%9E%84%E7%9A%84docker-image%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</guid>
+      <guid>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
       <description>&lt;h1 id=&#34;构建armx86架构的docker-image操作指南&#34;&gt;构建arm/x86架构的docker image操作指南&lt;/h1&gt;
 &lt;p&gt;由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。&lt;/p&gt;
 &lt;h2 id=&#34;1启动一台ubuntu的机器并安装docker-1903&#34;&gt;1.	启动一台ubuntu的机器，并安装docker 19.03&lt;/h2&gt;
@@ -2592,11 +2413,11 @@ ce366ad696cb                 linux/arm64                       111.13 MB
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E6%B5%8B%E9%87%8F%E7%BD%91%E7%BB%9C%E9%80%9F%E5%BA%A6%E5%B7%A5%E5%85%B7%E4%B9%8Biperf%E8%AE%A4%E7%9F%A5/</link>
+      <title>测量网络速度工具之iperf认知</title>
+      <link>https://Forest-L.github.io/post/iperf-cognition-as-a-network-speed-measurement-tool/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E6%B5%8B%E9%87%8F%E7%BD%91%E7%BB%9C%E9%80%9F%E5%BA%A6%E5%B7%A5%E5%85%B7%E4%B9%8Biperf%E8%AE%A4%E7%9F%A5/</guid>
+      <guid>https://Forest-L.github.io/post/iperf-cognition-as-a-network-speed-measurement-tool/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;iperf工具是测量服务器网络速度工具，它通过测量服务器可以处理的最大网络吞吐量来测试网络速度，在遇到网络问题时特别有用。&lt;/li&gt;
 &lt;/ul&gt;
@@ -2659,11 +2480,11 @@ TCP window size: 45.0 KByte (default)
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E6%B7%BB%E5%8A%A0%E5%85%AC%E7%BD%91ip%E5%88%B0kubernetes%E7%9A%84apiserver%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</link>
+      <title>添加公网ip到kubernetes的apiserver操作指南</title>
+      <link>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E6%B7%BB%E5%8A%A0%E5%85%AC%E7%BD%91ip%E5%88%B0kubernetes%E7%9A%84apiserver%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97/</guid>
+      <guid>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</guid>
       <description>&lt;p&gt;通常情况下，我们的kubernetes集群是内网环境，如果希望通过本地访问这个集群，怎么办呢？大家想到的是Kubeadm在初始化的时候会为管理员生成一个 Kubeconfig文件，把它下载下来 是不是就可以？事实证明这样不行， 因为这个集群是内网集群，Kubeconfig文件 中APIServer的地址是内网ip。解决方案很简单，把公网ip签到证书里面就可以，其中有apiServerCertSANs这个选项，只要把公网IP写到这里，再启动这个集群的时候，这个公网ip就会签到证书里。&lt;/p&gt;
 &lt;h2 id=&#34;1-环境信息&#34;&gt;1. 环境信息&lt;/h2&gt;
 &lt;ul&gt;
@@ -2737,11 +2558,11 @@ openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37&lt;/li&gt;
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/%E8%84%9A%E6%9C%AC%E5%8C%96%E8%A7%A6%E5%8F%91kubernetes%E9%9B%86%E7%BE%A4%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%B7%A5%E5%85%B7-shell-operator/</link>
+      <title>脚本化触发Kubernetes集群事件的工具-Shell-operator</title>
+      <link>https://Forest-L.github.io/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/%E8%84%9A%E6%9C%AC%E5%8C%96%E8%A7%A6%E5%8F%91kubernetes%E9%9B%86%E7%BE%A4%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%B7%A5%E5%85%B7-shell-operator/</guid>
+      <guid>https://Forest-L.github.io/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</guid>
       <description>&lt;p&gt;Shell-operator是用于在Kubernetes集群中运行事件驱动脚本工具。Shell-operator通过脚本作为事件触发的钩子（hook），在Kubernetes集群事件和Shell脚本之间提供了一个转化层。触发钩子包含add, update和delete。以pod add为例通俗的话说，当新创建了一个pod时，会自动触发脚本中else部分。&lt;/p&gt;
 &lt;h4 id=&#34;shell-operator特点&#34;&gt;Shell-operator特点：&lt;/h4&gt;
 &lt;ul&gt;
@@ -2885,28 +2706,28 @@ kubectl delete clusterrolebinding monitor-pods
     
     <item>
       <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s-ceph%E6%90%AD%E5%BB%BA/</link>
+      <link>https://Forest-L.github.io/post/k8s-ceph-installer/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-ceph%E6%90%AD%E5%BB%BA/</guid>
+      <guid>https://Forest-L.github.io/post/k8s-ceph-installer/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s-service-%E8%AE%A4%E7%9F%A5/</link>
+      <title>k8s-service-认知</title>
+      <link>https://Forest-L.github.io/post/k8s-service-cognize/</link>
       <pubDate>Mon, 29 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-service-%E8%AE%A4%E7%9F%A5/</guid>
+      <guid>https://Forest-L.github.io/post/k8s-service-cognize/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s-configmap%E8%AE%A4%E7%9F%A5/</link>
+      <title>k8s-ConfigMap认知</title>
+      <link>https://Forest-L.github.io/post/k8s-configmap-cognize/</link>
       <pubDate>Fri, 26 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-configmap%E8%AE%A4%E7%9F%A5/</guid>
+      <guid>https://Forest-L.github.io/post/k8s-configmap-cognize/</guid>
       <description>&lt;h1 id=&#34;k8s-configmap-认知&#34;&gt;k8s configMap 认知&lt;/h1&gt;
 &lt;p&gt;许多应用程序会从配置文件、命令行参数或环境变量中读取配置信息，而ConfigMap作用是保存配置信息，格式为键值对，可以单独一个key/value使用，也可以多个key/value构成的文件使用。数据不包含敏感信息的字符串。ConfigMap必须在Pod引用它之前创建;Pod只能使用同一个命名空间内的ConfigMap。&lt;/p&gt;
 &lt;h2 id=&#34;1-常见configmap创建方式&#34;&gt;1 常见configMap创建方式&lt;/h2&gt;
@@ -3083,11 +2904,11 @@ View the recording at:
     </item>
     
     <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s-default-storage-class%E6%90%AD%E5%BB%BA/</link>
+      <title>k8s-default-Storage-Class搭建</title>
+      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-default-storage-class%E6%90%AD%E5%BB%BA/</guid>
+      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
       <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
 &lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1g5a6p0p8fjj30ng0e43za.jpg&#34; alt=&#34;storageClass&#34; title=&#34;storageClass&#34;&gt;&lt;/p&gt;
