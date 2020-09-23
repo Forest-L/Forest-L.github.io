@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cephadm on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/cephadm/</link>
+    <description>Recent content in cephadm on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Sun, 04 Aug 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/cephadm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>基于cephadm安装ceph</title>
+      <link>https://Forest-L.github.io/post/k8s-ceph-install/</link>
+      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-ceph-install/</guid>
+      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
+&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
+&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
+&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
+&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;节点  &lt;/th&gt;
+&lt;th&gt;os  &lt;/th&gt;
+&lt;th&gt;IP   &lt;/th&gt;
+&lt;th&gt;磁盘&lt;/th&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph1&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.13&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph2&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.14&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph3&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.16&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph3  #节点3上执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13配置hosts&#34;&gt;1.3、配置hosts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt;&amp;gt; /etc/hosts &amp;lt;&amp;lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;14关闭防火墙&#34;&gt;1.4、关闭防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都要执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;systemctl disable --now firewalld
+setenforce 0
+sed -i &#39;s/^SELINUX=.*/SELINUX=disabled/&#39; /etc/selinux/config
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;15时间同步&#34;&gt;1.5、时间同步&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;16dockerlvm2和python3安装&#34;&gt;1.6、docker、lvm2和python3安装&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2cephadm安装ceph1&#34;&gt;2、cephadm安装(ceph1)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;官方下载方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git下载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;git clone --single-branch --branch octopus https://github.com/ceph/ceph.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cp ceph/src/cephadm/cephadm ./&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm安装(ceph1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceph指令生效&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cephadm shell&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph3&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3osd部署&#34;&gt;3、OSD部署&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm shell下执行&lt;/li&gt;
+&lt;li&gt;若块设备没显示，可加&amp;ndash;refresh参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&amp;lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看集群状态,ceph方式及运行容器方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-osd -…&amp;quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &amp;quot;/bin/prometheus --c…&amp;quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &amp;quot;/bin/alertmanager -…&amp;quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &amp;quot;/bin/sh -c &#39;grafana…&amp;quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &amp;quot;/bin/node_exporter …&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-crash…&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mgr -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

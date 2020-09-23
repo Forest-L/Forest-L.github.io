@@ -296,7 +296,7 @@ curl -6g [2402:e7c0:0:a00:ffff:ffff:fffe:fffb]:32012
     </item>
     
     <item>
-      <title>k8s1-15安装</title>
+      <title>k8s1.15安装</title>
       <link>https://Forest-L.github.io/post/k8s1-15-install/</link>
       <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
       
@@ -652,7 +652,7 @@ etcdctl snapshot restore /var/backups/kube_etcd/etcd-******/snapshot.db \
     </item>
     
     <item>
-      <title>k8s1-15-3在ubuntu系统部署</title>
+      <title>k8s1.15.3在ubuntu系统部署</title>
       <link>https://Forest-L.github.io/post/k8s1-15-3-install-on-the-ubuntu/</link>
       <pubDate>Mon, 02 Sep 2019 00:00:00 +0000</pubDate>
       
@@ -1254,7 +1254,7 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
     </item>
     
     <item>
-      <title>Linux-nfs-搭建</title>
+      <title>Linux中nfs搭建</title>
       <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
@@ -1271,8 +1271,8 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
 &lt;h2 id=&#34;12服务端配置&#34;&gt;1.2服务端配置&lt;/h2&gt;
 &lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
 rpcbind服务的开机自启和启动：
-&lt;code&gt;sudo systemctl enable rpcbind;sudo systemctl restart rpcbind&lt;/code&gt;
-nfs服务的开机自启和启动：
+&lt;code&gt;sudo systemctl enable rpcbind;sudo systemctl restart rpcbind&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;nfs服务的开机自启和启动：
 &lt;code&gt;sudo systemctl enable nfs;sudo systemctl restart nfs&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
 &lt;code&gt;sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
@@ -1381,7 +1381,7 @@ fi
     </item>
     
     <item>
-      <title>NetApp-存储在-KubeSphere-上的实践</title>
+      <title>NetApp存储在KubeSphere上的实践</title>
       <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
@@ -1698,15 +1698,6 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 &lt;/ul&gt;
 &lt;h2 id=&#34;参考文档&#34;&gt;参考文档：&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;http://help.websoft9.com/lamp-guide/installation/wecenter/install.html&#34;&gt;http://help.websoft9.com/lamp-guide/installation/wecenter/install.html&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>ubuntu快速安装wecenter</title>
-      <link>https://Forest-L.github.io/post/ubuntu-system-builds-vmware-workstation/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/ubuntu-system-builds-vmware-workstation/</guid>
-      <description></description>
     </item>
     
     <item>
@@ -2579,15 +2570,6 @@ kubectl delete clusterrole monitor-pods
 kubectl delete clusterrolebinding monitor-pods
 &lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;6参考&#34;&gt;6、参考&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/flant/shell-operator&#34;&gt;shell-operator&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/k8s-ceph-installer/</link>
-      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/k8s-ceph-installer/</guid>
-      <description></description>
     </item>
     
     <item>

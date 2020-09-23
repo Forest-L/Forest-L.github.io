@@ -4,7 +4,57 @@
   
   <url>
     <loc>https://Forest-L.github.io/</loc>
-    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/categories/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/ceph/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/k8s/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/pmem/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/series/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/categories/storage/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/series/themes-guide/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -14,21 +64,6 @@
   
   <url>
     <loc>https://Forest-L.github.io/post/cka-test-experience/</loc>
-    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/tags/k8s/</loc>
-    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/post/</loc>
-    <lastmod>2020-07-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/tags/</loc>
     <lastmod>2020-07-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -173,11 +208,6 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/ubuntu-system-builds-vmware-workstation/</loc>
-    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</loc>
     <lastmod>2019-08-13T00:00:00+00:00</lastmod>
   </url>
@@ -213,7 +243,17 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/k8s-ceph-installer/</loc>
+    <loc>https://Forest-L.github.io/tags/cephadm/</loc>
+    <lastmod>2019-08-04T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/osd/</loc>
+    <lastmod>2019-08-04T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/k8s-ceph-install/</loc>
     <lastmod>2019-08-04T00:00:00+00:00</lastmod>
   </url>
   
@@ -230,11 +270,6 @@
   <url>
     <loc>https://Forest-L.github.io/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/categories/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -258,27 +293,7 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/series/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/categories/syntax/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/tags/themes/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/categories/themes/</loc>
-    <lastmod>2019-03-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/series/themes-guide/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url>
   
@@ -298,7 +313,7 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/terrform-docking-qingcloud-installation-k8s/</loc>
+    <loc>https://Forest-L.github.io/post/terraform-docking-qingcloud-installation-k8s/</loc>
   </url>
   
   <url>

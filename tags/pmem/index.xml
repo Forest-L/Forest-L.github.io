@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pmem on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/pmem/</link>
+    <description>Recent content in Pmem on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/pmem/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Pmem与块存储性能对比</title>
+      <link>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</guid>
+      <description>&lt;h2 id=&#34;1pmem介绍&#34;&gt;1、Pmem介绍&lt;/h2&gt;
+&lt;p&gt;PMEM是硬件产品，Intel Optane DC持久存储模块，是一种具有大容量和数据持久性的创新存储技术。有2种运行模式。两级内存模式无需软件更改，DCPMM被视为更大的内存，并使用DRAM作为其缓存层。AppDirect模式将设备暴露为持久内存，支持软件栈，可用于加速不同的应用程序。在本文中，我们将使用AppDirect模式。&lt;/p&gt;
+&lt;h2 id=&#34;2环境信息&#34;&gt;2、环境信息&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;一台master和一台node构成的K8s1.18.6集群&lt;/li&gt;
+&lt;li&gt;redis镜像为根据源码编译为pmem-redis:4.0.0&lt;/li&gt;
+&lt;li&gt;ceph/neonsan块存储&lt;/li&gt;
+&lt;li&gt;centos7.7/内核5.8.7&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;3测试两种模式&#34;&gt;3、测试两种模式&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;测试目的是体验PMEM对REDIS的加速效果。先在没有PMEM加速AOF模式，再有PMEM加速PBA模式。&lt;/li&gt;
+&lt;li&gt;AOF模式是append only file的意思，通常REDIS是一种内存数据库，数据掉电就丢失了。AOF模式可以把数据库记录随时备份到分布式存储里，这样可以使得REDIS具有掉电恢复的功能。&lt;/li&gt;
+&lt;li&gt;PBA模式是pointer based AOF模式，它是使用PMEM对AOF做了加速，原理是备份写盘时只把指针写到磁盘里，数据还在内存或PMEM里，使用PMEM作为缓存。这样既可以掉电恢复，又提升了性能。充分发挥了PMEM AD模式的优势。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;4pmem-redis镜像构建&#34;&gt;4、pmem-redis镜像构建&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;git clone &lt;a href=&#34;https://github.com/clayding/opencloud_benchmark.git&#34;&gt;https://github.com/clayding/opencloud_benchmark.git&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;cd opencloud_benchmark/k8s/redis/docker&lt;/li&gt;
+&lt;li&gt;docker build -t pmem-redis:latest &amp;ndash;network host .&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;5pba模式的设置&#34;&gt;5、PBA模式的设置&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;ipmctl安装&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cd /etc/yum.repos.d/
+wget https://copr.fedorainfracloud.org/coprs/jhli/ipmctl/repo/epel-7/jhli-ipmctl-epel-7.repo
+wget https://copr.fedorainfracloud.org/coprs/jhli/safeclib/repo/epel-7/jhli-safeclib-epel-7.repo
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+el-ha-for-rhel-*-server-rpms&amp;quot;
+yum install ndctl ndctl-libs ndctl-devel libsafec rubygem-asciidoctor
+yum install ipmctl
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;app direct模式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;sudo ipmctl delete -goal
+sudo ipmctl create -goal PersistentMemoryType=AppDirect
+
+A reboot is required to process new memory allocation goals:
+sudo reboot
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;检测Pmem能正常工作且为ad模式,ad是否有值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ipmctl show -memoryresources
+ MemoryType   | DDR         | PMemModule  | Total
+========================================================
+ Volatile     | 191.000 GiB | 0.000 GiB   | 191.000 GiB
+ AppDirect    | -           | 504.000 GiB | 504.000 GiB
+ Cache        | 0.000 GiB   | -           | 0.000 GiB
+ Inaccessible | 1.000 GiB   | 1.689 GiB   | 2.689 GiB
+ Physical     | 192.000 GiB | 505.689 GiB | 697.689 GiB
+
+ 当ad没有值时，ipmctl start -diagnostic诊断是否有错误消息
+ 刚开始遇到这样的一个问题： 
+ The platform configuration check detected that PMem module 0x0001 is not configured.
+ 分析为：新版Ipmctl有问题，用1.x的版本把pcd delete以后重新provision就可以了
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;6pmem-csi安装&#34;&gt;6、Pmem-csi安装&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;下载， https://github.com/intel/pmem-csi/blob/devel/docs/install.md#install-pmem-csi-driver
+cd pmem-CSI
+
+Setting up certificates for securities
+# curl -L https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -o _work/bin/cfssl --create-dirs
+# curl -L https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -o _work/bin/cfssljson --create-dirs
+# chmod a+x _work/bin/cfssl _work/bin/cfssljson
+# export PATH=$PATH:$PWD/_work/bin
+# ./test/setup-ca-kubernetes.sh
+
+Deploying the driver to K8s using LVM mode, please choose yaml files corresponding to your kubernetes version
+# kubectl create -f deploy/kubernetes-1.18/pmem-csi-lvm.yaml
+Applying a storage class
+# kubectl apply -f deploy/kubernetes-1.18/pmem-storageclass-ext4.yaml
+pod状态
+kubectl get pod
+NAME                    READY   STATUS        RESTARTS   AGE
+pmem-csi-controller-0   2/2     Running       0          22s
+pmem-csi-node-tw4mw     2/2     Running       2          33h
+sc状态
+kubectl get sc
+NAME               PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+pmem-csi-sc-ext4   pmem-csi.intel.com         Delete          Immediate           false                  3d2h
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;7benchmark安装&#34;&gt;7、benchmark安装&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;yum install autoconf automake make gcc-c++&lt;/li&gt;
+&lt;li&gt;yum install pcre-devel zlib-devel libmemcached-devel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Remove system libevent and install new version:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;sudo yum remove libevent&lt;/li&gt;
+&lt;li&gt;wget &lt;a href=&#34;https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz&#34;&gt;https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;tar xfz libevent-2.0.21-stable.tar.gz&lt;/li&gt;
+&lt;li&gt;pushd libevent-2.0.21-stable&lt;/li&gt;
+&lt;li&gt;./configure&lt;/li&gt;
+&lt;li&gt;make&lt;/li&gt;
+&lt;li&gt;sudo make install&lt;/li&gt;
+&lt;li&gt;popd&lt;/li&gt;
+&lt;li&gt;export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Build and install memtier:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git clone &lt;a href=&#34;https://github.com/RedisLabs/memtier_benchmark&#34;&gt;https://github.com/RedisLabs/memtier_benchmark&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;cd memtier_benchmark&lt;/li&gt;
+&lt;li&gt;autoreconf -ivf&lt;/li&gt;
+&lt;li&gt;./configure &amp;ndash;disable-tls&lt;/li&gt;
+&lt;li&gt;make&lt;/li&gt;
+&lt;li&gt;sudo make install&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;8测试对比&#34;&gt;8、测试对比&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;aof的yanl文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language----&#34; data-lang=&#34;---&#34;&gt;apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rbd-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: csi-neonsan
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: redis-aof
+  labels:
+    app: redis-aof
+spec:
+  containers:
+    - name: redis-aof
+      image: pmem-redis:latest
+      imagePullPolicy: IfNotPresent
+      args: [&amp;quot;no&amp;quot;]
+      ports:
+      - containerPort: 6379
+      resources:
+        limits:
+          cpu: &amp;quot;1000m&amp;quot;
+          memory: &amp;quot;16Gi&amp;quot;
+        requests:
+          cpu: &amp;quot;1000m&amp;quot;
+          memory: &amp;quot;16Gi&amp;quot;
+      volumeMounts:
+      - mountPath: &amp;quot;/ceph&amp;quot;
+        name: ceph-csi-volume
+  volumes:
+  - name: ceph-csi-volume
+    persistentVolumeClaim:
+      claimName: rbd-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis-aof
+spec:
+  type: NodePort
+  ports:
+  - name: redis
+    port: 6379
+    nodePort: 30379
+    targetPort: 6379
+  selector:
+    app: redis-aof
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;pba的yanl文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pmem-csi-pvc-ext4
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: pmem-csi-sc-ext4 # defined in pmem-storageclass-ext4.yaml
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rbd-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: csi-neonsan
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: redis-with-pba
+  labels:
+    app: redis-with-pba
+spec:
+  containers:
+    - name: redis-with-pba
+      image: pmem-redis:latest
+      imagePullPolicy: IfNotPresent
+      args: [&amp;quot;yes&amp;quot;]
+      ports:
+      - containerPort: 6379
+      resources:
+        limits:
+          cpu: &amp;quot;1000m&amp;quot;
+          memory: &amp;quot;16Gi&amp;quot;
+        requests:
+          cpu: &amp;quot;1000m&amp;quot;
+          memory: &amp;quot;16Gi&amp;quot;
+      volumeMounts:
+      - mountPath: &amp;quot;/data&amp;quot;
+        name: my-csi-volume
+      - mountPath: &amp;quot;/ceph&amp;quot;
+        name: ceph-csi-volume
+  volumes:
+  - name: ceph-csi-volume
+    persistentVolumeClaim:
+      claimName: rbd-pvc
+  - name: my-csi-volume
+    persistentVolumeClaim:
+      claimName: pmem-csi-pvc-ext4
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-pba
+  labels:
+    app: redis-with-pba
+spec:
+  type: NodePort
+  ports:
+  - name: redis
+    port: 6379
+    nodePort: 31379
+    targetPort: 6379
+  selector:
+    app: redis-with-pba
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;先执行aof的yaml文件，kubectl apply -f aof.yaml，然后再执行memtier_benchmark&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;memtier_benchmark -s 172.30.35.9  -p 30379 -R -d 1024 --key-maximum=1000000 -n 10000  --ratio=1:9 | grep Totals&amp;gt;&amp;gt;aof_1024
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 100%,  37 secs]  0 threads:     2000000 ops,   53289 (avg:   53544) ops/sec, 7.23MB/sec (avg: 7.29MB/sec),  3.75 (avg:  3.73) msec latency
+
+
+
+[root@neonsan-10 scripts]# cat aof_1024
+Totals      53508.29        26.75     48130.71         3.73350         3.27900         8.31900        18.43100      7456.87
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;先执行pba的yaml文件，kubectl apply -f pba.yaml，然后再执行memtier_benchmark,注意yaml文件里面同时挂载不同存储。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;memtier_benchmark -s 172.30.35.9  -p 31379 -R -d 1024 --key-maximum=1000000 -n 10000  --ratio=1:9 | grep Totals&amp;gt;&amp;gt;pba_1024
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 100%,  24 secs]  0 threads:     2000000 ops,   81619 (avg:   81294) ops/sec, 11.07MB/sec (avg: 11.10MB/sec),  2.45 (avg:  2.46) msec latency
+
+
+[root@neonsan-10 scripts]# cat pba_1024
+Totals          0.00         0.00         0.00            -nan         0.00000         0.00000         0.00000         0.00
+Totals      82856.35        82.86     74487.86         2.45929         2.38300         4.79900         6.30300     11588.37
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;通过速度和延迟性比较两种存储的性能。&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
