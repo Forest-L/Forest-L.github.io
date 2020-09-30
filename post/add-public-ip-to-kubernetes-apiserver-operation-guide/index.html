@@ -154,10 +154,10 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+		href='/tags/k8s'>K8s</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/linux-tools'>Linux tools</a>
+		href='/tags/certificate'>Certificate</a>
 	
 	
 	
@@ -243,7 +243,108 @@ openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37</li>
 <li>3.6 修改kubeconfig中的server ip地址为 139.198.19.37，保存之后就可以直接通过公网访问kubernetes集群
 <code>kubectl --kubeconfig config config view</code>
 <code>kubectl --kubeconfig config get node</code></li>
-</ul></div>
+</ul>
+<h2 id="4-附录-证书过期处理方式">4. 附录-证书过期处理方式</h2>
+<ul>
+<li>kubeadm部署的k8s集群，默认证书目录为：/etc/kubernetes/pki,如果非pki，以ssl为例，需要创建软链接。证书过期包含核心组件apiserver和node上的token。</li>
+<li>4.1 master节点-apiserver处理方式</li>
+</ul>
+<pre><code>1、查看证书有效期
+cd /etc/kubernetes
+openssl x509 -in ssl/apiserver.crt -noout -enddate 
+2. 更新过期证书（/etc/kubernetes） (先在master1 节点执行)
+创建软连接pki -&gt; ssl ： ln -s ssl/ pki    (如pki存在，可略过)
+
+kubeadm alpha certs renew apiserver 
+kubeadm alpha certs renew apiserver-kubelet-client 
+kubeadm alpha certs renew front-proxy-client 
+3. 更新kubeconfig（/etc/kubernetes）(master1 节点)
+需更新admin.conf / scheduler.conf / controller-manager.conf / kubelet.conf
+
+kubeadm alpha certs renew admin.conf
+kubeadm alpha certs renew controller-manager.conf
+kubeadm alpha certs renew scheduler.conf
+
+特别注意：以master1为例，将如下master1替换实际的节点名称。
+kubeadm alpha kubeconfig user --client-name=system:node:master1 --org=system:nodes &gt; kubelet.conf
+
+4. 如上述kubeconfig中apiserver地址非lb地址，则修改为lb地址：(master1 节点)
+https://192.168.0.13:6443 -&gt; https://{ lb domain or ip }:6443
+
+5. 重启k8s master组件：(master1 节点)
+docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
+systemctl restart kubelet
+
+6. 验证kubeconfig有效性及查看节点状态 (master1 节点)
+
+kubectl get node –kubeconfig admin.conf
+kubectl get node –kubeconfig scheduler.conf
+kubectl get node –kubeconfig controller-manager.conf
+kubectl get node –kubeconfig kubelet.conf
+
+7. 特别注意：同步master1证书/etc/kubernetes/ssl至master2、master3的对应路径中/etc/kubernetes/ssl（同步前建议备份旧证书）
+证书路径：/etc/kubernetes/ssl
+
+8. 更新kubeconfig（/etc/kubernetes）(master2, master3)
+
+kubeadm alpha certs renew admin.conf
+kubeadm alpha certs renew controller-manager.conf
+kubeadm alpha certs renew scheduler.conf
+
+特别注意：以下命令中以master2、master3为例，将如下master2/master3替换实际的节点名称。
+kubeadm alpha kubeconfig user --client-name=system:node:master2 --org=system:nodes &gt; kubelet.conf （master2）
+kubeadm alpha kubeconfig user --client-name=system:node:master3 --org=system:nodes &gt; kubelet.conf （master3）
+
+9. 如上述kubeconfig中apiserver地址非lb地址，则修改为lb地址：(master2、master3)
+
+https://192.168.0.13:6443 -&gt; https://{ lb domain or ip }:6443
+
+注：涉及文件：admin.conf、controller-manager.conf、scheduler.conf、kubelet.conf
+
+10. 重启master2、master3中对应master组件
+
+docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
+systemctl restart kubelet
+
+11. 验证kubeconfig有效性 （master2、master3）
+
+kubectl get node –kubeconfig admin.conf
+kubectl get node –kubeconfig scheduler.conf
+kubectl get node –kubeconfig controller-manager.conf
+kubectl get node –kubeconfig kubelet.conf
+12. 更新~/.kube/config （master1、master2、master3）
+
+cp admin.conf ~/.kube/config
+注：如node节点也需使用kubectl，将master1上的~/.kube/config拷贝至对应node节点~/.kube/config
+
+13. 验证~/.kube/config有效性：
+
+ kubectl get node  查看集群状态
+</code></pre><ul>
+<li>4.2 node节点token证书处理方式</li>
+</ul>
+<pre><code>1. kubeadm token list 查看输出若为空或显示日期过期，则需重新生成。
+
+2. kubeadm token create 重新生成token
+
+3. 记录token值,保存下来。
+
+4. 替换node节点/etc/kubernetes/ bootstrap-kubelet.conf中token （所有node节点）
+
+5. 删除/etc/kubernetes/kubelet.conf （所有node节点）
+
+rm -rf /etc/kubernetes/kubelet.conf
+6. 重启kubelet （所有node节点）
+
+systemctl restart kubelet
+7. 查看节点状态：
+
+kubectl get node 验证集群状态
+</code></pre></div>
 	</section>
 
 
@@ -324,7 +425,7 @@ openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37</li>
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1112 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2587 words in this page.
 	</div>
 </div>
 
@@ -355,43 +456,6 @@ openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37</li>
 <div >
 
 
-
-<div class="font-serif pb-2 flex align-start leading-loose">
-	<span class="heading pr-6 leading-loose">Related</span>
-	<span >
-		
-			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/linux-nfs-install/">Linux中nfs搭建</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp存储在KubeSphere上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/docker-image-operation-guide-for-building-arm-x86-architecture/">构建arm-x86架构的docker-image操作指南</a>
-		
-</span>
-</div>
 
 </div>
 <hr />

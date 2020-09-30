@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Certificate on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/certificate/</link>
+    <description>Recent content in Certificate on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Tue, 13 Aug 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/certificate/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>添加公网ip到kubernetes的apiserver操作指南</title>
+      <link>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</link>
+      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</guid>
+      <description>&lt;p&gt;通常情况下，我们的kubernetes集群是内网环境，如果希望通过本地访问这个集群，怎么办呢？大家想到的是Kubeadm在初始化的时候会为管理员生成一个 Kubeconfig文件，把它下载下来 是不是就可以？事实证明这样不行， 因为这个集群是内网集群，Kubeconfig文件 中APIServer的地址是内网ip。解决方案很简单，把公网ip签到证书里面就可以，其中有apiServerCertSANs这个选项，只要把公网IP写到这里，再启动这个集群的时候，这个公网ip就会签到证书里。&lt;/p&gt;
+&lt;h2 id=&#34;1-环境信息&#34;&gt;1. 环境信息&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;安装方式：kubeadm&lt;/li&gt;
+&lt;li&gt;内网IP：192.168.0.8&lt;/li&gt;
+&lt;li&gt;外网IP：139.198.19.37&lt;/li&gt;
+&lt;li&gt;证书目录：/etc/kubernetes/pki&lt;/li&gt;
+&lt;li&gt;kubeadm配置文件目录：/etc/kubernetes/kubeadm-config.yaml&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;2-查看apiserver的证书包含的ip进入到证书目录执行&#34;&gt;2. 查看apiserver的证书包含的ip,进入到证书目录执行&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;cd /etc/kubernetes/pki&lt;/code&gt;
+&lt;code&gt;openssl x509 -in apiserver.crt -noout -text&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;openssl x509 -in apiserver.crt -noout -text
+Certificate:
+    Data:
+        ................
+        Validity
+            Not Before: Jun  5 02:26:44 2020 GMT
+            Not After : Jun  5 02:26:44 2021 GMT
+        ..................
+        X509v3 extensions:
+            ..........
+            X509v3 Subject Alternative Name:
+                IP Address:192.168.0.8
+    .......
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3-添加公网ip到apiserver&#34;&gt;3. 添加公网IP到apiserver&lt;/h2&gt;
+&lt;p&gt;绑定的公网ip为 139.198.19.37 ，确保公网ip的防火墙已经打开6443端口&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;3.1 登录到主节点，进入 /etc/kubernetes/目录下&lt;/li&gt;
+&lt;li&gt;3.2 修改kubeadm-config.yaml，找到 ClusterConfiguration 中的 	certSANs (如无，在 apiServer 下添加这一配置)，如下。添加刚才绑定的 139.198.19.37 到 certSANs 下，保存文件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+etcd:
+  external:
+    endpoints:
+    - https://192.168.0.8:2379
+apiServer:
+  extraArgs:
+    authorization-mode: Node,RBAC
+  timeoutForControlPlane: 4m0s
+  certSANs:
+    - 192.168.0.8
+    - 139.198.19.37
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;3.3 执行如下命令更新 apiserver.crt apiserver.key
+注意需要把之前apiserver.crt apiserver.key做备份,进入到pki目录下，执行如下指令做备份：
+&lt;code&gt;mv apiserver.crt apiserver.crt-bak&lt;/code&gt;
+&lt;code&gt;mv apiserver.key apiserver.key-bak&lt;/code&gt;
+备份完之后，回到/etc/kubernetes目录下，执行公网ip添加到apiserver操作指令为：
+kubeadm init phase certs apiserver &amp;ndash;config kubeadm-config.yaml&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kubeadm init phase certs apiserver --config kubeadm-config.yaml
+[certs] Generating &amp;quot;apiserver&amp;quot; certificate and key
+[certs] apiserver serving cert is signed for DNS names [192.168.0.8  139.198.19.37]
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;3.4 再次查看apiserver中证书包含的ip，指令如下,看的公网ip则操作成功。
+openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;openssl x509 -in pki/apiserver.crt -noout -text | grep 139.198.19.37
+                IP Address:192.168.0.8, IP Address:139.198.19.37
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;3.5 重启kube-apiserver
+如果是高可用集群，直接杀死当前节点的kube-apiserver进程，等待kubelet拉起kube-apiserver即可。需要在三个节点执行步骤1到步骤4，逐一更新。
+如果是非高可用集群，杀死kube-apiserver可能会导致服务有中断，需要在业务低峰的时候操作。
+进入/etc/kubernetes/manifests目录下，mv kube-apiserver.yaml文件至别的位置，然后又移回来即可&lt;/li&gt;
+&lt;li&gt;3.6 修改kubeconfig中的server ip地址为 139.198.19.37，保存之后就可以直接通过公网访问kubernetes集群
+&lt;code&gt;kubectl --kubeconfig config config view&lt;/code&gt;
+&lt;code&gt;kubectl --kubeconfig config get node&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;4-附录-证书过期处理方式&#34;&gt;4. 附录-证书过期处理方式&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;kubeadm部署的k8s集群，默认证书目录为：/etc/kubernetes/pki,如果非pki，以ssl为例，需要创建软链接。证书过期包含核心组件apiserver和node上的token。&lt;/li&gt;
+&lt;li&gt;4.1 master节点-apiserver处理方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;1、查看证书有效期
+cd /etc/kubernetes
+openssl x509 -in ssl/apiserver.crt -noout -enddate 
+2. 更新过期证书（/etc/kubernetes） (先在master1 节点执行)
+创建软连接pki -&amp;gt; ssl ： ln -s ssl/ pki    (如pki存在，可略过)
+
+kubeadm alpha certs renew apiserver 
+kubeadm alpha certs renew apiserver-kubelet-client 
+kubeadm alpha certs renew front-proxy-client 
+3. 更新kubeconfig（/etc/kubernetes）(master1 节点)
+需更新admin.conf / scheduler.conf / controller-manager.conf / kubelet.conf
+
+kubeadm alpha certs renew admin.conf
+kubeadm alpha certs renew controller-manager.conf
+kubeadm alpha certs renew scheduler.conf
+
+特别注意：以master1为例，将如下master1替换实际的节点名称。
+kubeadm alpha kubeconfig user --client-name=system:node:master1 --org=system:nodes &amp;gt; kubelet.conf
+
+4. 如上述kubeconfig中apiserver地址非lb地址，则修改为lb地址：(master1 节点)
+https://192.168.0.13:6443 -&amp;gt; https://{ lb domain or ip }:6443
+
+5. 重启k8s master组件：(master1 节点)
+docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
+systemctl restart kubelet
+
+6. 验证kubeconfig有效性及查看节点状态 (master1 节点)
+
+kubectl get node –kubeconfig admin.conf
+kubectl get node –kubeconfig scheduler.conf
+kubectl get node –kubeconfig controller-manager.conf
+kubectl get node –kubeconfig kubelet.conf
+
+7. 特别注意：同步master1证书/etc/kubernetes/ssl至master2、master3的对应路径中/etc/kubernetes/ssl（同步前建议备份旧证书）
+证书路径：/etc/kubernetes/ssl
+
+8. 更新kubeconfig（/etc/kubernetes）(master2, master3)
+
+kubeadm alpha certs renew admin.conf
+kubeadm alpha certs renew controller-manager.conf
+kubeadm alpha certs renew scheduler.conf
+
+特别注意：以下命令中以master2、master3为例，将如下master2/master3替换实际的节点名称。
+kubeadm alpha kubeconfig user --client-name=system:node:master2 --org=system:nodes &amp;gt; kubelet.conf （master2）
+kubeadm alpha kubeconfig user --client-name=system:node:master3 --org=system:nodes &amp;gt; kubelet.conf （master3）
+
+9. 如上述kubeconfig中apiserver地址非lb地址，则修改为lb地址：(master2、master3)
+
+https://192.168.0.13:6443 -&amp;gt; https://{ lb domain or ip }:6443
+
+注：涉及文件：admin.conf、controller-manager.conf、scheduler.conf、kubelet.conf
+
+10. 重启master2、master3中对应master组件
+
+docker ps -af name=k8s_kube-apiserver* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-scheduler* -q | xargs --no-run-if-empty docker rm -f
+docker ps -af name=k8s_kube-controller-manager* -q | xargs --no-run-if-empty docker rm -f
+systemctl restart kubelet
+
+11. 验证kubeconfig有效性 （master2、master3）
+
+kubectl get node –kubeconfig admin.conf
+kubectl get node –kubeconfig scheduler.conf
+kubectl get node –kubeconfig controller-manager.conf
+kubectl get node –kubeconfig kubelet.conf
+12. 更新~/.kube/config （master1、master2、master3）
+
+cp admin.conf ~/.kube/config
+注：如node节点也需使用kubectl，将master1上的~/.kube/config拷贝至对应node节点~/.kube/config
+
+13. 验证~/.kube/config有效性：
+
+ kubectl get node  查看集群状态
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;4.2 node节点token证书处理方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;1. kubeadm token list 查看输出若为空或显示日期过期，则需重新生成。
+
+2. kubeadm token create 重新生成token
+
+3. 记录token值,保存下来。
+
+4. 替换node节点/etc/kubernetes/ bootstrap-kubelet.conf中token （所有node节点）
+
+5. 删除/etc/kubernetes/kubelet.conf （所有node节点）
+
+rm -rf /etc/kubernetes/kubelet.conf
+6. 重启kubelet （所有node节点）
+
+systemctl restart kubelet
+7. 查看节点状态：
+
+kubectl get node 验证集群状态
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
