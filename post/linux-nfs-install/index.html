@@ -146,7 +146,17 @@ onload='renderMathInElement(document.body);'></script>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/storage'>storage</a>
+	
+	
+	
 
+	
+	&nbsp;&nbsp;
 	
 
 	
@@ -154,16 +164,35 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+		href='/tags/nfs'>nfs</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/linux-tools'>Linux tools</a>
+		href='/tags/linux-tools'>linux-tools</a>
 	
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+		datetime="2019-07-13T00:00:00Z">2019-7-13 00:00</time>
 </div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11服务端安装19216809">1.1服务端安装（192.168.0.9）</a></li>
+    <li><a href="#12服务端配置">1.2服务端配置</a></li>
+    <li><a href="#13配置共享目录">1.3配置共享目录</a></li>
+    <li><a href="#21客户端安装192168010">2.1客户端安装（192.168.0.10）</a></li>
+    <li><a href="#22客户端开机自启和启动即可">2.2客户端开机自启和启动即可</a></li>
+    <li><a href="#23客户端验证及测试">2.3客户端验证及测试</a></li>
+    <li><a href="#cenots和ubuntu脚本部署">cenots和ubuntu脚本部署</a></li>
+  </ul>
+</nav>
+</div>
+</details>
 
 <hr />
 
@@ -176,8 +205,8 @@ onload='renderMathInElement(document.body);'></script>
 	<section class="mx-auto content">
 		<div class="c-rich-text"><h1 id="linux-下nfs-服务器的搭建及配置">Linux 下NFS 服务器的搭建及配置</h1>
 <p>nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。</p>
-<h2 id="演示nfs机器信息分为服务端和客户端介绍以下服务端的ip请根据自己环境来替换">演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。</h2>
-<p>服务端：192.168.0.9，客户端：192.168.0.10</p>
+<p>演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
+服务端：192.168.0.9，客户端：192.168.0.10</p>
 <h2 id="11服务端安装19216809">1.1服务端安装（192.168.0.9）</h2>
 <p><font color=#DC143C >centos:</font>
 <code>sudo yum install nfs-utils -y</code></p>
@@ -384,17 +413,17 @@ fi
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/netapp-stored-on-kubesphere-practice/">
+    <a class="flex-grow-0" href="/archives/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        NetApp存储在KubeSphere上的实践
+        
     </a>
     
     
-    <a class="flex-grow-0" href="/post/kubesphere-does-cluster-migration-based-on-velero/">
-        Kubesphere基于Velero做集群的迁移
+    <a class="flex-grow-0" href="/post/k8s-glusterfs-install/">
+        glusterfs安装
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
@@ -404,43 +433,6 @@ fi
 <div >
 
 
-
-<div class="font-serif pb-2 flex align-start leading-loose">
-	<span class="heading pr-6 leading-loose">Related</span>
-	<span >
-		
-			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp存储在KubeSphere上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/docker-image-operation-guide-for-building-arm-x86-architecture/">构建arm-x86架构的docker-image操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/iperf-cognition-as-a-network-speed-measurement-tool/">测量网络速度工具之iperf认知</a>
-		
-</span>
-</div>
 
 </div>
 <hr />

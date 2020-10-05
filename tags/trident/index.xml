@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>trident on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/trident/</link>
+    <description>Recent content in trident on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Fri, 13 Dec 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/trident/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>netapp存储在kubesphere上的实践</title>
+      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
+&lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
+&lt;strong&gt;KubeSphere&lt;/strong&gt; 是一款开源项目，在目前主流容器调度平台 Kubernetes 之上构建的企业级分布式多租户&lt;strong&gt;容器管理平台&lt;/strong&gt;，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大降低开发、测试、运维的日常工作的复杂度。&lt;/p&gt;
+&lt;h3 id=&#34;1整体方案&#34;&gt;1、整体方案&lt;/h3&gt;
+&lt;p&gt;在VMware Workstation环境下安装ONTAP;ONTAP系统上创建SVM(Storage Virtual Machine)且对接nfs协议；在已有k8s环境下部署Trident,Trident将使用ONTAP系统上提供的信息（svm、managementLIF和dataLIF）作为后端来提供卷；在已创建的k8s和StorageClass卷下部署kubesphere。&lt;/p&gt;
+&lt;h3 id=&#34;2版本信息&#34;&gt;2、版本信息&lt;/h3&gt;
+&lt;p&gt;Ontap: 9.5
+Trident: v19.07
+k8s: 1.15
+kubesphere: 2.0.2&lt;/p&gt;
+&lt;h3 id=&#34;3步骤&#34;&gt;3、步骤&lt;/h3&gt;
+&lt;p&gt;主要描述ontap搭建及配置、Trident搭建和配置和kubesphere搭建及配置等方面。参考&lt;a href=&#34;https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/&#34;&gt;ontap搭建&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
+&lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
+https://IP address,以上设置的iP地址，用户名和密码：
+&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
+&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;结合ontap的提供的参数创建第一个后端vi backend.json。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;version&amp;quot;: 1,
+    &amp;quot;storageDriverName&amp;quot;: &amp;quot;ontap-nas&amp;quot;,
+    &amp;quot;backendName&amp;quot;: &amp;quot;customBackendName&amp;quot;,
+    &amp;quot;managementLIF&amp;quot;: &amp;quot;10.0.0.1&amp;quot;,
+    &amp;quot;dataLIF&amp;quot;: &amp;quot;10.0.0.2&amp;quot;,
+    &amp;quot;svm&amp;quot;: &amp;quot;trident_svm&amp;quot;,
+    &amp;quot;username&amp;quot;: &amp;quot;cluster-admin&amp;quot;,
+    &amp;quot;password&amp;quot;: &amp;quot;password&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;生成后端卷&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建StorageClass,vi storage-class-ontapnas.yaml&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ontapnasudp
+provisioner: netapp.io/trident
+mountOptions: [&amp;quot;rw&amp;quot;, &amp;quot;nfsvers=3&amp;quot;, &amp;quot;proto=udp&amp;quot;]
+parameters:
+  backendType: &amp;quot;ontap-nas&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;创建StorageClass指令&lt;code&gt;kubectl create -f storage-class-ontapnas.yaml&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;33-kubesphere的安装及配置&#34;&gt;3.3 kubesphere的安装及配置&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;在 Kubernetes 集群中创建名为 kubesphere-system 和 kubesphere-monitoring-system 的 namespace。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ cat &amp;lt;&amp;lt;EOF | kubectl create -f -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: kubesphere-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: kubesphere-monitoring-system
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;创建 Kubernetes 集群 CA 证书的 Secret。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-system create secret generic kubesphere-ca  \
+--from-file=ca.crt=/etc/kubernetes/pki/ca.crt  \
+--from-file=ca.key=/etc/kubernetes/pki/ca.key
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;若 etcd 已经配置过证书，则参考如下创建（以下命令适用于 Kubeadm 创建的 Kubernetes 集群环境）：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-monitoring-system create secret generic kube-etcd-client-certs  \
+--from-file=etcd-client-ca.crt=/etc/kubernetes/pki/etcd/ca.crt  \
+--from-file=etcd-client.crt=/etc/kubernetes/pki/etcd/healthcheck-client.crt  \
+--from-file=etcd-client.key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;修改kubesphere.yaml中存储的设置参数和对应的参数即可
+&lt;code&gt;kubectl apply -f kubesphere.yaml&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
+&lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
+&lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
+&lt;a href=&#34;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&#34;&gt;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>netapp联合k8s在kubesphere应用</title>
+      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
+&lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;k8s: 1.13+&lt;/li&gt;
+&lt;li&gt;ontap: 9.5&lt;/li&gt;
+&lt;li&gt;trident: v19.07&lt;/li&gt;
+&lt;li&gt;kubesphere: 2.0.2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;前期准备&#34;&gt;前期准备&lt;/h4&gt;
+&lt;p&gt;需要准备材料在以下链接上，链接：https://pan.baidu.com/s/1q3KugGrz-XWJzqhgD7Ze9g
+提取码：rhyw&lt;/p&gt;
+&lt;p&gt;包括ontap的安装说明，Workstation上ontap9.5模拟器的ova，ontap使用文档，对接各种存储的协议证书，&lt;/p&gt;
+&lt;h4 id=&#34;1-ontap的安装&#34;&gt;1. ontap的安装&lt;/h4&gt;
+&lt;p&gt;本次测试的环境是安装在VMware Workstation，具体参考链接上这个文档Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide，大致流程为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;window机器的资源配置&lt;/li&gt;
+&lt;li&gt;开启VT&lt;/li&gt;
+&lt;li&gt;为模拟ONTAP配置VMware Workstation&lt;/li&gt;
+&lt;li&gt;在VMware Workstation上配置网络适配器，选择bridge网络&lt;/li&gt;
+&lt;li&gt;开启模拟ONTAP&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-模拟ontap的配置&#34;&gt;2. 模拟ontap的配置&lt;/h4&gt;
+&lt;p&gt;以上ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2.1 Press Ctrl-C for Boot 菜单消息显示时，按 Ctrl-C&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;md1.uzip: 39168 x 16384 blocks
+md2.uzip: 5760 x 16384 blocks
+*******************************
+* *
+* Press Ctrl-C for Boot Menu. *
+* *
+*******************************
+^C
+Boot Menu will be available.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.2 选择4配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Please choose one of the following:
+(1) Normal Boot.
+(2) Boot without /etc/rc.
+(3) Change password.
+(4) Clean configuration and initialize all disks.
+(5) Maintenance mode boot.
+(6) Update flash from backup config.
+(7) Install new software first.
+(8) Reboot node.
+Selection (1-8)? 4
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.3 确认reset 和 确定&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Zero disks, reset config and install a new file system?: y
+This will erase all the data on the disks, are you sure?: y
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.4 创建集群,填写参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Enter the cluster management interface port [e0d]: e0c
+Enter the cluster management interface IP address: 192.168.x.20
+Enter the cluster management interface netmask: 255.255.255.0
+Enter the cluster management interface default gateway: &amp;lt;Enter&amp;gt;
+A cluster management interface on port e0c with IP address 192.168.x.
+20 has been created.
+You can use this address to connect to and manager the cluster.
+Do you want to create a new cluster or join an existing cluster?
+{create}:
+create
+Enter the cluster name: cluster1
+login: admin
+Password: &amp;lt;password you defined&amp;gt;
+Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;3-登录ontap界面&#34;&gt;3. 登录ontap界面&lt;/h4&gt;
+&lt;p&gt;参考链接中的m_SL10537_gui_nas_basic_concepts_v2.1.0文档，这里需要配置的信息为，对接各个存储的协议证书、子网的设置、聚合的创建、svm创建和导出策略的配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
+&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对接各个存储的协议证书
+登录平台之后，配置&amp;ndash;》许可证&amp;ndash;》添加对应的证书，显示为绿色的勾就添加正确。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;子网的设置
+登录平台，网络&amp;ndash;》子网&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;聚合的创建
+登录平台，存储&amp;ndash;》聚合和磁盘&amp;ndash;》聚合&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;svm的创建，此处需要选择对应的存储协议、 存储中的聚合和权限、管理(LIF)和数据（LIF）等信息。
+登录平台，存储&amp;ndash;》SVM&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;导出策略的设置，svm创建之后，点击svm设置&amp;ndash;》导出策略，在规则索引下添加客户端规范0.0.0.0/0，协议和权限。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;4-trident安装部署&#34;&gt;4. trident安装部署&lt;/h4&gt;
+&lt;p&gt;介质在链接中，包括所需要的镜像和trident安装包和想要的配置文件。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果多台机器情形，需要在每台机器上执行&lt;code&gt;docker load -i trident.tar&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;解压trident安装包，&lt;code&gt;tar -xf $BASE_FOLDER/trident-installer-19.07.0.tar.gz&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;进入trident-installer目录，执行trident安装指令：&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;检查是否安装成功&lt;code&gt;kubectl get pod -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;创建并验证第一个后端,注意backend.json填写正确的ontap参数，
+&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;验证后端是否生成：&lt;code&gt;./tridentctl -n trident get backend&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;创建storage class：&lt;code&gt;kubectl create -f sample-input/storage-class-basic.yaml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;5-kubesphere安装部署&#34;&gt;5. kubesphere安装部署&lt;/h4&gt;
+&lt;p&gt;参考官方部署文档为：https://github.com/kubesphere/ks-installer&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

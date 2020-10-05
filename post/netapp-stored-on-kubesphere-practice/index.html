@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>一切皆有可能  | NetApp存储在KubeSphere上的实践</title>
+	<title>一切皆有可能  | netapp存储在kubesphere上的实践</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -142,11 +142,21 @@ onload='renderMathInElement(document.body);'></script>
 		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
 	</h2>
 </div>
-<h1 class="pt-2">NetApp存储在KubeSphere上的实践</h1>
+<h1 class="pt-2">netapp存储在kubesphere上的实践</h1>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/storage'>storage</a>
+	
+	
+	
 
+	
+	&nbsp;&nbsp;
 	
 
 	
@@ -154,16 +164,38 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+		href='/tags/netapp'>netapp</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/linux-tools'>Linux tools</a>
+		href='/tags/trident'>trident</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>k8s</a>
 	
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+		datetime="2019-12-13T00:00:00Z">2019-12-13 00:00</time>
 </div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1整体方案">1、整体方案</a></li>
+        <li><a href="#2版本信息">2、版本信息</a></li>
+        <li><a href="#3步骤">3、步骤</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+</details>
 
 <hr />
 
@@ -174,8 +206,8 @@ onload='renderMathInElement(document.body);'></script>
 
 <article>
 	<section class="mx-auto content">
-		<div class="c-rich-text"><p><strong>NetApp</strong>是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。
-<strong>Ontap</strong>数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
+		<div class="c-rich-text"><p><strong>NetApp</strong>是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。</p>
+<p><strong>Ontap</strong>数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
 <strong>Trident</strong>是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂<strong>持久性</strong>需求。
 <strong>KubeSphere</strong> 是一款开源项目，在目前主流容器调度平台 Kubernetes 之上构建的企业级分布式多租户<strong>容器管理平台</strong>，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大降低开发、测试、运维的日常工作的复杂度。</p>
 <h3 id="1整体方案">1、整体方案</h3>
@@ -186,11 +218,11 @@ Trident: v19.07
 k8s: 1.15
 kubesphere: 2.0.2</p>
 <h3 id="3步骤">3、步骤</h3>
-<p>主要描述ontap搭建及配置、Trident搭建和配置和kubesphere搭建及配置等方面。</p>
+<p>主要描述ontap搭建及配置、Trident搭建和配置和kubesphere搭建及配置等方面。参考<a href="https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/">ontap搭建</a></p>
 <h4 id="31-ontap搭建及配置">3.1 ontap搭建及配置</h4>
 <p>在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
 https://IP address,以上设置的iP地址，用户名和密码：
-<img src="http://ww1.sinaimg.cn/large/006bbiLEgy1g6t9q3s4kkj30yf0l8qsj.jpg" alt="netapp.png"></p>
+<img src="/img/netapp.png" alt="netapp"></p>
 <h4 id="32-trident搭建及配置">3.2 Trident搭建及配置</h4>
 <ul>
 <li>下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
@@ -258,7 +290,7 @@ EOF
 <p>访问 KubeSphere UI 界面。</p>
 </li>
 </ul>
-<p><img src="https://pek3b.qingstor.com/kubesphere-docs/png/20190912002602.png" alt="kubesphere"></p>
+<p><img src="/img/kubesphere.png" alt="kubesphere"></p>
 <h4 id="参考文档">参考文档</h4>
 <p><a href="http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN">http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN</a>
 <a href="https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html">https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html</a>
@@ -343,7 +375,7 @@ EOF
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1243 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1252 words in this page.
 	</div>
 </div>
 
@@ -363,8 +395,8 @@ EOF
     </a>
     
     
-    <a class="flex-grow-0" href="/post/linux-nfs-install/">
-        Linux中nfs搭建
+    <a class="flex-grow-0" href="/post/ipv6-address-setup-k8s/">
+        ipv6地址搭建K8s
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
@@ -379,35 +411,19 @@ EOF
 	<span class="heading pr-6 leading-loose">Related</span>
 	<span >
 		
+			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
+		
 			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/linux-nfs-install/">Linux中nfs搭建</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
 		
 			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
 		
 			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
 		
-			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
+			<a href="/post/k8s-openebs-install/">openebs基于k8s安装</a>&nbsp;&nbsp;&#47;&nbsp;
 		
-			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
+			<a href="/post/k8s-rook-install/">rook基于k8s安装</a>&nbsp;&nbsp;&#47;&nbsp;
 		
-			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/docker-image-operation-guide-for-building-arm-x86-architecture/">构建arm-x86架构的docker-image操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/iperf-cognition-as-a-network-speed-measurement-tool/">测量网络速度工具之iperf认知</a>
+			<a href="/post/k8s-default-storage-class-installer/">k8s-default-Storage-Class搭建</a>
 		
 </span>
 </div>

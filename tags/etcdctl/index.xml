@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>etcdctl on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/etcdctl/</link>
+    <description>Recent content in etcdctl on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Tue, 13 Aug 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/etcdctl/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>kubesphere2-1-HA环境，一个master或者两个master宕机恢复</title>
+      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</link>
+      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</guid>
+      <description>&lt;h1 id=&#34;kubesphere21-ha环境一个master或者两个master宕机恢复&#34;&gt;kubesphere2.1-HA环境，一个master或者两个master宕机恢复&lt;/h1&gt;
+&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而很多事情都有意外，当其中一个master或者两个master卡住了，或者重启都不能自动恢复的情况下，那么怎么恢复呢，以下分一个master宕机和两个master宕机的恢复方法。&lt;/p&gt;
+&lt;h3 id=&#34;验证环境信息&#34;&gt;验证环境信息&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;os: centos7.5
+master1: 192.168.11.6
+master2: 192.168.11.8
+master3: 192.168.11.13
+node1: 192.168.11.14
+lb: 192.168.11.253
+nfs服务端: 192.168.11.14
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master宕机的模拟及恢复方法&#34;&gt;一个master宕机的模拟及恢复方法&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;正常的环境：nodes都running，etcd服务都正常。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kubectl get nodes
+NAME      STATUS   ROLES    AGE   VERSION
+master1   Ready    master   19m   v1.15.5
+master2   Ready    master   16m   v1.15.5
+master3   Ready    master   16m   v1.15.5
+node1     Ready    worker   14m   v1.15.5
+
+export ETCDCTL_API=3
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 3.8 MB, true, 5, 4434
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 3.8 MB, false, 5, 4434
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 3.8 MB, false, 5, 4434
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;一个master宕机情况，把master2重置，看nodes和etcd情况。还需在界面创建一些带有存储的pod用例。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kubectl get nodes   
+NAME      STATUS     ROLES    AGE   VERSION
+master1   Ready      master   57m   v1.15.5
+master2   NotReady   master   55m   v1.15.5
+master3   Ready      master   55m   v1.15.5
+node1     Ready      worker   52m   v1.15.5
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 5, 14953
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 5, 14972
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;恢复方法：修改脚本中hosts.ini文件，需要注意顺序
+在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面,然后在另一个终端机器上重新执行安装脚本。以下恢复情况，etcd正常，nodes也正常，业务数据存在且业务pod没有中断正常使用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kubectl get nodes
+NAME      STATUS     ROLES    AGE   VERSION
+master1   Ready      master   83m   v1.15.5
+master2   Ready      master   80m   v1.15.5
+master3   Ready      master   80m   v1.15.5
+node1     Ready      worker   78m   v1.15.5
+
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 11, 20292
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 11 MB, false, 11, 20297
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 11, 20298
+
+docker ps | grep tomcat
+6863620b07cf        882487b8be1d                                     &amp;quot;catalina.sh run&amp;quot;        17 minutes ago       Up 17 minutes                           k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;两个master宕机的模拟及恢复方法&#34;&gt;两个master宕机的模拟及恢复方法&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;两个master宕机情况，把master2和master3重置，看nodes和etcd情况，nodes不正常，etcd两个不正常。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kubectl get nodes
+Unable to connect to the server: EOF
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
+Failed to get the status of endpoint 192.168.11.13:2379 (context deadline exceeded)
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, false, 12, 27944
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;恢复方法：
+1、同样需要在host.ini文件修改master的顺序，由于我们重置2和3，所有此处不用修改顺序；
+2、在已解压的安装介质目录下，进入k8s/roles/kubernetes/preinstall/tasks/main.yml文件，用#注释如下内容，重跑安装脚本，作用说明：在重置的master2和master3机器上安装docker和etcd，但整个集群还需修复。。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;#- import_tasks: 0020-verify-settings.yml
+#  when:
+#    - not dns_late
+#  tags:
+#    - asserts
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、在master2机器上，临时修复master2节点的etcd服务，执行如下指令：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;停止etcd：systemctl stop etcd
+备份etcd数据：mv /var/lib/etcd /var/lib/etcd-bak
+从master1的/var/backups/kube_etcd/备份目录下拷贝最近时间的snapshot.db至master2机器上
+在master2先转为版本3指令令：export ETCDCTL_API=3
+在master2恢复指令：etcdctl snapshot restore /root/snapshot.db    --endpoints=192.168.11.8:2379    --cert=/etc/ssl/etcd/ssl/node-master2.pem    --key=/etc/ssl/etcd/ssl/node-master2-key.pem    --cacert=/etc/ssl/etcd/ssl/ca.pem --data-dir=/var/lib/etcd
+重启etcd: systemctl restart etcd
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;4、修改host.ini文件master2和master3顺序，把[all][kube-master][etcd]三个组的master3放在最后面，再次跑安装脚本。其中的host.ini文件为&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[all]
+master1 ansible_connection=local  ip=192.168.11.6
+master2  ansible_host=192.168.11.8  ip=192.168.11.8  ansible_ssh_pass=
+master3  ansible_host=192.168.11.13  ip=192.168.11.13  ansible_ssh_pass=
+node1    ansible_host=192.168.11.14  ip=192.168.11.14  ansible_ssh_pass=
+
+[kube-master]
+master1
+master2
+master3
+
+[kube-node]
+node1
+
+[etcd]
+master1
+master2
+master3
+
+[k8s-cluster:children]
+kube-node
+kube-master 
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;5、由第四步只是临时修复master2的etcd，并不完全修复，先全部修复作如下处理：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;第四步执行过程中，z在“wait for etcd up”会报错，先ctrl +c 终止脚本；
+在master2机器上，停止etcd服务：systemctl stop etcd
+在master2机器上，删除etcd数据：rm -rf /var/lib/etcd
+再次修改host.ini文件，master2和master3顺序，把[all][kube-master][etcd]三个组的master2放在最后面，再次跑安装脚本即可。
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;验证结果&#34;&gt;验证结果&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;集群中的nodes、etcd和带有存储数据的业务pod情况：&lt;/li&gt;
+&lt;li&gt;集群中的nodes、etcd和带有存储数据的业务pod情况,nodes恢复正常，etcd服务也回复正常，带有存储的pod一直运行，集群恢复成功：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[root@master1 ~]# kubectl get nodes
+NAME      STATUS   ROLES    AGE     VERSION
+master1   Ready    master   4h56m   v1.15.5
+master2   Ready    master   4h53m   v1.15.5
+master3   Ready    master   4h53m   v1.15.5
+node1     Ready    worker   4h51m   v1.15.5
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# 
+[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+192.168.11.6:2379, b3487da7c562b17, 3.2.18, 12 MB, false, 1372, 32116
+192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 12 MB, true, 1372, 32116
+192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 12 MB, false, 1372, 32116
+
+docker ps | grep tomcat
+6863620b07cf        882487b8be1d                                     &amp;quot;catalina.sh run&amp;quot;        4 hours ago         Up 4 hours                              k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+    <item>
+      <title>kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</title>
+      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</link>
+      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</guid>
+      <description>&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而在生产环境中，为了业务更正常运行，当以下两种情形发生时，告诉大家怎么恢复。第一种情形是：其中某台master机器的etcd服务不能正常提供服务，而需要在另外一台机器上部署一个etcd服务加入到现etcd集群中；第二种情形是：其中某台master宕机，需要在另外一台机器上部署master，并加入到现master集群中。&lt;/p&gt;
+&lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;os: centos7.5
+master1: 192.168.11.6
+master2: 192.168.11.16
+master3: 192.168.11.13
+node1: 192.168.11.14
+lb: 192.168.11.253
+nfs服务端: 192.168.11.14
+新加机器master2: 192.168.11.8
+安装介质机器：192.168.11.6
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master宕机在另外一台服务器上恢复方法&#34;&gt;一个master宕机，在另外一台服务器上恢复方法&lt;/h2&gt;
+&lt;p&gt;假设为master2（192.168.11.16）宕机了，现以新机器192.168.11.8作为恢复master2的机器。以下操作都在master1机器上执行。
+1、在安装介质机器即master1机器上面，进入/etc/ssl/etcd/ssl目录下，将含有master2相关联的文件证书删掉（那个master有问题就出来那个）。
+&lt;code&gt;rm -rf admin-master2-key.pem admin-master2.pem member-master2-key.pem member-master2.pem node-master2-key.pem node-master2.pem&lt;/code&gt;
+2、将etcd集群中master2的节点移除。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;第一步先转为etcd3版本：export ETCDCTL_API=3
+查看etcd集群的成员：
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
+b3487da7c562b17, started, etcd1, https://192.168.11.6:2380, https://192.168.11.6:2379
+3ad323c042cc4c05, started, etcd2, https://192.168.11.13:2380, https://192.168.11.13:2379
+52a4779150442b41, started, etcd3, https://192.168.11.16:2380, https://192.168.11.16:2379
+第三步：移除master2节点，如192.168.11.16
+etcdctl member remove 52a4779150442b41 --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem  --key=/etc/ssl/etcd/ssl/node-master1-key.pem
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、新打开master1机器窗口进入解压包目录下修改conf/hosts.ini,一定要新打开窗口（由于上一步操作使master1机器为etcd3版本指令）。
+master2的IP由原来的192.168.11.16改成192.168.11.8；在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面,然后执行安装脚本即可。
+4、验证结果：
+用&lt;code&gt;kubectl get nodes -o wide&lt;/code&gt;指令看master2IP是否替换；
+看etcd集群中是否包含新的master2IP，指令为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1、开启etcd3版本：export ETCDCTL_API=3
+2、etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master中etcd服务不正常在另外一台服务器上恢复etcd方法&#34;&gt;一个master中etcd服务不正常，在另外一台服务器上恢复etcd方法&lt;/h2&gt;
+&lt;p&gt;假设为master2（192.168.11.16）宕机了，现以新机器192.168.11.8作为恢复master2的机器。以下操作都在master1机器上执行。
+1、在安装介质机器即master1机器上面，进入/etc/ssl/etcd/ssl目录下，将含有master2相关联的文件证书删掉（那个master有问题就出来那个）。
+&lt;code&gt;rm -rf admin-master2-key.pem admin-master2.pem member-master2-key.pem member-master2.pem node-master2-key.pem node-master2.pem&lt;/code&gt;
+2、将etcd集群中master2的节点移除。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;第一步先转为etcd3版本：export ETCDCTL_API=3
+查看etcd集群的成员：
+etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
+b3487da7c562b17, started, etcd1, https://192.168.11.6:2380, https://192.168.11.6:2379
+3ad323c042cc4c05, started, etcd2, https://192.168.11.13:2380, https://192.168.11.13:2379
+52a4779150442b41, started, etcd3, https://192.168.11.16:2380, https://192.168.11.16:2379
+第三步：移除master2节点，如192.168.11.16
+etcdctl member remove 52a4779150442b41 --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem  --key=/etc/ssl/etcd/ssl/node-master1-key.pem
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、新打开master1机器窗口进入解压包目录下修改conf/hosts.ini,一定要新打开窗口（由于上一步操作使master1机器为etcd3版本指令）。
+master2的IP由原来的192.168.11.16改成192.168.11.8；在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面。
+4、进入解压包，scripts目录下，编辑install.sh脚本，用#将如下内容注释掉：
+&lt;code&gt;ansible-playbook -i $BASE_FOLDER/../k8s/inventory/my_cluster/hosts.ini $BASE_FOLDER/../kubesphere/kubesphere.yml -b&lt;/code&gt;
+5、进入解压包，k8s目录下，编辑cluster.yml文件，用#将以下开头的内容至结尾都注释掉&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;- hosts: k8s-cluster
+  any_errors_fatal: &amp;quot;{{ any_errors_fatal | default(true) }}&amp;quot;
+  roles:
+    - { role: kubespray-defaults}
+    - { role: kubernetes/node, tags: node }
+  environment: &amp;quot;{{ proxy_env }}&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;6、重新到脚本目录，执行install.sh脚本即可。
+7、验证结果：
+看etcd集群中是否包含新的master2IP，指令为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1、开启etcd3版本：export ETCDCTL_API=3
+2、etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | rook基于k8s安装</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">rook基于k8s安装</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/storage'>storage</a>
+	
+	
+	
+
+	
+	&nbsp;&nbsp;
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/rook'>rook</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>k8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2019-08-07T00:00:00Z">2019-8-7 00:00</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#ceph介绍">ceph介绍</a></li>
+    <li><a href="#1环境准备">1、环境准备</a>
+      <ul>
+        <li><a href="#11节点规划">1.1、节点规划</a></li>
+        <li><a href="#12修改hosts文件">1.2、修改hosts文件</a></li>
+        <li><a href="#13配置hosts">1.3、配置hosts</a></li>
+        <li><a href="#14关闭防火墙">1.4、关闭防火墙</a></li>
+        <li><a href="#15时间同步">1.5、时间同步</a></li>
+        <li><a href="#16dockerlvm2和python3安装">1.6、docker、lvm2和python3安装</a></li>
+      </ul>
+    </li>
+    <li><a href="#2cephadm安装ceph1">2、cephadm安装(ceph1)</a></li>
+    <li><a href="#3osd部署">3、OSD部署</a>
+      <ul>
+        <li><a href="#参考">参考</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><h2 id="ceph介绍">ceph介绍</h2>
+<p>ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：</p>
+<ul>
+<li>OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。</li>
+<li>Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。</li>
+<li>MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。</li>
+</ul>
+<h2 id="1环境准备">1、环境准备</h2>
+<h3 id="11节点规划">1.1、节点规划</h3>
+<table>
+<thead>
+<tr>
+<th>节点  </th>
+<th>os  </th>
+<th>IP   </th>
+<th>磁盘</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ceph1</td>
+<td>centos</td>
+<td>192.168.0.13</td>
+<td>vdc</td>
+<td>cephadm，mgr, mon,osd</td>
+</tr>
+<tr>
+<td>ceph2</td>
+<td>centos</td>
+<td>192.168.0.14</td>
+<td>vdc</td>
+<td>mon,osd</td>
+</tr>
+<tr>
+<td>ceph3</td>
+<td>centos</td>
+<td>192.168.0.16</td>
+<td>vdc</td>
+<td>mon,osd</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12修改hosts文件">1.2、修改hosts文件</h3>
+<ul>
+<li>hostnamectl set-hostname ceph1  #节点1上执行</li>
+<li>hostnamectl set-hostname ceph2  #节点2上执行</li>
+<li>hostnamectl set-hostname ceph3  #节点3上执行</li>
+</ul>
+<h3 id="13配置hosts">1.3、配置hosts</h3>
+<ul>
+<li>三个节点都执行</li>
+</ul>
+<pre><code>cat &gt;&gt; /etc/hosts &lt;&lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+</code></pre><h3 id="14关闭防火墙">1.4、关闭防火墙</h3>
+<ul>
+<li>三个节点都要执行</li>
+</ul>
+<pre><code>systemctl disable --now firewalld
+setenforce 0
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+</code></pre><h3 id="15时间同步">1.5、时间同步</h3>
+<pre><code>yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+</code></pre><h3 id="16dockerlvm2和python3安装">1.6、docker、lvm2和python3安装</h3>
+<pre><code>三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+</code></pre><h2 id="2cephadm安装ceph1">2、cephadm安装(ceph1)</h2>
+<ul>
+<li>官方下载方法</li>
+</ul>
+<p><code>curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm</code></p>
+<ul>
+<li>git下载</li>
+</ul>
+<p><code>git clone --single-branch --branch octopus https://github.com/ceph/ceph.git</code></p>
+<p><code>cp ceph/src/cephadm/cephadm ./</code></p>
+<ul>
+<li>cephadm安装(ceph1)</li>
+</ul>
+<pre><code>./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+</code></pre><ul>
+<li>
+<p>配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。</p>
+</li>
+<li>
+<p>ceph指令生效</p>
+</li>
+</ul>
+<p><code>cephadm shell</code></p>
+<ul>
+<li>添加节点</li>
+</ul>
+<p><code>ceph orch host add ceph2</code></p>
+<p><code>ceph orch host add ceph3</code></p>
+<h2 id="3osd部署">3、OSD部署</h2>
+<ul>
+<li>cephadm shell下执行</li>
+<li>若块设备没显示，可加&ndash;refresh参数</li>
+</ul>
+<pre><code>[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+</code></pre><ul>
+<li>查看集群状态,ceph方式及运行容器方式</li>
+</ul>
+<pre><code>ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &quot;/usr/bin/ceph-osd -…&quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &quot;/bin/prometheus --c…&quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &quot;/bin/alertmanager -…&quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &quot;/bin/sh -c 'grafana…&quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &quot;/bin/node_exporter …&quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &quot;/usr/bin/ceph-crash…&quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &quot;/usr/bin/ceph-mgr -…&quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &quot;/usr/bin/ceph-mon -…&quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+</code></pre><h3 id="参考">参考</h3>
+<ul>
+<li><a href="https://docs.ceph.com/en/latest/cephadm/install/">https://docs.ceph.com/en/latest/cephadm/install/</a></li>
+</ul></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1232 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/k8s-ceph-install/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        基于cephadm安装ceph
+    </a>
+    
+    
+    <a class="flex-grow-0" href="/post/k8s-openebs-install/">
+        openebs基于k8s安装
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/k8s-openebs-install/">openebs基于k8s安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s-default-storage-class-installer/">k8s-default-Storage-Class搭建</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

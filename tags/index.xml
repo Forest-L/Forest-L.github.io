@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s</title>
+      <link>https://Forest-L.github.io/tags/k8s/</link>
+      <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pv-pvc-sc</title>
+      <link>https://Forest-L.github.io/tags/pv-pvc-sc/</link>
+      <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/pv-pvc-sc/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>ceph</title>
@@ -22,16 +40,7 @@
     </item>
     
     <item>
-      <title>K8s</title>
-      <link>https://Forest-L.github.io/tags/k8s/</link>
-      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/tags/k8s/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Pmem</title>
+      <title>pmem</title>
       <link>https://Forest-L.github.io/tags/pmem/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
@@ -85,6 +94,42 @@
     </item>
     
     <item>
+      <title>netapp</title>
+      <link>https://Forest-L.github.io/tags/netapp/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/netapp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ontap</title>
+      <link>https://Forest-L.github.io/tags/ontap/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/ontap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>trident</title>
+      <link>https://Forest-L.github.io/tags/trident/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/trident/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>velero</title>
+      <link>https://Forest-L.github.io/tags/velero/</link>
+      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/velero/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>apt-get</title>
       <link>https://Forest-L.github.io/tags/apt-get/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
@@ -121,11 +166,38 @@
     </item>
     
     <item>
+      <title>etcdctl</title>
+      <link>https://Forest-L.github.io/tags/etcdctl/</link>
+      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/etcdctl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>mysql</title>
       <link>https://Forest-L.github.io/tags/mysql/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/tags/mysql/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>openebs</title>
+      <link>https://Forest-L.github.io/tags/openebs/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/openebs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rook</title>
+      <link>https://Forest-L.github.io/tags/rook/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/rook/</guid>
       <description></description>
     </item>
     
@@ -144,6 +216,33 @@
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/tags/osd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>nfs</title>
+      <link>https://Forest-L.github.io/tags/nfs/</link>
+      <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/nfs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>nfs-client-provisioner</title>
+      <link>https://Forest-L.github.io/tags/nfs-client-provisioner/</link>
+      <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/nfs-client-provisioner/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>glusterfs</title>
+      <link>https://Forest-L.github.io/tags/glusterfs/</link>
+      <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/glusterfs/</guid>
       <description></description>
     </item>
     

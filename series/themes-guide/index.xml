@@ -7,10 +7,116 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/series/themes-guide/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>k8s分布式存储总结</title>
+      <link>https://Forest-L.github.io/post/k8s-storage-summary/</link>
+      <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-storage-summary/</guid>
+      <description>&lt;h2 id=&#34;1pvpvc和sc来源&#34;&gt;1、pv、pvc和sc来源&lt;/h2&gt;
+&lt;p&gt;pv引入解耦了pod与底层存储；pvc引入分离声明与消费，分离开发与运维责任，存储由运维系统人员管理，开发人员只需要通过pvc声明需要存储的类型、大小和访问模式即可；sc引入使pv自动创建或删除，开发人员定义的pvc中声明stroageclassname以及大小等需求自动创建pv；运维人员只需要声明好sc以及quota配额即可，无需维护pv。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;早期pod使用volume方式，每次pod都需要配置存储，volume都需要配置存储插件的一堆配置，如果是第三方存储，配置非常复杂；强制开发人员需要了解底层存储类型和配置。从而引入了pv。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    volumeMounts:
+    - mountPath: /data
+      name: data
+  volumes:
+  - name: data
+    capacity:
+      storage: 10Gi
+    cephfs:
+      monitors:
+      - 192.168.0.1:6789
+      - 192.168.0.2:6789
+      - 192.168.0.3:6789
+      path: /opt/eshop_dir/eshop
+      user: admin
+      secretRef:
+        name: ceph-secret
+
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;pv的yaml文件，pv其实就是把volume的配置声明从pod中分离出来。存储系统由运维人员管理，开发人员不知道底层配置，所以引入了pvc。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cephfs
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  cephfs:
+    monitors:
+    - 192.168.0.1:6789
+    - 192.168.0.2:6789
+    - 192.168.0.3:6789
+    path: /opt/eshop_dir/eshop
+    user: admin
+    secretRef:
+      name: ceph-secret
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;pvc的yaml文件，pvc会根据声明的大小、存储类型和accessMode等关键字查找pv，如果找到了匹配的pv，则会与之关联,而pod直接关联pvc。运维人员需要维护一堆pv，如果pv不够还需要手工创建新的pv，pv空闲还需要手动回收，所以引入了sc。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cephfs
+spec:
+  accessModes:
+      - ReadWriteMany
+  resources:
+      requests:
+        storage: 8Gi
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;storageclass类似声明了一个非常大的存储池，其中一个最重要参数是provisioner，这个provisioner可以aws-ebs，ceph和nfs等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: aws-gp2
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2存储发展过程&#34;&gt;2、存储发展过程&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;最初通过volume plugin实现，又称in-tree。&lt;/li&gt;
+&lt;li&gt;1.8开始，新的插件形式支持外部存储系统，即FlexVolume,通过外部脚本集成外部存储接口。&lt;/li&gt;
+&lt;li&gt;1.9开始，csi接入，存储厂商需要实现三个服务接口Identity Service、Controller Service、Node Service。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Identity service用于返回一些插件信息。
+Controller Service实现Volume的curd操作。
+Node Service运行在所有的Node节点，用于实现把volume挂载在当前Node节点的指定目录，该服务会监听一个socket，controller通过这个socket进行通信。
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;云原生分布式存储（Container Attached Storage）CAS&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;1、重新设计一个分布式存储，像openebs/longhorn/PortWorx/StorageOS。
+2、已有的分布式存储包装管理，像Rook。
+3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3存储分类&#34;&gt;3、存储分类&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;块存储&lt;/li&gt;
+&lt;li&gt;共享存储&lt;/li&gt;
+&lt;li&gt;对象存储&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Pmem与块存储性能对比</title>
@@ -295,6 +401,720 @@ Totals      82856.35        82.86     74487.86         2.45929         2.38300  
     </item>
     
     <item>
+      <title>netapp存储在kubesphere上的实践</title>
+      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
+&lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
+&lt;strong&gt;KubeSphere&lt;/strong&gt; 是一款开源项目，在目前主流容器调度平台 Kubernetes 之上构建的企业级分布式多租户&lt;strong&gt;容器管理平台&lt;/strong&gt;，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大降低开发、测试、运维的日常工作的复杂度。&lt;/p&gt;
+&lt;h3 id=&#34;1整体方案&#34;&gt;1、整体方案&lt;/h3&gt;
+&lt;p&gt;在VMware Workstation环境下安装ONTAP;ONTAP系统上创建SVM(Storage Virtual Machine)且对接nfs协议；在已有k8s环境下部署Trident,Trident将使用ONTAP系统上提供的信息（svm、managementLIF和dataLIF）作为后端来提供卷；在已创建的k8s和StorageClass卷下部署kubesphere。&lt;/p&gt;
+&lt;h3 id=&#34;2版本信息&#34;&gt;2、版本信息&lt;/h3&gt;
+&lt;p&gt;Ontap: 9.5
+Trident: v19.07
+k8s: 1.15
+kubesphere: 2.0.2&lt;/p&gt;
+&lt;h3 id=&#34;3步骤&#34;&gt;3、步骤&lt;/h3&gt;
+&lt;p&gt;主要描述ontap搭建及配置、Trident搭建和配置和kubesphere搭建及配置等方面。参考&lt;a href=&#34;https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/&#34;&gt;ontap搭建&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
+&lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
+https://IP address,以上设置的iP地址，用户名和密码：
+&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
+&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;结合ontap的提供的参数创建第一个后端vi backend.json。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;version&amp;quot;: 1,
+    &amp;quot;storageDriverName&amp;quot;: &amp;quot;ontap-nas&amp;quot;,
+    &amp;quot;backendName&amp;quot;: &amp;quot;customBackendName&amp;quot;,
+    &amp;quot;managementLIF&amp;quot;: &amp;quot;10.0.0.1&amp;quot;,
+    &amp;quot;dataLIF&amp;quot;: &amp;quot;10.0.0.2&amp;quot;,
+    &amp;quot;svm&amp;quot;: &amp;quot;trident_svm&amp;quot;,
+    &amp;quot;username&amp;quot;: &amp;quot;cluster-admin&amp;quot;,
+    &amp;quot;password&amp;quot;: &amp;quot;password&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;生成后端卷&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建StorageClass,vi storage-class-ontapnas.yaml&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ontapnasudp
+provisioner: netapp.io/trident
+mountOptions: [&amp;quot;rw&amp;quot;, &amp;quot;nfsvers=3&amp;quot;, &amp;quot;proto=udp&amp;quot;]
+parameters:
+  backendType: &amp;quot;ontap-nas&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;创建StorageClass指令&lt;code&gt;kubectl create -f storage-class-ontapnas.yaml&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;33-kubesphere的安装及配置&#34;&gt;3.3 kubesphere的安装及配置&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;在 Kubernetes 集群中创建名为 kubesphere-system 和 kubesphere-monitoring-system 的 namespace。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ cat &amp;lt;&amp;lt;EOF | kubectl create -f -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: kubesphere-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: kubesphere-monitoring-system
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;创建 Kubernetes 集群 CA 证书的 Secret。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-system create secret generic kubesphere-ca  \
+--from-file=ca.crt=/etc/kubernetes/pki/ca.crt  \
+--from-file=ca.key=/etc/kubernetes/pki/ca.key
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;若 etcd 已经配置过证书，则参考如下创建（以下命令适用于 Kubeadm 创建的 Kubernetes 集群环境）：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-monitoring-system create secret generic kube-etcd-client-certs  \
+--from-file=etcd-client-ca.crt=/etc/kubernetes/pki/etcd/ca.crt  \
+--from-file=etcd-client.crt=/etc/kubernetes/pki/etcd/healthcheck-client.crt  \
+--from-file=etcd-client.key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;修改kubesphere.yaml中存储的设置参数和对应的参数即可
+&lt;code&gt;kubectl apply -f kubesphere.yaml&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
+&lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
+&lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
+&lt;a href=&#34;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&#34;&gt;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>netapp联合k8s在kubesphere应用</title>
+      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
+&lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;k8s: 1.13+&lt;/li&gt;
+&lt;li&gt;ontap: 9.5&lt;/li&gt;
+&lt;li&gt;trident: v19.07&lt;/li&gt;
+&lt;li&gt;kubesphere: 2.0.2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;前期准备&#34;&gt;前期准备&lt;/h4&gt;
+&lt;p&gt;需要准备材料在以下链接上，链接：https://pan.baidu.com/s/1q3KugGrz-XWJzqhgD7Ze9g
+提取码：rhyw&lt;/p&gt;
+&lt;p&gt;包括ontap的安装说明，Workstation上ontap9.5模拟器的ova，ontap使用文档，对接各种存储的协议证书，&lt;/p&gt;
+&lt;h4 id=&#34;1-ontap的安装&#34;&gt;1. ontap的安装&lt;/h4&gt;
+&lt;p&gt;本次测试的环境是安装在VMware Workstation，具体参考链接上这个文档Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide，大致流程为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;window机器的资源配置&lt;/li&gt;
+&lt;li&gt;开启VT&lt;/li&gt;
+&lt;li&gt;为模拟ONTAP配置VMware Workstation&lt;/li&gt;
+&lt;li&gt;在VMware Workstation上配置网络适配器，选择bridge网络&lt;/li&gt;
+&lt;li&gt;开启模拟ONTAP&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-模拟ontap的配置&#34;&gt;2. 模拟ontap的配置&lt;/h4&gt;
+&lt;p&gt;以上ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2.1 Press Ctrl-C for Boot 菜单消息显示时，按 Ctrl-C&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;md1.uzip: 39168 x 16384 blocks
+md2.uzip: 5760 x 16384 blocks
+*******************************
+* *
+* Press Ctrl-C for Boot Menu. *
+* *
+*******************************
+^C
+Boot Menu will be available.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.2 选择4配置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Please choose one of the following:
+(1) Normal Boot.
+(2) Boot without /etc/rc.
+(3) Change password.
+(4) Clean configuration and initialize all disks.
+(5) Maintenance mode boot.
+(6) Update flash from backup config.
+(7) Install new software first.
+(8) Reboot node.
+Selection (1-8)? 4
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.3 确认reset 和 确定&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Zero disks, reset config and install a new file system?: y
+This will erase all the data on the disks, are you sure?: y
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;2.4 创建集群,填写参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Enter the cluster management interface port [e0d]: e0c
+Enter the cluster management interface IP address: 192.168.x.20
+Enter the cluster management interface netmask: 255.255.255.0
+Enter the cluster management interface default gateway: &amp;lt;Enter&amp;gt;
+A cluster management interface on port e0c with IP address 192.168.x.
+20 has been created.
+You can use this address to connect to and manager the cluster.
+Do you want to create a new cluster or join an existing cluster?
+{create}:
+create
+Enter the cluster name: cluster1
+login: admin
+Password: &amp;lt;password you defined&amp;gt;
+Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;3-登录ontap界面&#34;&gt;3. 登录ontap界面&lt;/h4&gt;
+&lt;p&gt;参考链接中的m_SL10537_gui_nas_basic_concepts_v2.1.0文档，这里需要配置的信息为，对接各个存储的协议证书、子网的设置、聚合的创建、svm创建和导出策略的配置。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
+&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对接各个存储的协议证书
+登录平台之后，配置&amp;ndash;》许可证&amp;ndash;》添加对应的证书，显示为绿色的勾就添加正确。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;子网的设置
+登录平台，网络&amp;ndash;》子网&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;聚合的创建
+登录平台，存储&amp;ndash;》聚合和磁盘&amp;ndash;》聚合&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;svm的创建，此处需要选择对应的存储协议、 存储中的聚合和权限、管理(LIF)和数据（LIF）等信息。
+登录平台，存储&amp;ndash;》SVM&amp;ndash;》创建&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;导出策略的设置，svm创建之后，点击svm设置&amp;ndash;》导出策略，在规则索引下添加客户端规范0.0.0.0/0，协议和权限。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;4-trident安装部署&#34;&gt;4. trident安装部署&lt;/h4&gt;
+&lt;p&gt;介质在链接中，包括所需要的镜像和trident安装包和想要的配置文件。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果多台机器情形，需要在每台机器上执行&lt;code&gt;docker load -i trident.tar&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;解压trident安装包，&lt;code&gt;tar -xf $BASE_FOLDER/trident-installer-19.07.0.tar.gz&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;进入trident-installer目录，执行trident安装指令：&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;检查是否安装成功&lt;code&gt;kubectl get pod -n trident&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;创建并验证第一个后端,注意backend.json填写正确的ontap参数，
+&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;验证后端是否生成：&lt;code&gt;./tridentctl -n trident get backend&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;创建storage class：&lt;code&gt;kubectl create -f sample-input/storage-class-basic.yaml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;5-kubesphere安装部署&#34;&gt;5. kubesphere安装部署&lt;/h4&gt;
+&lt;p&gt;参考官方部署文档为：https://github.com/kubesphere/ks-installer&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Kubesphere基于Velero做集群的迁移</title>
+      <link>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</link>
+      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
+      <description>&lt;p&gt;#Kubesphere基于Velero做集群的迁移
+使用Velero 快速完成云原生应用迁移至备份集群中。&lt;/p&gt;
+&lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
+&lt;p&gt;集群A（生产）：
+master：192.168.11.6、192.168.11.13、192.168.11.16
+lb：192.168.11.252
+node：192.168.11.22
+nfs：192.168.11.14
+集群B（容灾）：
+master：192.168.11.8、192.168.11.10、192.168.11.17
+lb：192.168.11.253
+node：192.168.11.18
+nfs：192.168.11.14&lt;/p&gt;
+&lt;h3 id=&#34;velero安装部署&#34;&gt;Velero安装部署&lt;/h3&gt;
+&lt;p&gt;集群A和集群B都需要安装velero，安装过程参考官方文档&lt;a href=&#34;https://velero.io/docs/v1.2.0/contributions/minio/&#34;&gt;velero安装&lt;/a&gt;,大致流程为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1、安装velero客户端安装包，A和B集群都需要。
+1.1、wget https://github.com/vmware-tanzu/velero/releases/download/v1.0.0/velero-v1.0.0-linux-amd64.tar.gz
+1.2、解压安装包，且将velero拷贝至/usr/local/bin目录下。
+2、安装velero服务端，A和B集群都需要。
+2.1、本地创建密钥文件，vi credentials-velero
+[default]
+aws_access_key_id = minio
+aws_secret_access_key = minio123
+2.2、集群B环境，运下载和运行00-minio-deployment.yaml文件，且需要将其中的ClusterIP改成NodePort，添加nodePort: 31860，集群A环境不需要执行这步。
+kubectl apply -f examples/minio/00-minio-deployment.yaml
+2.3、集群B环境，启动服务端,需要在密钥文件同级目录下执行：
+velero install \
+    --provider aws \
+    --bucket velero \
+    --secret-file ./credentials-velero \
+    --use-volume-snapshots=false \
+    --backup-location-config region=minio,s3ForcePathStyle=&amp;quot;true&amp;quot;,s3Url=http://minio.velero.svc:9000 \
+	--plugins velero/velero-plugin-for-aws:v1.0.0
+	
+2.4、集群A环境，启动服务端，注意：需要在集群A中获取velero的外部curl：
+2.4.1、集群A中，kubectl get svc -n velero,获取9000映射的端口，如：9000:31860，根据情况而定
+2.4.2、启动指令：
+velero install \
+    --provider aws \
+    --bucket velero \
+    --secret-file ./credentials-velero \
+    --use-volume-snapshots=false \
+    --backup-location-config region=minio,s3ForcePathStyle=&amp;quot;true&amp;quot;,s3Url=http://192.168.11.8:31860 \
+	--plugins velero/velero-plugin-for-aws:v1.0.0
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;集群a数据的备份及集群b恢复&#34;&gt;集群A数据的备份及集群B恢复&lt;/h3&gt;
+&lt;p&gt;具体备份指令，定时备份，参考官方文档&lt;a href=&#34;https://velero.io/docs/v1.2.0/contributions/minio/&#34;&gt;备份指令&lt;/a&gt;
+在集群A中模拟了带有持久化的有状态和无状态的应用，备份维度以namespace为基准，为test,将pv的模式改成retain形式。
+备份指令为：velero backup create test-backup &amp;ndash;include-namespaces test
+集群A所有的机器关机且在机器B恢复验证：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@master1 velero-v1.2.0-linux-amd64]# velero restore create --from-backup test-backup
+Restore request &amp;quot;test-backup-20191121141336&amp;quot; submitted successfully.
+Run `velero restore describe test-backup-20191121141336` or `velero restore logs test-backup-20191121141336` for more details.
+[root@master1 velero-v1.2.0-linux-amd64]# kubectl get ns
+NAME                           STATUS   AGE
+default                        Active   43h
+demo                           Active   42h
+kube-node-lease                Active   43h
+kube-public                    Active   43h
+kube-system                    Active   43h
+kubesphere-controls-system     Active   43h
+kubesphere-monitoring-system   Active   43h
+kubesphere-system              Active   43h
+openpitrix-system              Active   23h
+test                           Active   12s
+velero                         Active   24m
+[root@master1 velero-v1.2.0-linux-amd64]# kubectl get pod -n test
+NAME                             READY   STATUS    RESTARTS   AGE
+mysql-v1-0                       1/1     Running   0          22s
+tomcattest-v1-554c8875cd-26fz4   1/1     Running   0          22s
+tomcattest-v1-554c8875cd-cmm2z   1/1     Running   0          22s
+tomcattest-v1-554c8875cd-dc7mr   1/1     Running   0          22s
+tomcattest-v1-554c8875cd-fcgn4   1/1     Running   0          22s
+tomcattest-v1-554c8875cd-wqb4t   1/1     Running   0          22s
+wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+    <item>
+      <title>openebs基于k8s安装</title>
+      <link>https://Forest-L.github.io/post/k8s-openebs-install/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-openebs-install/</guid>
+      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
+&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
+&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
+&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
+&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;节点  &lt;/th&gt;
+&lt;th&gt;os  &lt;/th&gt;
+&lt;th&gt;IP   &lt;/th&gt;
+&lt;th&gt;磁盘&lt;/th&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph1&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.13&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph2&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.14&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph3&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.16&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph3  #节点3上执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13配置hosts&#34;&gt;1.3、配置hosts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt;&amp;gt; /etc/hosts &amp;lt;&amp;lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;14关闭防火墙&#34;&gt;1.4、关闭防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都要执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;systemctl disable --now firewalld
+setenforce 0
+sed -i &#39;s/^SELINUX=.*/SELINUX=disabled/&#39; /etc/selinux/config
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;15时间同步&#34;&gt;1.5、时间同步&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;16dockerlvm2和python3安装&#34;&gt;1.6、docker、lvm2和python3安装&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2cephadm安装ceph1&#34;&gt;2、cephadm安装(ceph1)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;官方下载方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git下载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;git clone --single-branch --branch octopus https://github.com/ceph/ceph.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cp ceph/src/cephadm/cephadm ./&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm安装(ceph1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceph指令生效&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cephadm shell&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph3&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3osd部署&#34;&gt;3、OSD部署&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm shell下执行&lt;/li&gt;
+&lt;li&gt;若块设备没显示，可加&amp;ndash;refresh参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&amp;lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看集群状态,ceph方式及运行容器方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-osd -…&amp;quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &amp;quot;/bin/prometheus --c…&amp;quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &amp;quot;/bin/alertmanager -…&amp;quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &amp;quot;/bin/sh -c &#39;grafana…&amp;quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &amp;quot;/bin/node_exporter …&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-crash…&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mgr -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>rook基于k8s安装</title>
+      <link>https://Forest-L.github.io/post/k8s-rook-install/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
+      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
+&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
+&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
+&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
+&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;节点  &lt;/th&gt;
+&lt;th&gt;os  &lt;/th&gt;
+&lt;th&gt;IP   &lt;/th&gt;
+&lt;th&gt;磁盘&lt;/th&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph1&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.13&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph2&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.14&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph3&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.16&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph3  #节点3上执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13配置hosts&#34;&gt;1.3、配置hosts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt;&amp;gt; /etc/hosts &amp;lt;&amp;lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;14关闭防火墙&#34;&gt;1.4、关闭防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都要执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;systemctl disable --now firewalld
+setenforce 0
+sed -i &#39;s/^SELINUX=.*/SELINUX=disabled/&#39; /etc/selinux/config
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;15时间同步&#34;&gt;1.5、时间同步&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;16dockerlvm2和python3安装&#34;&gt;1.6、docker、lvm2和python3安装&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2cephadm安装ceph1&#34;&gt;2、cephadm安装(ceph1)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;官方下载方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git下载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;git clone --single-branch --branch octopus https://github.com/ceph/ceph.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cp ceph/src/cephadm/cephadm ./&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm安装(ceph1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceph指令生效&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cephadm shell&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph3&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3osd部署&#34;&gt;3、OSD部署&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm shell下执行&lt;/li&gt;
+&lt;li&gt;若块设备没显示，可加&amp;ndash;refresh参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&amp;lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看集群状态,ceph方式及运行容器方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-osd -…&amp;quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &amp;quot;/bin/prometheus --c…&amp;quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &amp;quot;/bin/alertmanager -…&amp;quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &amp;quot;/bin/sh -c &#39;grafana…&amp;quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &amp;quot;/bin/node_exporter …&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-crash…&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mgr -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
       <title>基于cephadm安装ceph</title>
       <link>https://Forest-L.github.io/post/k8s-ceph-install/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
@@ -499,6 +1319,396 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>k8s-default-Storage-Class搭建</title>
+      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
+      <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
+      <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
+&lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;1-创建storageclass&#34;&gt;1. 创建storageClass&lt;/h2&gt;
+&lt;p&gt;要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
+nfs服务器参考博客&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs服务器搭建&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;11-nfs-client-provisioner&#34;&gt;1.1 nfs-client-provisioner&lt;/h3&gt;
+&lt;p&gt;前提：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kubernetes 1.9+&lt;/li&gt;
+&lt;li&gt;Existing NFS Share&lt;/li&gt;
+&lt;li&gt;helm&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;111-安装nfs-client-provisioner指令&#34;&gt;1.1.1 安装nfs-client-provisioner指令：&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;helm install --name nfs-client --set nfs.server=192.168.0.9 --set nfs.path=/nfsdatas stable/nfs-client-provisioner&lt;/code&gt;
+如果安装报错，显示没有该helm的stable，在机器上添加helm 源
+&lt;code&gt;helm repo add stable http://mirror.azure.cn/kubernetes/charts/&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;112-卸载指令&#34;&gt;1.1.2 卸载指令：&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;helm delete nfs-client&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&#34;113-验证storageclass是否存在&#34;&gt;1.1.3 验证storageClass是否存在&lt;/h4&gt;
+&lt;p&gt;在相应安装nfs-client-provisioner机器上执行：&lt;code&gt;kubectl get sc&lt;/code&gt;即可，如下所示：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@i-cj1r8a8m ~]# kubectl get sc
+NAME              PROVISIONER                                   AGE
+nfs-client    cluster.local/my-release-nfs-client-provisioner   1h
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2-defaultstorageclass&#34;&gt;2. DefaultStorageClass&lt;/h2&gt;
+&lt;p&gt;在定义StorageClass时，可以在Annotation中添加一个键值对：storageclass.kubernetes.io/is-default-class: true，那么此StorageClass就变成默认的StorageClass了。&lt;/p&gt;
+&lt;h3 id=&#34;21-第一种方法&#34;&gt;2.1 第一种方法&lt;/h3&gt;
+&lt;p&gt;在这个PVC对象中添加一个声明StorageClass对象的标识，这里我们可以利用一个annotations属性来标识，如下&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvctest
+  annotations:
+    volume.beta.kubernetes.io/storage-class: &amp;quot;nfs-client&amp;quot;
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Mi
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;22-第二种方法&#34;&gt;2.2 第二种方法&lt;/h3&gt;
+&lt;p&gt;用 kubectl patch 命令来更新：
+&lt;code&gt;kubectl patch storageclass nfs-client -p &#39;{&amp;quot;metadata&amp;quot;: {&amp;quot;annotations&amp;quot;:{&amp;quot;storageclass.kubernetes.io/is-default-class&amp;quot;:&amp;quot;true&amp;quot;}}}&#39;&lt;/code&gt;
+最后结果中包含default为：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[root@i-cj1r8a8m ~]# kubectl get sc
+NAME                 PROVISIONER                                   AGE
+nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+    <item>
+      <title>glusterfs安装</title>
+      <link>https://Forest-L.github.io/post/k8s-glusterfs-install/</link>
+      <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-glusterfs-install/</guid>
+      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
+&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
+&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
+&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
+&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;节点  &lt;/th&gt;
+&lt;th&gt;os  &lt;/th&gt;
+&lt;th&gt;IP   &lt;/th&gt;
+&lt;th&gt;磁盘&lt;/th&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph1&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.13&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph2&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.14&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph3&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.16&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph3  #节点3上执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13配置hosts&#34;&gt;1.3、配置hosts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt;&amp;gt; /etc/hosts &amp;lt;&amp;lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;14关闭防火墙&#34;&gt;1.4、关闭防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都要执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;systemctl disable --now firewalld
+setenforce 0
+sed -i &#39;s/^SELINUX=.*/SELINUX=disabled/&#39; /etc/selinux/config
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;15时间同步&#34;&gt;1.5、时间同步&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;16dockerlvm2和python3安装&#34;&gt;1.6、docker、lvm2和python3安装&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2cephadm安装ceph1&#34;&gt;2、cephadm安装(ceph1)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;官方下载方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git下载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;git clone --single-branch --branch octopus https://github.com/ceph/ceph.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cp ceph/src/cephadm/cephadm ./&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm安装(ceph1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceph指令生效&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cephadm shell&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph3&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3osd部署&#34;&gt;3、OSD部署&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm shell下执行&lt;/li&gt;
+&lt;li&gt;若块设备没显示，可加&amp;ndash;refresh参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&amp;lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看集群状态,ceph方式及运行容器方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-osd -…&amp;quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &amp;quot;/bin/prometheus --c…&amp;quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &amp;quot;/bin/alertmanager -…&amp;quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &amp;quot;/bin/sh -c &#39;grafana…&amp;quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &amp;quot;/bin/node_exporter …&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-crash…&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mgr -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Linux中nfs搭建</title>
+      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
+      <pubDate>Sat, 13 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
+      <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
+&lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
+&lt;p&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
+服务端：192.168.0.9，客户端：192.168.0.10&lt;/p&gt;
+&lt;h2 id=&#34;11服务端安装19216809&#34;&gt;1.1服务端安装（192.168.0.9）&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo apt install nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;12服务端配置&#34;&gt;1.2服务端配置&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+rpcbind服务的开机自启和启动：
+&lt;code&gt;sudo systemctl enable rpcbind;sudo systemctl restart rpcbind&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;nfs服务的开机自启和启动：
+&lt;code&gt;sudo systemctl enable nfs;sudo systemctl restart nfs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;13配置共享目录&#34;&gt;1.3配置共享目录&lt;/h2&gt;
+&lt;p&gt;目录为服务端目录，后续存储的数据在该目录下
+&lt;code&gt;sudo mkdir -p /nfsdatas&lt;/code&gt;
+&lt;code&gt;sudo chmod 755 /nfsdatas&lt;/code&gt;
+&lt;font color=#DC143C &gt;重要:&lt;/font&gt; 根据上面创建的目录，相应配置导出目录
+&lt;code&gt;sudo vi /etc/exports&lt;/code&gt;
+添加如下配置再保存，重启nfs服务即可：
+/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;/nfsdatas:共享目录位置。&lt;/li&gt;
+&lt;li&gt;192.168.0.0/24：客户端IP范围，*代表所有。&lt;/li&gt;
+&lt;li&gt;rw：权限设置，可读可写。&lt;/li&gt;
+&lt;li&gt;sync：同步共享目录。&lt;/li&gt;
+&lt;li&gt;no_root_squash: 可以使用root授权。&lt;/li&gt;
+&lt;li&gt;no_all_squash: 可以使用普通用户授权&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;systemctl restart nfs&lt;/code&gt;
+&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;21客户端安装192168010&#34;&gt;2.1客户端安装（192.168.0.10）&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo apt install nfs-common&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;22客户端开机自启和启动即可&#34;&gt;2.2客户端开机自启和启动即可&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable rpcbind&lt;/code&gt;
+&lt;code&gt;sudo systemctl start rpcbind&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable nfs-common;sudo systemctl restart nfs-common&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;23客户端验证及测试&#34;&gt;2.3客户端验证及测试&lt;/h2&gt;
+&lt;p&gt;检查服务端的共享目录：
+&lt;code&gt;showmount -e 192.168.0.9&lt;/code&gt;
+客户端创建目录
+&lt;code&gt;sudo mkdir -p /tmp/nfsdata&lt;/code&gt;
+挂载指令：
+&lt;code&gt;sudo mount -t nfs 192.168.0.9:/nfsdatas /tmp/nfsdata&lt;/code&gt;
+然后进入/tmp/nfsdata目录下，新建文件
+&lt;code&gt;sudo touch test&lt;/code&gt;
+之后在nfs服务端192.168.0.9的/nfsdatas目录查看是否有test文件
+卸载指令：不要在/tmp/nfsdata目录下执行卸载指令。
+&lt;code&gt;umount /tmp/nfsdata&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;cenots和ubuntu脚本部署&#34;&gt;cenots和ubuntu脚本部署&lt;/h2&gt;
+&lt;p&gt;下面内容添加：vi nfs-install.sh
+加权限和执行：chmod +x nfs-install.sh &amp;amp;&amp;amp; ./nfs-install.sh
+以下脚本安装的服务端目录为：/nfsdatas,如果需要修改的话，脚本内容需要修改。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#!/bin/bash
+
+function centostest(){
+    yum clean all;yum makecache
+    yum install nfs-utils -y
+    systemctl enable rpcbind;sudo systemctl restart rpcbind
+    systemctl enable nfs;sudo systemctl restart nfs
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
+    systemctl restart nfs
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str=&amp;quot;successsful!&amp;quot;
+        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
+    else
+        str=&amp;quot;failed!&amp;quot;
+        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+        exit
+    fi
+}
+
+function ubuntutest(){
+    apt-get update
+    sudo apt install nfs-kernel-server
+    sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
+    sudo systemctl restart nfs-kernel-server
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str=&amp;quot;successsful!&amp;quot;
+        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
+    else
+        str=&amp;quot;failed!&amp;quot;
+        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+        exit
+    fi
+}
+
+cat /etc/redhat-release
+
+if [[ $? -eq 0 ]]; then
+    str=&amp;quot;centos!&amp;quot;
+    echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;
+    centostest
+else
+    str=&amp;quot;ubuntu!&amp;quot;
+    echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+    ubuntutest
+fi
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>

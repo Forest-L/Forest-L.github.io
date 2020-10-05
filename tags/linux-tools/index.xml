@@ -296,267 +296,6 @@ curl -6g [2402:e7c0:0:a00:ffff:ffff:fffe:fffb]:32012
     </item>
     
     <item>
-      <title>k8s1.15安装</title>
-      <link>https://Forest-L.github.io/post/k8s1-15-install/</link>
-      <pubDate>Mon, 04 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/k8s1-15-install/</guid>
-      <description>&lt;h1 id=&#34;使用kubeadm安装k8s-115版本&#34;&gt;使用kubeadm安装k8s 1.15版本&lt;/h1&gt;
-&lt;p&gt;k8s 1.15版本中，kubeadm对HA集群的配置已经达到了beta可用，这一版本更新主要是针对稳定性的持续改善和可扩展性。其中用到的镜像和rpm包在百度云上，链接如下。
-&lt;a href=&#34;https://pan.baidu.com/s/1LoKvv86Fs5ilZ-TYQdN35A&#34;&gt;https://pan.baidu.com/s/1LoKvv86Fs5ilZ-TYQdN35A&lt;/a&gt;
-cos3&lt;/p&gt;
-&lt;h2 id=&#34;1准备&#34;&gt;1.准备&lt;/h2&gt;
-&lt;h3 id=&#34;11系统准备&#34;&gt;1.1系统准备&lt;/h3&gt;
-&lt;p&gt;需要将主机ip和主机名放在每台机器的&lt;code&gt;vi /etc/hosts&lt;/code&gt;下
-&lt;code&gt;192.168.11.21 i-fahx5c7k&lt;/code&gt;
-&lt;code&gt;192.168.11.22 i-ouaaujhz&lt;/code&gt;
-如果各个主机启用了防火墙，需要开启各个组件所需要的端口，可以查看https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
-这里各个节点禁用防火墙
-&lt;code&gt;systemctl stop firewalld&lt;/code&gt;
-&lt;code&gt;systemctl disable firewalld&lt;/code&gt;
-禁用selinux
-&lt;code&gt;setenforce 0&lt;/code&gt;
-vi /etc/selinux/config
-SELINUX=disabled
-创建vi /etc/sysctl.d/k8s.conf文件，添加如下内容：
-&lt;code&gt;net.bridge.bridge-nf-call-ip6tables = 1&lt;/code&gt;
-&lt;code&gt;net.bridge.bridge-nf-call-iptables = 1&lt;/code&gt;
-&lt;code&gt;net.ipv4.ip_forward = 1&lt;/code&gt;
-执行命令使修改生效
-&lt;code&gt;modprobe br_netfilter&lt;/code&gt;
-&lt;code&gt;sysctl -p /etc/sysctl.d/k8s.conf&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id=&#34;12-kube-proxy开启ipvs的前置条件&#34;&gt;1.2 kube-proxy开启ipvs的前置条件&lt;/h3&gt;
-&lt;p&gt;在所有的节点上执行如下脚本：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;cat &amp;gt; /etc/sysconfig/modules/ipvs.modules &amp;lt;&amp;lt;EOF
-#!/bin/bash
-modprobe -- ip_vs
-modprobe -- ip_vs_rr
-modprobe -- ip_vs_wrr
-modprobe -- ip_vs_sh
-modprobe -- nf_conntrack_ipv4
-EOF
-chmod 755 /etc/sysconfig/modules/ipvs.modules &amp;amp;&amp;amp; bash /etc/sysconfig/modules/ipvs.modules &amp;amp;&amp;amp; lsmod | grep -e ip_vs -e nf_conntrack_ipv4
-
-各个节点需要安装 ipset ipvsadm
-yum install ipset ipvsadm -y
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;13-docker安装&#34;&gt;1.3 docker安装&lt;/h3&gt;
-&lt;p&gt;安装docker的yum源,国内寻找清华源
-&lt;code&gt;yum install wget -y&lt;/code&gt;
-&lt;code&gt;yum install -y yum-utils device-mapper-persistent-data lvm2&lt;/code&gt;
-&lt;code&gt;wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo&lt;/code&gt;
-&lt;code&gt;sed -i &#39;s+download.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+&#39; /etc/yum.repos.d/docker-ce.repo&lt;/code&gt;
-&lt;code&gt;yum makecache fast&lt;/code&gt;
-&lt;code&gt;yum install docker-ce -y&lt;/code&gt;
-重启docker：&lt;code&gt;systemctl enable docker;systemctl restart docker&lt;/code&gt;
-修改docker cgroup driver为systemd
-创建或修改&lt;code&gt;vi /etc/docker/daemon.json&lt;/code&gt;：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;{
-  &amp;quot;exec-opts&amp;quot;: [&amp;quot;native.cgroupdriver=systemd&amp;quot;]
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;重启docker:&lt;code&gt;systemctl restart docker&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;2-使用kubeadm部署kubernetes&#34;&gt;2. 使用kubeadm部署kubernetes&lt;/h2&gt;
-&lt;h3 id=&#34;21-安装kubeadm和kubelet&#34;&gt;2.1 安装kubeadm和kubelet&lt;/h3&gt;
-&lt;p&gt;下面在各节点安装kubeadm和kubelet和kubectl，请在百度云上面下载rpm包，在rmp目录下执行如下指令：
-&lt;code&gt;yum install -y cri-tools-1.13.0-0.x86_64.rpm kubernetes-cni-0.7.5-0.x86_64.rpm kubelet-1.15.1-0.x86_64.rpm kubectl-1.15.1-0.x86_64.rpm kubeadm-1.15.1-0.x86_64.rpm &lt;/code&gt;
-k8s 1.8开始要求关闭系统的swap,不关闭，kubelet将无法启动，执行指令方法：
-&lt;code&gt;swapoff -a&lt;/code&gt;
-修改 /etc/fstab 文件，注释掉 SWAP 的自动挂载，使用free -m确认swap已经关闭。 swappiness参数调整，修改&lt;code&gt;vi /etc/sysctl.d/k8s.conf&lt;/code&gt;添加下面一行：
-&lt;code&gt;vm.swappiness=0&lt;/code&gt;
-执行&lt;code&gt;sysctl -p /etc/sysctl.d/k8s.conf&lt;/code&gt;使修改生效。
-因为这里本次测试主机上还运行其他服务，关闭swap可能会对其他服务产生影响，所以这里修改kubelet的配置去掉这个限制。
-修改&lt;code&gt;vi /etc/sysconfig/kubelet&lt;/code&gt;，加入：&lt;code&gt;KUBELET_EXTRA_ARGS=--fail-swap-on=false&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id=&#34;22-使用kubeadm-init初始化集群&#34;&gt;2.2 使用kubeadm init初始化集群&lt;/h3&gt;
-&lt;p&gt;在各节点开机启动kubelet服务：&lt;code&gt;systemctl enable kubelet&lt;/code&gt;
-使用&lt;code&gt;kubeadm config print init-defaults&lt;/code&gt;可以打印集群初始化默认的使用的配置:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: kubeadm.k8s.io/v1beta2
-bootstrapTokens:
-- groups:
-  - system:bootstrappers:kubeadm:default-node-token
-  token: abcdef.0123456789abcdef
-  ttl: 24h0m0s
-  usages:
-  - signing
-  - authentication
-kind: InitConfiguration
-localAPIEndpoint:
-  advertiseAddress: 1.2.3.4
-  bindPort: 6443
-nodeRegistration:
-  criSocket: /var/run/dockershim.sock
-  name: node1
-  taints:
-  - effect: NoSchedule
-    key: node-role.kubernetes.io/master
----
-apiServer:
-  timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io/v1beta2
-certificatesDir: /etc/kubernetes/pki
-clusterName: kubernetes
-controllerManager: {}
-dns:
-  type: CoreDNS
-etcd:
-  local:
-    dataDir: /var/lib/etcd
-imageRepository: k8s.gcr.io
-kind: ClusterConfiguration
-kubernetesVersion: v1.14.0
-networking:
-  dnsDomain: cluster.local
-  serviceSubnet: 10.96.0.0/12
-scheduler: {}
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;从默认的配置中可以看到，可以使用imageRepository定制在集群初始化时拉取k8s所需镜像的地址。advertiseAddress的ip替换本机，基于默认配置定制出本次使用kubeadm初始化集群所需的配置文件且在11.21机器上&lt;code&gt;vi kubeadm.yaml&lt;/code&gt;：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: kubeadm.k8s.io/v1beta2
-kind: InitConfiguration
-localAPIEndpoint:
-  advertiseAddress: 192.168.11.21
-  bindPort: 6443
-nodeRegistration:
-  taints:
-  - effect: PreferNoSchedule
-    key: node-role.kubernetes.io/master
----
-apiVersion: kubeadm.k8s.io/v1beta2
-kind: ClusterConfiguration
-kubernetesVersion: v1.15.0
-networking:
-  podSubnet: 10.244.0.0/16
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;font color=#DC143C &gt;说 明 : &lt;/font&gt;
-使用kubeadm默认配置初始化的集群，会在master节点打上node-role.kubernetes.io/master:NoSchedule的污点，阻止master节点接受调度运行工作负载。这里测试环境只有两个节点，所以将这个taint修改为node-role.kubernetes.io/master:PreferNoSchedule。&lt;/p&gt;
-&lt;p&gt;在开始初始化集群之前，需要从百度云上面下载tar包镜像下来，tar通过scp分别传到各个节点执行docker load -i解压，
-镜像列表:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;k8s.gcr.io/kube-proxy                v1.15.0             d235b23c3570        5 weeks ago         82.4MB
-k8s.gcr.io/kube-apiserver            v1.15.0             201c7a840312        5 weeks ago         207MB
-k8s.gcr.io/kube-scheduler            v1.15.0             2d3813851e87        5 weeks ago         81.1MB
-k8s.gcr.io/kube-controller-manager   v1.15.0             8328bb49b652        5 weeks ago         159MB
-gcr.io/kubernetes-helm/tiller        v2.14.1             ac22eb1f780e        7 weeks ago         94.2MB
-quay.io/coreos/flannel               v0.11.0-amd64       ff281650a721        6 months ago        52.6MB
-k8s.gcr.io/coredns                   1.3.1               eb516548c180        6 months ago        40.3MB
-k8s.gcr.io/etcd                      3.3.10              2c4adeb21b4f        8 months ago        258MB
-k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        19 months ago       742kB
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;接下来使用kubeadm初始化集群，选择node1作为Master Node，在node1上执行下面的命令：&lt;code&gt;kubeadm init --config kubeadm.yaml --ignore-preflight-errors=Swap&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;kubeadm join 192.168.11.21:6443 --token k6s0kn.nyao1ulwwmlm2org \ --discovery-token-ca-cert-hash sha256:b721d25356668f921c90bf5f554836cb346b827a62b78797d0bcbcba24214725 &lt;/code&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;其中关键步骤：
-* [kubelet-start] 生成kubelet的配置文件”/var/lib/kubelet/config.yaml”
-* [certs]生成相关的各种证书
-* [kubeconfig]生成相关的kubeconfig文件
-* [control-plane]使用/etc/kubernetes/manifests目录中的yaml文件创建apiserver、controller-manager、scheduler的静态pod
-* [bootstraptoken]生成token记录下来，后边使用kubeadm join往集群中添加节点时会用到
-* 下面的命令是配置常规用户如何使用kubectl访问集群：
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-* 最后给出了将节点加入集群的命令kubeadm join 192.168.99.11:6443 –token 4qcl2f.gtl3h8e5kjltuo0r \ –discovery-token-ca-cert-hash sha256:7ed5404175cc0bf18dbfe53f19d4a35b1e3d40c19b10924275868ebf2a3bbe6e
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;需要在11.21机器上执行：
-&lt;code&gt;mkdir -p $HOME/.kube&lt;/code&gt;
-&lt;code&gt;sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config&lt;/code&gt;
-&lt;code&gt;sudo chown $(id -u):$(id -g) $HOME/.kube/config&lt;/code&gt;
-查看集群状态，确认组件都处于healthy状态：
-&lt;code&gt;kubectl get cs&lt;/code&gt;
-集群初始化如果遇到问题，可以使用下面的命令进行清理：
-&lt;code&gt;kubeadm reset&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id=&#34;23-安装pod-network&#34;&gt;2.3 安装Pod Network&lt;/h3&gt;
-&lt;p&gt;接下来安装flannel network add-on：
-&lt;code&gt;mkdir -p ~/k8s/&lt;/code&gt;
-&lt;code&gt;cd ~/k8s&lt;/code&gt;
-&lt;code&gt;curl -O https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml&lt;/code&gt;
-&lt;code&gt;kubectl apply -f  kube-flannel.yml&lt;/code&gt;
-这里注意kube-flannel.yml这个文件里的flannel的镜像是0.11.0，quay.io/coreos/flannel:v0.11.0-amd64
-如果Node有多个网卡的话，参考https://github.com/kubernetes/kubernetes/issues/39701，
-目前需要在kube-flannel.yml中使用–iface参数指定集群主机内网网卡的名称，否则可能会出现dns无法解析。需要将kube-flannel.yml下载到本地，flanneld启动参数加上–iface=&lt;iface-name&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;containers:
-      - name: kube-flannel
-        image: quay.io/coreos/flannel:v0.11.0-amd64
-        command:
-        - /opt/bin/flanneld
-        args:
-        - --ip-masq
-        - --kube-subnet-mgr
-        - --iface=eth1
-......
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;使用&lt;code&gt;kubectl get pod –-all-namespaces -o wide&lt;/code&gt;确保所有的Pod都处于Running状态。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;kube-flannel.yml
-[root@i-fahx5c7k k8s]# kubectl get pod --all-namespaces -o wide
-NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE     IP              NODE         NOMINATED NODE   READINESS GATES
-kube-system   coredns-5c98db65d4-nbb4w             1/1     Running   0          6m29s   10.244.0.2      i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   coredns-5c98db65d4-wtm58             1/1     Running   0          6m29s   10.244.0.3      i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   etcd-i-fahx5c7k                      1/1     Running   0          5m26s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   kube-apiserver-i-fahx5c7k            1/1     Running   0          5m37s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   kube-controller-manager-i-fahx5c7k   1/1     Running   0          5m45s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   kube-flannel-ds-amd64-bqswg          1/1     Running   0          58s     192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   kube-proxy-zhzxj                     1/1     Running   0          6m29s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-kube-system   kube-scheduler-i-fahx5c7k            1/1     Running   0          5m20s   192.168.11.21   i-fahx5c7k   &amp;lt;none&amp;gt;           &amp;lt;none&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;24-测试集群dns是否可用&#34;&gt;2.4 测试集群DNS是否可用&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;kubectl run curl --image=radial/busyboxplus:curl -it&lt;/code&gt;
-进入后执行&lt;code&gt;nslookup kubernetes.default&lt;/code&gt;确认解析正常:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[ root@curl-6bf6db5c4f-f8jjn:/ ]$ nslookup kubernetes.default
-Server:    10.96.0.10
-Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
-
-Name:      kubernetes.default
-Address 1: 10.96.0.1 kubernetes.default.svc.cluster.local
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;25-向kubernetes集群中添加node节点&#34;&gt;2.5 向Kubernetes集群中添加Node节点&lt;/h3&gt;
-&lt;p&gt;在master上查看添加节点指令：&lt;code&gt;kubeadm token create --print-join-command&lt;/code&gt;
-下面将11.22这个主机添加到Kubernetes集群中，在11.22机器上执行:
-&lt;code&gt;kubeadm join 192.168.11.21:6443 --token k6s0kn.nyao1ulwwmlm2org \ --discovery-token-ca-cert-hash sha256:b721d25356668f921c90bf5f554836cb346b827a62b78797d0bcbcba24214725&lt;/code&gt;
-11.22加入集群很是顺利，下面在master节点上执行命令查看集群中的节点：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@i-fahx5c7k k8s]# kubectl get nodes
-NAME         STATUS   ROLES    AGE   VERSION
-i-fahx5c7k   Ready    master   13m   v1.15.1
-i-ouaaujhz   Ready    &amp;lt;none&amp;gt;   50s   v1.15.1
-&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;251-如何从集群中移除node&#34;&gt;2.5.1 如何从集群中移除Node&lt;/h4&gt;
-&lt;p&gt;如果需要从集群中移除11.22这个Node执行下面的命令：
-在master节点上执行：
-&lt;code&gt;kubectl drain i-ouaaujhz --delete-local-data --force --ignore-daemonsets&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;kubectl delete node i-ouaaujhz&lt;/code&gt;
-在11.22上执行：
-&lt;code&gt;kubeadm reset&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id=&#34;kube-proxy开启ipvs&#34;&gt;kube-proxy开启ipvs&lt;/h3&gt;
-&lt;p&gt;修改ConfigMap的kube-system/kube-proxy中的config.conf，mode: “ipvs”
-&lt;code&gt;kubectl edit cm kube-proxy -n kube-system&lt;/code&gt;
-之后重启各个节点上的kube-proxy pod：
-&lt;code&gt;kubectl get pod -n kube-system | grep kube-proxy | awk &#39;{system(&amp;quot;kubectl delete pod &amp;quot;$1&amp;quot; -n kube-system&amp;quot;)}&#39;&lt;/code&gt;
-日志查看：&lt;code&gt;kubectl logs kube-proxy-62ntf  -n kube-system&lt;/code&gt;出现ipvs即开启。&lt;/p&gt;
-&lt;h2 id=&#34;3kubernetes常用组件部署&#34;&gt;3.Kubernetes常用组件部署&lt;/h2&gt;
-&lt;p&gt;使用Helm这个Kubernetes的包管理器，这里也将使用Helm安装Kubernetes的常用组件。&lt;/p&gt;
-&lt;h3 id=&#34;31-helm的安装&#34;&gt;3.1 Helm的安装&lt;/h3&gt;
-&lt;p&gt;Helm由客户端命helm令行工具和服务端tiller组成，Helm的安装十分简单。 下载helm命令行工具到master节点node1的/usr/local/bin下，这里下载的2.14.1版本：&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;curl -O https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz&lt;/code&gt;
-&lt;code&gt;tar -zxvf helm-v2.14.1-linux-amd64.tar.gz&lt;/code&gt;
-&lt;code&gt;cd linux-amd64/&lt;/code&gt;
-&lt;code&gt;cp helm /usr/local/bin/&lt;/code&gt;
-为了安装服务端tiller，还需要在这台机器上配置好kubectl工具和kubeconfig文件，确保kubectl工具可以在这台机器上访问apiserver且正常使用。 这里的11.21节点已经配置好了kubectl。
-因为Kubernetes APIServer开启了RBAC访问控制，所以需要创建tiller使用的service account: tiller并分配合适的角色给它。这里简单起见直接分配cluster-admin这个集群内置的ClusterRole给它。创建&lt;code&gt;vi helm-rbac.yaml&lt;/code&gt;文件：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tiller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: tiller
-    namespace: kube-system
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;kubectl create -f helm-rbac.yaml&lt;/code&gt;
-接下来使用helm部署tiller:
-&lt;code&gt;helm init --service-account tiller --skip-refresh&lt;/code&gt;
-tiller默认被部署在k8s集群中的kube-system这个namespace下：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@i-fahx5c7k centosrepo]# kubectl get pod -n kube-system -l app=helm
-NAME                             READY   STATUS    RESTARTS   AGE
-tiller-deploy-7bf78cdbf7-46bv5   1/1     Running   0          22s
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;helm version&lt;/code&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
       <title>centos、ubuntu和pip离线依赖包的制作和使用方法</title>
       <link>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
@@ -1075,648 +814,6 @@ sonobuoy项目的安装方法
 &lt;/ul&gt;
 &lt;h2 id=&#34;6-参考文章&#34;&gt;6. 参考文章&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/cncf/k8s-conformance/blob/master/instructions.md&#34;&gt;https://github.com/cncf/k8s-conformance/blob/master/instructions.md&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>kubesphere2-1-HA环境，一个master或者两个master宕机恢复</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</guid>
-      <description>&lt;h1 id=&#34;kubesphere21-ha环境一个master或者两个master宕机恢复&#34;&gt;kubesphere2.1-HA环境，一个master或者两个master宕机恢复&lt;/h1&gt;
-&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而很多事情都有意外，当其中一个master或者两个master卡住了，或者重启都不能自动恢复的情况下，那么怎么恢复呢，以下分一个master宕机和两个master宕机的恢复方法。&lt;/p&gt;
-&lt;h3 id=&#34;验证环境信息&#34;&gt;验证环境信息&lt;/h3&gt;
-&lt;pre&gt;&lt;code&gt;os: centos7.5
-master1: 192.168.11.6
-master2: 192.168.11.8
-master3: 192.168.11.13
-node1: 192.168.11.14
-lb: 192.168.11.253
-nfs服务端: 192.168.11.14
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master宕机的模拟及恢复方法&#34;&gt;一个master宕机的模拟及恢复方法&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;正常的环境：nodes都running，etcd服务都正常。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;kubectl get nodes
-NAME      STATUS   ROLES    AGE   VERSION
-master1   Ready    master   19m   v1.15.5
-master2   Ready    master   16m   v1.15.5
-master3   Ready    master   16m   v1.15.5
-node1     Ready    worker   14m   v1.15.5
-
-export ETCDCTL_API=3
-
-etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-192.168.11.6:2379, b3487da7c562b17, 3.2.18, 3.8 MB, true, 5, 4434
-192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 3.8 MB, false, 5, 4434
-192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 3.8 MB, false, 5, 4434
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;一个master宕机情况，把master2重置，看nodes和etcd情况。还需在界面创建一些带有存储的pod用例。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;kubectl get nodes   
-NAME      STATUS     ROLES    AGE   VERSION
-master1   Ready      master   57m   v1.15.5
-master2   NotReady   master   55m   v1.15.5
-master3   Ready      master   55m   v1.15.5
-node1     Ready      worker   52m   v1.15.5
-
-etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
-192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 5, 14953
-192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 5, 14972
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;恢复方法：修改脚本中hosts.ini文件，需要注意顺序
-在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面,然后在另一个终端机器上重新执行安装脚本。以下恢复情况，etcd正常，nodes也正常，业务数据存在且业务pod没有中断正常使用。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;kubectl get nodes
-NAME      STATUS     ROLES    AGE   VERSION
-master1   Ready      master   83m   v1.15.5
-master2   Ready      master   80m   v1.15.5
-master3   Ready      master   80m   v1.15.5
-node1     Ready      worker   78m   v1.15.5
-
-etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, true, 11, 20292
-192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 11 MB, false, 11, 20297
-192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 11 MB, false, 11, 20298
-
-docker ps | grep tomcat
-6863620b07cf        882487b8be1d                                     &amp;quot;catalina.sh run&amp;quot;        17 minutes ago       Up 17 minutes                           k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;两个master宕机的模拟及恢复方法&#34;&gt;两个master宕机的模拟及恢复方法&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;两个master宕机情况，把master2和master3重置，看nodes和etcd情况，nodes不正常，etcd两个不正常。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;kubectl get nodes
-Unable to connect to the server: EOF
-[root@master1 ~]# 
-[root@master1 ~]# 
-[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-Failed to get the status of endpoint 192.168.11.8:2379 (context deadline exceeded)
-Failed to get the status of endpoint 192.168.11.13:2379 (context deadline exceeded)
-192.168.11.6:2379, b3487da7c562b17, 3.2.18, 11 MB, false, 12, 27944
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;恢复方法：
-1、同样需要在host.ini文件修改master的顺序，由于我们重置2和3，所有此处不用修改顺序；
-2、在已解压的安装介质目录下，进入k8s/roles/kubernetes/preinstall/tasks/main.yml文件，用#注释如下内容，重跑安装脚本，作用说明：在重置的master2和master3机器上安装docker和etcd，但整个集群还需修复。。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;#- import_tasks: 0020-verify-settings.yml
-#  when:
-#    - not dns_late
-#  tags:
-#    - asserts
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、在master2机器上，临时修复master2节点的etcd服务，执行如下指令：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;停止etcd：systemctl stop etcd
-备份etcd数据：mv /var/lib/etcd /var/lib/etcd-bak
-从master1的/var/backups/kube_etcd/备份目录下拷贝最近时间的snapshot.db至master2机器上
-在master2先转为版本3指令令：export ETCDCTL_API=3
-在master2恢复指令：etcdctl snapshot restore /root/snapshot.db    --endpoints=192.168.11.8:2379    --cert=/etc/ssl/etcd/ssl/node-master2.pem    --key=/etc/ssl/etcd/ssl/node-master2-key.pem    --cacert=/etc/ssl/etcd/ssl/ca.pem --data-dir=/var/lib/etcd
-重启etcd: systemctl restart etcd
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;4、修改host.ini文件master2和master3顺序，把[all][kube-master][etcd]三个组的master3放在最后面，再次跑安装脚本。其中的host.ini文件为&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[all]
-master1 ansible_connection=local  ip=192.168.11.6
-master2  ansible_host=192.168.11.8  ip=192.168.11.8  ansible_ssh_pass=
-master3  ansible_host=192.168.11.13  ip=192.168.11.13  ansible_ssh_pass=
-node1    ansible_host=192.168.11.14  ip=192.168.11.14  ansible_ssh_pass=
-
-[kube-master]
-master1
-master2
-master3
-
-[kube-node]
-node1
-
-[etcd]
-master1
-master2
-master3
-
-[k8s-cluster:children]
-kube-node
-kube-master 
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;5、由第四步只是临时修复master2的etcd，并不完全修复，先全部修复作如下处理：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;第四步执行过程中，z在“wait for etcd up”会报错，先ctrl +c 终止脚本；
-在master2机器上，停止etcd服务：systemctl stop etcd
-在master2机器上，删除etcd数据：rm -rf /var/lib/etcd
-再次修改host.ini文件，master2和master3顺序，把[all][kube-master][etcd]三个组的master2放在最后面，再次跑安装脚本即可。
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;验证结果&#34;&gt;验证结果&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;集群中的nodes、etcd和带有存储数据的业务pod情况：&lt;/li&gt;
-&lt;li&gt;集群中的nodes、etcd和带有存储数据的业务pod情况,nodes恢复正常，etcd服务也回复正常，带有存储的pod一直运行，集群恢复成功：&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;[root@master1 ~]# kubectl get nodes
-NAME      STATUS   ROLES    AGE     VERSION
-master1   Ready    master   4h56m   v1.15.5
-master2   Ready    master   4h53m   v1.15.5
-master3   Ready    master   4h53m   v1.15.5
-node1     Ready    worker   4h51m   v1.15.5
-[root@master1 ~]# 
-[root@master1 ~]# 
-[root@master1 ~]# 
-[root@master1 ~]# etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-192.168.11.6:2379, b3487da7c562b17, 3.2.18, 12 MB, false, 1372, 32116
-192.168.11.8:2379, 3d04d74d80b7f07b, 3.2.18, 12 MB, true, 1372, 32116
-192.168.11.13:2379, 3ad323c042cc4c05, 3.2.18, 12 MB, false, 1372, 32116
-
-docker ps | grep tomcat
-6863620b07cf        882487b8be1d                                     &amp;quot;catalina.sh run&amp;quot;        4 hours ago         Up 4 hours                              k8s_tomcat-2jl160_tomcat-v1-6c7745494-k64w5_demo_5b406841-df9b-4d5c-b018-998c400a2c3e_1
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</guid>
-      <description>&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而在生产环境中，为了业务更正常运行，当以下两种情形发生时，告诉大家怎么恢复。第一种情形是：其中某台master机器的etcd服务不能正常提供服务，而需要在另外一台机器上部署一个etcd服务加入到现etcd集群中；第二种情形是：其中某台master宕机，需要在另外一台机器上部署master，并加入到现master集群中。&lt;/p&gt;
-&lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
-&lt;pre&gt;&lt;code&gt;os: centos7.5
-master1: 192.168.11.6
-master2: 192.168.11.16
-master3: 192.168.11.13
-node1: 192.168.11.14
-lb: 192.168.11.253
-nfs服务端: 192.168.11.14
-新加机器master2: 192.168.11.8
-安装介质机器：192.168.11.6
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master宕机在另外一台服务器上恢复方法&#34;&gt;一个master宕机，在另外一台服务器上恢复方法&lt;/h2&gt;
-&lt;p&gt;假设为master2（192.168.11.16）宕机了，现以新机器192.168.11.8作为恢复master2的机器。以下操作都在master1机器上执行。
-1、在安装介质机器即master1机器上面，进入/etc/ssl/etcd/ssl目录下，将含有master2相关联的文件证书删掉（那个master有问题就出来那个）。
-&lt;code&gt;rm -rf admin-master2-key.pem admin-master2.pem member-master2-key.pem member-master2.pem node-master2-key.pem node-master2.pem&lt;/code&gt;
-2、将etcd集群中master2的节点移除。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;第一步先转为etcd3版本：export ETCDCTL_API=3
-查看etcd集群的成员：
-etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
-b3487da7c562b17, started, etcd1, https://192.168.11.6:2380, https://192.168.11.6:2379
-3ad323c042cc4c05, started, etcd2, https://192.168.11.13:2380, https://192.168.11.13:2379
-52a4779150442b41, started, etcd3, https://192.168.11.16:2380, https://192.168.11.16:2379
-第三步：移除master2节点，如192.168.11.16
-etcdctl member remove 52a4779150442b41 --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem  --key=/etc/ssl/etcd/ssl/node-master1-key.pem
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、新打开master1机器窗口进入解压包目录下修改conf/hosts.ini,一定要新打开窗口（由于上一步操作使master1机器为etcd3版本指令）。
-master2的IP由原来的192.168.11.16改成192.168.11.8；在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面,然后执行安装脚本即可。
-4、验证结果：
-用&lt;code&gt;kubectl get nodes -o wide&lt;/code&gt;指令看master2IP是否替换；
-看etcd集群中是否包含新的master2IP，指令为：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;1、开启etcd3版本：export ETCDCTL_API=3
-2、etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem --endpoints=192.168.11.6:2379,192.168.11.8:2379,192.168.11.13:2379 endpoint status
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;一个master中etcd服务不正常在另外一台服务器上恢复etcd方法&#34;&gt;一个master中etcd服务不正常，在另外一台服务器上恢复etcd方法&lt;/h2&gt;
-&lt;p&gt;假设为master2（192.168.11.16）宕机了，现以新机器192.168.11.8作为恢复master2的机器。以下操作都在master1机器上执行。
-1、在安装介质机器即master1机器上面，进入/etc/ssl/etcd/ssl目录下，将含有master2相关联的文件证书删掉（那个master有问题就出来那个）。
-&lt;code&gt;rm -rf admin-master2-key.pem admin-master2.pem member-master2-key.pem member-master2.pem node-master2-key.pem node-master2.pem&lt;/code&gt;
-2、将etcd集群中master2的节点移除。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;第一步先转为etcd3版本：export ETCDCTL_API=3
-查看etcd集群的成员：
-etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
-b3487da7c562b17, started, etcd1, https://192.168.11.6:2380, https://192.168.11.6:2379
-3ad323c042cc4c05, started, etcd2, https://192.168.11.13:2380, https://192.168.11.13:2379
-52a4779150442b41, started, etcd3, https://192.168.11.16:2380, https://192.168.11.16:2379
-第三步：移除master2节点，如192.168.11.16
-etcdctl member remove 52a4779150442b41 --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem  --key=/etc/ssl/etcd/ssl/node-master1-key.pem
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3、新打开master1机器窗口进入解压包目录下修改conf/hosts.ini,一定要新打开窗口（由于上一步操作使master1机器为etcd3版本指令）。
-master2的IP由原来的192.168.11.16改成192.168.11.8；在[all]组里面，master2行整体放在master3下面，[kube-master]和[etcd]组中master2放在master3下面。
-4、进入解压包，scripts目录下，编辑install.sh脚本，用#将如下内容注释掉：
-&lt;code&gt;ansible-playbook -i $BASE_FOLDER/../k8s/inventory/my_cluster/hosts.ini $BASE_FOLDER/../kubesphere/kubesphere.yml -b&lt;/code&gt;
-5、进入解压包，k8s目录下，编辑cluster.yml文件，用#将以下开头的内容至结尾都注释掉&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;- hosts: k8s-cluster
-  any_errors_fatal: &amp;quot;{{ any_errors_fatal | default(true) }}&amp;quot;
-  roles:
-    - { role: kubespray-defaults}
-    - { role: kubernetes/node, tags: node }
-  environment: &amp;quot;{{ proxy_env }}&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;6、重新到脚本目录，执行install.sh脚本即可。
-7、验证结果：
-看etcd集群中是否包含新的master2IP，指令为：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;1、开启etcd3版本：export ETCDCTL_API=3
-2、etcdctl --cacert=/etc/ssl/etcd/ssl/ca.pem --cert=/etc/ssl/etcd/ssl/node-master1.pem --key=/etc/ssl/etcd/ssl/node-master1-key.pem member list
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>Kubesphere基于Velero做集群的迁移</title>
-      <link>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
-      <description>&lt;p&gt;#Kubesphere基于Velero做集群的迁移
-使用Velero 快速完成云原生应用迁移至备份集群中。&lt;/p&gt;
-&lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
-&lt;p&gt;集群A（生产）：
-master：192.168.11.6、192.168.11.13、192.168.11.16
-lb：192.168.11.252
-node：192.168.11.22
-nfs：192.168.11.14
-集群B（容灾）：
-master：192.168.11.8、192.168.11.10、192.168.11.17
-lb：192.168.11.253
-node：192.168.11.18
-nfs：192.168.11.14&lt;/p&gt;
-&lt;h3 id=&#34;velero安装部署&#34;&gt;Velero安装部署&lt;/h3&gt;
-&lt;p&gt;集群A和集群B都需要安装velero，安装过程参考官方文档&lt;a href=&#34;https://velero.io/docs/v1.2.0/contributions/minio/&#34;&gt;velero安装&lt;/a&gt;,大致流程为：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;1、安装velero客户端安装包，A和B集群都需要。
-1.1、wget https://github.com/vmware-tanzu/velero/releases/download/v1.0.0/velero-v1.0.0-linux-amd64.tar.gz
-1.2、解压安装包，且将velero拷贝至/usr/local/bin目录下。
-2、安装velero服务端，A和B集群都需要。
-2.1、本地创建密钥文件，vi credentials-velero
-[default]
-aws_access_key_id = minio
-aws_secret_access_key = minio123
-2.2、集群B环境，运下载和运行00-minio-deployment.yaml文件，且需要将其中的ClusterIP改成NodePort，添加nodePort: 31860，集群A环境不需要执行这步。
-kubectl apply -f examples/minio/00-minio-deployment.yaml
-2.3、集群B环境，启动服务端,需要在密钥文件同级目录下执行：
-velero install \
-    --provider aws \
-    --bucket velero \
-    --secret-file ./credentials-velero \
-    --use-volume-snapshots=false \
-    --backup-location-config region=minio,s3ForcePathStyle=&amp;quot;true&amp;quot;,s3Url=http://minio.velero.svc:9000 \
-	--plugins velero/velero-plugin-for-aws:v1.0.0
-	
-2.4、集群A环境，启动服务端，注意：需要在集群A中获取velero的外部curl：
-2.4.1、集群A中，kubectl get svc -n velero,获取9000映射的端口，如：9000:31860，根据情况而定
-2.4.2、启动指令：
-velero install \
-    --provider aws \
-    --bucket velero \
-    --secret-file ./credentials-velero \
-    --use-volume-snapshots=false \
-    --backup-location-config region=minio,s3ForcePathStyle=&amp;quot;true&amp;quot;,s3Url=http://192.168.11.8:31860 \
-	--plugins velero/velero-plugin-for-aws:v1.0.0
-
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;集群a数据的备份及集群b恢复&#34;&gt;集群A数据的备份及集群B恢复&lt;/h3&gt;
-&lt;p&gt;具体备份指令，定时备份，参考官方文档&lt;a href=&#34;https://velero.io/docs/v1.2.0/contributions/minio/&#34;&gt;备份指令&lt;/a&gt;
-在集群A中模拟了带有持久化的有状态和无状态的应用，备份维度以namespace为基准，为test。
-备份指令为：velero backup create test-backup &amp;ndash;include-namespaces test
-集群A所有的机器关机且在机器B恢复验证：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@master1 velero-v1.2.0-linux-amd64]# velero restore create --from-backup test-backup
-Restore request &amp;quot;test-backup-20191121141336&amp;quot; submitted successfully.
-Run `velero restore describe test-backup-20191121141336` or `velero restore logs test-backup-20191121141336` for more details.
-[root@master1 velero-v1.2.0-linux-amd64]# kubectl get ns
-NAME                           STATUS   AGE
-default                        Active   43h
-demo                           Active   42h
-kube-node-lease                Active   43h
-kube-public                    Active   43h
-kube-system                    Active   43h
-kubesphere-controls-system     Active   43h
-kubesphere-monitoring-system   Active   43h
-kubesphere-system              Active   43h
-openpitrix-system              Active   23h
-test                           Active   12s
-velero                         Active   24m
-[root@master1 velero-v1.2.0-linux-amd64]# kubectl get pod -n test
-NAME                             READY   STATUS    RESTARTS   AGE
-mysql-v1-0                       1/1     Running   0          22s
-tomcattest-v1-554c8875cd-26fz4   1/1     Running   0          22s
-tomcattest-v1-554c8875cd-cmm2z   1/1     Running   0          22s
-tomcattest-v1-554c8875cd-dc7mr   1/1     Running   0          22s
-tomcattest-v1-554c8875cd-fcgn4   1/1     Running   0          22s
-tomcattest-v1-554c8875cd-wqb4t   1/1     Running   0          22s
-wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>Linux中nfs搭建</title>
-      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
-      <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
-&lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
-&lt;h2 id=&#34;演示nfs机器信息分为服务端和客户端介绍以下服务端的ip请根据自己环境来替换&#34;&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。&lt;/h2&gt;
-&lt;p&gt;服务端：192.168.0.9，客户端：192.168.0.10&lt;/p&gt;
-&lt;h2 id=&#34;11服务端安装19216809&#34;&gt;1.1服务端安装（192.168.0.9）&lt;/h2&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
-&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
-&lt;code&gt;sudo apt install nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;12服务端配置&#34;&gt;1.2服务端配置&lt;/h2&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
-rpcbind服务的开机自启和启动：
-&lt;code&gt;sudo systemctl enable rpcbind;sudo systemctl restart rpcbind&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;nfs服务的开机自启和启动：
-&lt;code&gt;sudo systemctl enable nfs;sudo systemctl restart nfs&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
-&lt;code&gt;sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;13配置共享目录&#34;&gt;1.3配置共享目录&lt;/h2&gt;
-&lt;p&gt;目录为服务端目录，后续存储的数据在该目录下
-&lt;code&gt;sudo mkdir -p /nfsdatas&lt;/code&gt;
-&lt;code&gt;sudo chmod 755 /nfsdatas&lt;/code&gt;
-&lt;font color=#DC143C &gt;重要:&lt;/font&gt; 根据上面创建的目录，相应配置导出目录
-&lt;code&gt;sudo vi /etc/exports&lt;/code&gt;
-添加如下配置再保存，重启nfs服务即可：
-/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;/nfsdatas:共享目录位置。&lt;/li&gt;
-&lt;li&gt;192.168.0.0/24：客户端IP范围，*代表所有。&lt;/li&gt;
-&lt;li&gt;rw：权限设置，可读可写。&lt;/li&gt;
-&lt;li&gt;sync：同步共享目录。&lt;/li&gt;
-&lt;li&gt;no_root_squash: 可以使用root授权。&lt;/li&gt;
-&lt;li&gt;no_all_squash: 可以使用普通用户授权&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
-&lt;code&gt;systemctl restart nfs&lt;/code&gt;
-&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
-&lt;code&gt;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;21客户端安装192168010&#34;&gt;2.1客户端安装（192.168.0.10）&lt;/h2&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
-&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
-&lt;code&gt;sudo apt install nfs-common&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;22客户端开机自启和启动即可&#34;&gt;2.2客户端开机自启和启动即可&lt;/h2&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
-&lt;code&gt;sudo systemctl enable rpcbind&lt;/code&gt;
-&lt;code&gt;sudo systemctl start rpcbind&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
-&lt;code&gt;sudo systemctl enable nfs-common;sudo systemctl restart nfs-common&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;23客户端验证及测试&#34;&gt;2.3客户端验证及测试&lt;/h2&gt;
-&lt;p&gt;检查服务端的共享目录：
-&lt;code&gt;showmount -e 192.168.0.9&lt;/code&gt;
-客户端创建目录
-&lt;code&gt;sudo mkdir -p /tmp/nfsdata&lt;/code&gt;
-挂载指令：
-&lt;code&gt;sudo mount -t nfs 192.168.0.9:/nfsdatas /tmp/nfsdata&lt;/code&gt;
-然后进入/tmp/nfsdata目录下，新建文件
-&lt;code&gt;sudo touch test&lt;/code&gt;
-之后在nfs服务端192.168.0.9的/nfsdatas目录查看是否有test文件
-卸载指令：不要在/tmp/nfsdata目录下执行卸载指令。
-&lt;code&gt;umount /tmp/nfsdata&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&#34;cenots和ubuntu脚本部署&#34;&gt;cenots和ubuntu脚本部署&lt;/h2&gt;
-&lt;p&gt;下面内容添加：vi nfs-install.sh
-加权限和执行：chmod +x nfs-install.sh &amp;amp;&amp;amp; ./nfs-install.sh
-以下脚本安装的服务端目录为：/nfsdatas,如果需要修改的话，脚本内容需要修改。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;#!/bin/bash
-
-function centostest(){
-    yum clean all;yum makecache
-    yum install nfs-utils -y
-    systemctl enable rpcbind;sudo systemctl restart rpcbind
-    systemctl enable nfs;sudo systemctl restart nfs
-    mkdir -p /nfsdatas
-    chmod 755 /nfsdatas
-    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
-    systemctl restart nfs
-    showmount -e localhost
-    if [[ $? -eq 0 ]]; then
-        #statements
-        str=&amp;quot;successsful!&amp;quot;
-        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
-    else
-        str=&amp;quot;failed!&amp;quot;
-        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
-        exit
-    fi
-}
-
-function ubuntutest(){
-    apt-get update
-    sudo apt install nfs-kernel-server
-    sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server
-    mkdir -p /nfsdatas
-    chmod 755 /nfsdatas
-    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
-    sudo systemctl restart nfs-kernel-server
-    showmount -e localhost
-    if [[ $? -eq 0 ]]; then
-        #statements
-        str=&amp;quot;successsful!&amp;quot;
-        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
-    else
-        str=&amp;quot;failed!&amp;quot;
-        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
-        exit
-    fi
-}
-
-cat /etc/redhat-release
-
-if [[ $? -eq 0 ]]; then
-    str=&amp;quot;centos!&amp;quot;
-    echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;
-    centostest
-else
-    str=&amp;quot;ubuntu!&amp;quot;
-    echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
-    ubuntutest
-fi
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>NetApp存储在KubeSphere上的实践</title>
-      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。
-&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
-&lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
-&lt;strong&gt;KubeSphere&lt;/strong&gt; 是一款开源项目，在目前主流容器调度平台 Kubernetes 之上构建的企业级分布式多租户&lt;strong&gt;容器管理平台&lt;/strong&gt;，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大降低开发、测试、运维的日常工作的复杂度。&lt;/p&gt;
-&lt;h3 id=&#34;1整体方案&#34;&gt;1、整体方案&lt;/h3&gt;
-&lt;p&gt;在VMware Workstation环境下安装ONTAP;ONTAP系统上创建SVM(Storage Virtual Machine)且对接nfs协议；在已有k8s环境下部署Trident,Trident将使用ONTAP系统上提供的信息（svm、managementLIF和dataLIF）作为后端来提供卷；在已创建的k8s和StorageClass卷下部署kubesphere。&lt;/p&gt;
-&lt;h3 id=&#34;2版本信息&#34;&gt;2、版本信息&lt;/h3&gt;
-&lt;p&gt;Ontap: 9.5
-Trident: v19.07
-k8s: 1.15
-kubesphere: 2.0.2&lt;/p&gt;
-&lt;h3 id=&#34;3步骤&#34;&gt;3、步骤&lt;/h3&gt;
-&lt;p&gt;主要描述ontap搭建及配置、Trident搭建和配置和kubesphere搭建及配置等方面。&lt;/p&gt;
-&lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
-&lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
-https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1g6t9q3s4kkj30yf0l8qsj.jpg&#34; alt=&#34;netapp.png&#34;&gt;&lt;/p&gt;
-&lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
-&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;结合ontap的提供的参数创建第一个后端vi backend.json。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;{
-    &amp;quot;version&amp;quot;: 1,
-    &amp;quot;storageDriverName&amp;quot;: &amp;quot;ontap-nas&amp;quot;,
-    &amp;quot;backendName&amp;quot;: &amp;quot;customBackendName&amp;quot;,
-    &amp;quot;managementLIF&amp;quot;: &amp;quot;10.0.0.1&amp;quot;,
-    &amp;quot;dataLIF&amp;quot;: &amp;quot;10.0.0.2&amp;quot;,
-    &amp;quot;svm&amp;quot;: &amp;quot;trident_svm&amp;quot;,
-    &amp;quot;username&amp;quot;: &amp;quot;cluster-admin&amp;quot;,
-    &amp;quot;password&amp;quot;: &amp;quot;password&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;生成后端卷&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;创建StorageClass,vi storage-class-ontapnas.yaml&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: ontapnasudp
-provisioner: netapp.io/trident
-mountOptions: [&amp;quot;rw&amp;quot;, &amp;quot;nfsvers=3&amp;quot;, &amp;quot;proto=udp&amp;quot;]
-parameters:
-  backendType: &amp;quot;ontap-nas&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;创建StorageClass指令&lt;code&gt;kubectl create -f storage-class-ontapnas.yaml&lt;/code&gt;&lt;/p&gt;
-&lt;h4 id=&#34;33-kubesphere的安装及配置&#34;&gt;3.3 kubesphere的安装及配置&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;在 Kubernetes 集群中创建名为 kubesphere-system 和 kubesphere-monitoring-system 的 namespace。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;$ cat &amp;lt;&amp;lt;EOF | kubectl create -f -
----
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: kubesphere-system
----
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: kubesphere-monitoring-system
-EOF
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;创建 Kubernetes 集群 CA 证书的 Secret。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-system create secret generic kubesphere-ca  \
---from-file=ca.crt=/etc/kubernetes/pki/ca.crt  \
---from-file=ca.key=/etc/kubernetes/pki/ca.key
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;若 etcd 已经配置过证书，则参考如下创建（以下命令适用于 Kubeadm 创建的 Kubernetes 集群环境）：&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;$ kubectl -n kubesphere-monitoring-system create secret generic kube-etcd-client-certs  \
---from-file=etcd-client-ca.crt=/etc/kubernetes/pki/etcd/ca.crt  \
---from-file=etcd-client.crt=/etc/kubernetes/pki/etcd/healthcheck-client.crt  \
---from-file=etcd-client.key=/etc/kubernetes/pki/etcd/healthcheck-client.key
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;修改kubesphere.yaml中存储的设置参数和对应的参数即可
-&lt;code&gt;kubectl apply -f kubesphere.yaml&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://pek3b.qingstor.com/kubesphere-docs/png/20190912002602.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
-&lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
-&lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
-&lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
-&lt;a href=&#34;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&#34;&gt;https://github.com/kubesphere/ks-installer/blob/master/README_zh.md&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>netapp联合k8s在kubesphere应用</title>
-      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
-      <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
-      <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
-&lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;k8s: 1.13+&lt;/li&gt;
-&lt;li&gt;ontap: 9.5&lt;/li&gt;
-&lt;li&gt;trident: v19.07&lt;/li&gt;
-&lt;li&gt;kubesphere: 2.0.2&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;前期准备&#34;&gt;前期准备&lt;/h4&gt;
-&lt;p&gt;需要准备材料在以下链接上，链接：https://pan.baidu.com/s/1q3KugGrz-XWJzqhgD7Ze9g
-提取码：rhyw&lt;/p&gt;
-&lt;p&gt;包括ontap的安装说明，Workstation上ontap9.5模拟器的ova，ontap使用文档，对接各种存储的协议证书，&lt;/p&gt;
-&lt;h4 id=&#34;1-ontap的安装&#34;&gt;1. ontap的安装&lt;/h4&gt;
-&lt;p&gt;本次测试的环境是安装在VMware Workstation，具体参考链接上这个文档Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide，大致流程为：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;window机器的资源配置&lt;/li&gt;
-&lt;li&gt;开启VT&lt;/li&gt;
-&lt;li&gt;为模拟ONTAP配置VMware Workstation&lt;/li&gt;
-&lt;li&gt;在VMware Workstation上配置网络适配器，选择bridge网络&lt;/li&gt;
-&lt;li&gt;开启模拟ONTAP&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;2-模拟ontap的配置&#34;&gt;2. 模拟ontap的配置&lt;/h4&gt;
-&lt;p&gt;以上ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;2.1 Press Ctrl-C for Boot 菜单消息显示时，按 Ctrl-C&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;md1.uzip: 39168 x 16384 blocks
-md2.uzip: 5760 x 16384 blocks
-*******************************
-* *
-* Press Ctrl-C for Boot Menu. *
-* *
-*******************************
-^C
-Boot Menu will be available.
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;2.2 选择4配置&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;Please choose one of the following:
-(1) Normal Boot.
-(2) Boot without /etc/rc.
-(3) Change password.
-(4) Clean configuration and initialize all disks.
-(5) Maintenance mode boot.
-(6) Update flash from backup config.
-(7) Install new software first.
-(8) Reboot node.
-Selection (1-8)? 4
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;2.3 确认reset 和 确定&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;Zero disks, reset config and install a new file system?: y
-This will erase all the data on the disks, are you sure?: y
-&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
-&lt;li&gt;2.4 创建集群,填写参数&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;Enter the cluster management interface port [e0d]: e0c
-Enter the cluster management interface IP address: 192.168.x.20
-Enter the cluster management interface netmask: 255.255.255.0
-Enter the cluster management interface default gateway: &amp;lt;Enter&amp;gt;
-A cluster management interface on port e0c with IP address 192.168.x.
-20 has been created.
-You can use this address to connect to and manager the cluster.
-Do you want to create a new cluster or join an existing cluster?
-{create}:
-create
-Enter the cluster name: cluster1
-login: admin
-Password: &amp;lt;password you defined&amp;gt;
-Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
-&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;3-登录ontap界面&#34;&gt;3. 登录ontap界面&lt;/h4&gt;
-&lt;p&gt;参考链接中的m_SL10537_gui_nas_basic_concepts_v2.1.0文档，这里需要配置的信息为，对接各个存储的协议证书、子网的设置、聚合的创建、svm创建和导出策略的配置。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://ww1.sinaimg.cn/large/006bbiLEgy1g6t9q3s4kkj30yf0l8qsj.jpg&#34; alt=&#34;netapp.png&#34;&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;对接各个存储的协议证书
-登录平台之后，配置&amp;ndash;》许可证&amp;ndash;》添加对应的证书，显示为绿色的勾就添加正确。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;子网的设置
-登录平台，网络&amp;ndash;》子网&amp;ndash;》创建&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;聚合的创建
-登录平台，存储&amp;ndash;》聚合和磁盘&amp;ndash;》聚合&amp;ndash;》创建&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;svm的创建，此处需要选择对应的存储协议、 存储中的聚合和权限、管理(LIF)和数据（LIF）等信息。
-登录平台，存储&amp;ndash;》SVM&amp;ndash;》创建&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;导出策略的设置，svm创建之后，点击svm设置&amp;ndash;》导出策略，在规则索引下添加客户端规范0.0.0.0/0，协议和权限。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;4-trident安装部署&#34;&gt;4. trident安装部署&lt;/h4&gt;
-&lt;p&gt;介质在链接中，包括所需要的镜像和trident安装包和想要的配置文件。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;如果多台机器情形，需要在每台机器上执行&lt;code&gt;docker load -i trident.tar&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;解压trident安装包，&lt;code&gt;tar -xf $BASE_FOLDER/trident-installer-19.07.0.tar.gz&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;进入trident-installer目录，执行trident安装指令：&lt;code&gt;./tridentctl install -n trident&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;检查是否安装成功&lt;code&gt;kubectl get pod -n trident&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;创建并验证第一个后端,注意backend.json填写正确的ontap参数，
-&lt;code&gt;./tridentctl -n trident create backend -f backend.json&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;验证后端是否生成：&lt;code&gt;./tridentctl -n trident get backend&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;创建storage class：&lt;code&gt;kubectl create -f sample-input/storage-class-basic.yaml&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;5-kubesphere安装部署&#34;&gt;5. kubesphere安装部署&lt;/h4&gt;
-&lt;p&gt;参考官方部署文档为：https://github.com/kubesphere/ks-installer&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -2957,6 +2054,340 @@ spec:
     </item>
     
     <item>
+      <title>glusterfs安装</title>
+      <link>https://Forest-L.github.io/post/k8s-glusterfs-install/</link>
+      <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/k8s-glusterfs-install/</guid>
+      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
+&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
+&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
+&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
+&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;节点  &lt;/th&gt;
+&lt;th&gt;os  &lt;/th&gt;
+&lt;th&gt;IP   &lt;/th&gt;
+&lt;th&gt;磁盘&lt;/th&gt;
+&lt;th&gt;角色&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph1&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.13&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph2&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.14&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;ceph3&lt;/td&gt;
+&lt;td&gt;centos&lt;/td&gt;
+&lt;td&gt;192.168.0.16&lt;/td&gt;
+&lt;td&gt;vdc&lt;/td&gt;
+&lt;td&gt;mon,osd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;
+&lt;li&gt;hostnamectl set-hostname ceph3  #节点3上执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;13配置hosts&#34;&gt;1.3、配置hosts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;cat &amp;gt;&amp;gt; /etc/hosts &amp;lt;&amp;lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;14关闭防火墙&#34;&gt;1.4、关闭防火墙&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;三个节点都要执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;systemctl disable --now firewalld
+setenforce 0
+sed -i &#39;s/^SELINUX=.*/SELINUX=disabled/&#39; /etc/selinux/config
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;15时间同步&#34;&gt;1.5、时间同步&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;yum install -y chrony
+systemctl enable --now chronyd
+
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;16dockerlvm2和python3安装&#34;&gt;1.6、docker、lvm2和python3安装&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2cephadm安装ceph1&#34;&gt;2、cephadm安装(ceph1)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;官方下载方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;git下载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;git clone --single-branch --branch octopus https://github.com/ceph/ceph.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cp ceph/src/cephadm/cephadm ./&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm安装(ceph1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ceph指令生效&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cephadm shell&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;添加节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph2&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ceph orch host add ceph3&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;3osd部署&#34;&gt;3、OSD部署&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;cephadm shell下执行&lt;/li&gt;
+&lt;li&gt;若块设备没显示，可加&amp;ndash;refresh参数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&amp;lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&amp;lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看集群状态,ceph方式及运行容器方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-osd -…&amp;quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &amp;quot;/bin/prometheus --c…&amp;quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &amp;quot;/bin/alertmanager -…&amp;quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &amp;quot;/bin/sh -c &#39;grafana…&amp;quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &amp;quot;/bin/node_exporter …&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-crash…&amp;quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mgr -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -…&amp;quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.ceph.com/en/latest/cephadm/install/&#34;&gt;https://docs.ceph.com/en/latest/cephadm/install/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Linux中nfs搭建</title>
+      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
+      <pubDate>Sat, 13 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
+      <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
+&lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
+&lt;p&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
+服务端：192.168.0.9，客户端：192.168.0.10&lt;/p&gt;
+&lt;h2 id=&#34;11服务端安装19216809&#34;&gt;1.1服务端安装（192.168.0.9）&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo apt install nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;12服务端配置&#34;&gt;1.2服务端配置&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+rpcbind服务的开机自启和启动：
+&lt;code&gt;sudo systemctl enable rpcbind;sudo systemctl restart rpcbind&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;nfs服务的开机自启和启动：
+&lt;code&gt;sudo systemctl enable nfs;sudo systemctl restart nfs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;13配置共享目录&#34;&gt;1.3配置共享目录&lt;/h2&gt;
+&lt;p&gt;目录为服务端目录，后续存储的数据在该目录下
+&lt;code&gt;sudo mkdir -p /nfsdatas&lt;/code&gt;
+&lt;code&gt;sudo chmod 755 /nfsdatas&lt;/code&gt;
+&lt;font color=#DC143C &gt;重要:&lt;/font&gt; 根据上面创建的目录，相应配置导出目录
+&lt;code&gt;sudo vi /etc/exports&lt;/code&gt;
+添加如下配置再保存，重启nfs服务即可：
+/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;/nfsdatas:共享目录位置。&lt;/li&gt;
+&lt;li&gt;192.168.0.0/24：客户端IP范围，*代表所有。&lt;/li&gt;
+&lt;li&gt;rw：权限设置，可读可写。&lt;/li&gt;
+&lt;li&gt;sync：同步共享目录。&lt;/li&gt;
+&lt;li&gt;no_root_squash: 可以使用root授权。&lt;/li&gt;
+&lt;li&gt;no_all_squash: 可以使用普通用户授权&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;systemctl restart nfs&lt;/code&gt;
+&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl restart nfs-kernel-server&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;21客户端安装192168010&#34;&gt;2.1客户端安装（192.168.0.10）&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo yum install nfs-utils -y&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo apt install nfs-common&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;22客户端开机自启和启动即可&#34;&gt;2.2客户端开机自启和启动即可&lt;/h2&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;centos:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable rpcbind&lt;/code&gt;
+&lt;code&gt;sudo systemctl start rpcbind&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;font color=#DC143C &gt;ubuntu16.04:&lt;/font&gt;
+&lt;code&gt;sudo systemctl enable nfs-common;sudo systemctl restart nfs-common&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;23客户端验证及测试&#34;&gt;2.3客户端验证及测试&lt;/h2&gt;
+&lt;p&gt;检查服务端的共享目录：
+&lt;code&gt;showmount -e 192.168.0.9&lt;/code&gt;
+客户端创建目录
+&lt;code&gt;sudo mkdir -p /tmp/nfsdata&lt;/code&gt;
+挂载指令：
+&lt;code&gt;sudo mount -t nfs 192.168.0.9:/nfsdatas /tmp/nfsdata&lt;/code&gt;
+然后进入/tmp/nfsdata目录下，新建文件
+&lt;code&gt;sudo touch test&lt;/code&gt;
+之后在nfs服务端192.168.0.9的/nfsdatas目录查看是否有test文件
+卸载指令：不要在/tmp/nfsdata目录下执行卸载指令。
+&lt;code&gt;umount /tmp/nfsdata&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;cenots和ubuntu脚本部署&#34;&gt;cenots和ubuntu脚本部署&lt;/h2&gt;
+&lt;p&gt;下面内容添加：vi nfs-install.sh
+加权限和执行：chmod +x nfs-install.sh &amp;amp;&amp;amp; ./nfs-install.sh
+以下脚本安装的服务端目录为：/nfsdatas,如果需要修改的话，脚本内容需要修改。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#!/bin/bash
+
+function centostest(){
+    yum clean all;yum makecache
+    yum install nfs-utils -y
+    systemctl enable rpcbind;sudo systemctl restart rpcbind
+    systemctl enable nfs;sudo systemctl restart nfs
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
+    systemctl restart nfs
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str=&amp;quot;successsful!&amp;quot;
+        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
+    else
+        str=&amp;quot;failed!&amp;quot;
+        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+        exit
+    fi
+}
+
+function ubuntutest(){
+    apt-get update
+    sudo apt install nfs-kernel-server
+    sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo &amp;quot;/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)&amp;quot; &amp;gt; /etc/exports
+    sudo systemctl restart nfs-kernel-server
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str=&amp;quot;successsful!&amp;quot;
+        echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;  
+    else
+        str=&amp;quot;failed!&amp;quot;
+        echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+        exit
+    fi
+}
+
+cat /etc/redhat-release
+
+if [[ $? -eq 0 ]]; then
+    str=&amp;quot;centos!&amp;quot;
+    echo -e &amp;quot;\033[30;47m$str\033[0m&amp;quot;
+    centostest
+else
+    str=&amp;quot;ubuntu!&amp;quot;
+    echo -e &amp;quot;\033[31;47m$str\033[0m&amp;quot;
+    ubuntutest
+fi
+&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
+    
+    <item>
       <title>终端录屏软件入门</title>
       <link>https://Forest-L.github.io/post/asciinema/</link>
       <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
@@ -3012,63 +2443,6 @@ View the recording at:
 &lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;4浏览器访问效果&#34;&gt;4.浏览器访问效果&lt;/h2&gt;
 &lt;p&gt;双击对应的一个录屏，有share  download settings，且settings可以设置参数
 &lt;img src=&#34;https://Forest-L.github.io/img/asciinema.png&#34; alt=&#34;asciinema-demo效果图&#34;&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>k8s-default-Storage-Class搭建</title>
-      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
-      <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
-&lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1g5a6p0p8fjj30ng0e43za.jpg&#34; alt=&#34;storageClass&#34; title=&#34;storageClass&#34;&gt;&lt;/p&gt;
-&lt;h2 id=&#34;1-创建storageclass&#34;&gt;1. 创建storageClass&lt;/h2&gt;
-&lt;p&gt;要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
-nfs服务器参考博客：
-&lt;a href=&#34;https://lilinlinlin.github.io/2019/07/23/Linux-nfs-%E6%90%AD%E5%BB%BA/&#34;&gt;https://lilinlinlin.github.io/2019/07/23/Linux-nfs-%E6%90%AD%E5%BB%BA/&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id=&#34;11-nfs-client-provisioner&#34;&gt;1.1 nfs-client-provisioner&lt;/h3&gt;
-&lt;p&gt;前提：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Kubernetes 1.9+&lt;/li&gt;
-&lt;li&gt;Existing NFS Share&lt;/li&gt;
-&lt;li&gt;helm&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;111-安装nfs-client-provisioner指令&#34;&gt;1.1.1 安装nfs-client-provisioner指令：&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;helm install --name nfs-client --set nfs.server=192.168.0.9 --set nfs.path=/nfsdatas stable/nfs-client-provisioner&lt;/code&gt;
-如果安装报错，显示没有该helm的stable，在机器上添加helm 源
-&lt;code&gt;helm repo add stable http://mirror.azure.cn/kubernetes/charts/&lt;/code&gt;&lt;/p&gt;
-&lt;h4 id=&#34;112-卸载指令&#34;&gt;1.1.2 卸载指令：&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;helm delete nfs-client&lt;/code&gt;&lt;/p&gt;
-&lt;h4 id=&#34;113-验证storageclass是否存在&#34;&gt;1.1.3 验证storageClass是否存在&lt;/h4&gt;
-&lt;p&gt;在相应安装nfs-client-provisioner机器上执行：&lt;code&gt;kubectl get sc&lt;/code&gt;即可，如下所示：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@i-cj1r8a8m ~]# kubectl get sc
-NAME              PROVISIONER                                   AGE
-nfs-client    cluster.local/my-release-nfs-client-provisioner   1h
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2-defaultstorageclass&#34;&gt;2. DefaultStorageClass&lt;/h2&gt;
-&lt;p&gt;在定义StorageClass时，可以在Annotation中添加一个键值对：storageclass.kubernetes.io/is-default-class: true，那么此StorageClass就变成默认的StorageClass了。&lt;/p&gt;
-&lt;h3 id=&#34;21-第一种方法&#34;&gt;2.1 第一种方法&lt;/h3&gt;
-&lt;p&gt;在这个PVC对象中添加一个声明StorageClass对象的标识，这里我们可以利用一个annotations属性来标识，如下&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvctest
-  annotations:
-    volume.beta.kubernetes.io/storage-class: &amp;quot;nfs-client&amp;quot;
-spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Mi
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;22-第二种方法&#34;&gt;2.2 第二种方法&lt;/h3&gt;
-&lt;p&gt;用 kubectl patch 命令来更新：
-&lt;code&gt;kubectl patch storageclass nfs-client -p &#39;{&amp;quot;metadata&amp;quot;: {&amp;quot;annotations&amp;quot;:{&amp;quot;storageclass.kubernetes.io/is-default-class&amp;quot;:&amp;quot;true&amp;quot;}}}&#39;&lt;/code&gt;
-最后结果中包含default为：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;[root@i-cj1r8a8m ~]# kubectl get sc
-NAME                 PROVISIONER                                   AGE
-nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
-&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
   </channel>

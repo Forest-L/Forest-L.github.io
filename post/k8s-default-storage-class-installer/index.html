@@ -146,7 +146,17 @@ onload='renderMathInElement(document.body);'></script>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/storage'>storage</a>
+	
+	
+	
 
+	
+	&nbsp;&nbsp;
 	
 
 	
@@ -154,16 +164,42 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+		href='/tags/nfs'>nfs</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/linux-tools'>Linux tools</a>
+		href='/tags/nfs-client-provisioner'>nfs-client-provisioner</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>k8s</a>
 	
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="0001-01-01T00:00:00Z">0001-1-1 00:00</time>
+		datetime="2019-08-01T00:00:00Z">2019-8-1 00:00</time>
 </div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-创建storageclass">1. 创建storageClass</a>
+      <ul>
+        <li><a href="#11-nfs-client-provisioner">1.1 nfs-client-provisioner</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-defaultstorageclass">2. DefaultStorageClass</a>
+      <ul>
+        <li><a href="#21-第一种方法">2.1 第一种方法</a></li>
+        <li><a href="#22-第二种方法">2.2 第二种方法</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</div>
+</details>
 
 <hr />
 
@@ -176,11 +212,10 @@ onload='renderMathInElement(document.body);'></script>
 	<section class="mx-auto content">
 		<div class="c-rich-text"><h1 id="k8s-default-storage-class搭建">k8s default Storage Class搭建</h1>
 <p>在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。</p>
-<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1g5a6p0p8fjj30ng0e43za.jpg" alt="storageClass" title="storageClass"></p>
+<p><img src="/img/storageclass.png" alt="storageClass"></p>
 <h2 id="1-创建storageclass">1. 创建storageClass</h2>
 <p>要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
-nfs服务器参考博客：
-<a href="https://lilinlinlin.github.io/2019/07/23/Linux-nfs-%E6%90%AD%E5%BB%BA/">https://lilinlinlin.github.io/2019/07/23/Linux-nfs-%E6%90%AD%E5%BB%BA/</a></p>
+nfs服务器参考博客<a href="https://kubesphereio.com/post/linux-nfs-install/">nfs服务器搭建</a></p>
 <h3 id="11-nfs-client-provisioner">1.1 nfs-client-provisioner</h3>
 <p>前提：</p>
 <ul>
@@ -303,7 +338,7 @@ nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 749 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 755 words in this page.
 	</div>
 </div>
 
@@ -314,9 +349,17 @@ nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
+    <a class="flex-grow-0" href="/post/k8s-service-cognize/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        k8s-service-认知
+    </a>
     
-    <a class="flex-grow-0" href="/post/terraform-docking-qingcloud-installation-k8s/">
-        
+    
+    <a class="flex-grow-0" href="/post/k8s-ceph-install/">
+        基于cephadm安装ceph
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
@@ -331,35 +374,7 @@ nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
 	<span class="heading pr-6 leading-loose">Related</span>
 	<span >
 		
-			<a href="/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/">iptables指令将容器内部端口映射到外部宿主机端口指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/ipv6-address-setup-k8s/">ipv6地址搭建K8s</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/backup-and-restore-etcd-data-of-k8s/">k8s之etcd数据的备份与恢复</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s1-15-3-install-on-the-ubuntu/">k8s1.15.3在ubuntu系统部署</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/linux-nfs-install/">Linux中nfs搭建</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-stored-on-kubesphere-practice/">NetApp存储在KubeSphere上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-works-with-k8s-in-kubesphere/">netapp联合k8s在kubesphere应用</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>
+			<a href="/post/linux-nfs-install/">Linux中nfs搭建</a>
 		
 </span>
 </div>
