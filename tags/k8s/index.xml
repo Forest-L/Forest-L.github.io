@@ -109,10 +109,11 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 2、已有的分布式存储包装管理，像Rook。
 3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
 &lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3存储分类&#34;&gt;3、存储分类&lt;/h2&gt;
+&lt;h4 id=&#34;31-块存储&#34;&gt;3.1 块存储&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;块存储&lt;/li&gt;
-&lt;li&gt;共享存储&lt;/li&gt;
-&lt;li&gt;对象存储&lt;/li&gt;
+&lt;li&gt;比如我们使用的ceph，ceph通过rbd实现块存储，&lt;/li&gt;
+&lt;li&gt;共享存储，共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。&lt;/li&gt;
+&lt;li&gt;对象存储，Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
 &lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>

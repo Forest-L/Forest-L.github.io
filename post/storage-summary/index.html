@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>一切皆有可能  | k8s分布式存储总结</title>
+	<title>一切皆有可能  | 存储总结</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -142,7 +142,7 @@ onload='renderMathInElement(document.body);'></script>
 		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
 	</h2>
 </div>
-<h1 class="pt-2">k8s分布式存储总结</h1>
+<h1 class="pt-2">存储总结</h1>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
@@ -164,15 +164,15 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/pv-pvc-sc'>pv-pvc-sc</a>&nbsp;&#47;
+		href='/tags/vg'>vg</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/k8s'>k8s</a>
+		href='/tags/lvs'>lvs</a>
 	
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2020-10-05T00:00:00Z">2020-10-5 00:00</time>
+		datetime="2020-10-06T00:00:00Z">2020-10-6 00:00</time>
 </div>
 
 <details class="toc" open>
@@ -182,14 +182,23 @@ onload='renderMathInElement(document.body);'></script>
 <div class="inline toc-content">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#1pvpvc和sc来源">1、pv、pvc和sc来源</a></li>
-    <li><a href="#2存储发展过程">2、存储发展过程</a></li>
-    <li><a href="#3存储分类">3、存储分类</a>
+    <li><a href="#ceph介绍">ceph介绍</a></li>
+    <li><a href="#1环境准备">1、环境准备</a>
       <ul>
-        <li></li>
+        <li><a href="#11节点规划">1.1、节点规划</a></li>
+        <li><a href="#12修改hosts文件">1.2、修改hosts文件</a></li>
+        <li><a href="#13配置hosts">1.3、配置hosts</a></li>
+        <li><a href="#14关闭防火墙">1.4、关闭防火墙</a></li>
+        <li><a href="#15时间同步">1.5、时间同步</a></li>
+        <li><a href="#16dockerlvm2和python3安装">1.6、docker、lvm2和python3安装</a></li>
       </ul>
     </li>
-    <li><a href="#4各个存储fio性能测试供参考">4、各个存储fio性能测试，供参考。</a></li>
+    <li><a href="#2cephadm安装ceph1">2、cephadm安装(ceph1)</a></li>
+    <li><a href="#3osd部署">3、OSD部署</a>
+      <ul>
+        <li><a href="#参考">参考</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 </div>
@@ -204,105 +213,205 @@ onload='renderMathInElement(document.body);'></script>
 
 <article>
 	<section class="mx-auto content">
-		<div class="c-rich-text"><h2 id="1pvpvc和sc来源">1、pv、pvc和sc来源</h2>
-<p>pv引入解耦了pod与底层存储；pvc引入分离声明与消费，分离开发与运维责任，存储由运维系统人员管理，开发人员只需要通过pvc声明需要存储的类型、大小和访问模式即可；sc引入使pv自动创建或删除，开发人员定义的pvc中声明stroageclassname以及大小等需求自动创建pv；运维人员只需要声明好sc以及quota配额即可，无需维护pv。</p>
+		<div class="c-rich-text"><h2 id="ceph介绍">ceph介绍</h2>
+<p>ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：</p>
 <ul>
-<li>早期pod使用volume方式，每次pod都需要配置存储，volume都需要配置存储插件的一堆配置，如果是第三方存储，配置非常复杂；强制开发人员需要了解底层存储类型和配置。从而引入了pv。</li>
+<li>OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。</li>
+<li>Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。</li>
+<li>MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。</li>
 </ul>
-<pre><code>apiVersion: v1
-kind: Pod
-metadata:
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    name: nginx
-    volumeMounts:
-    - mountPath: /data
-      name: data
-  volumes:
-  - name: data
-    capacity:
-      storage: 10Gi
-    cephfs:
-      monitors:
-      - 192.168.0.1:6789
-      - 192.168.0.2:6789
-      - 192.168.0.3:6789
-      path: /opt/eshop_dir/eshop
-      user: admin
-      secretRef:
-        name: ceph-secret
+<h2 id="1环境准备">1、环境准备</h2>
+<h3 id="11节点规划">1.1、节点规划</h3>
+<table>
+<thead>
+<tr>
+<th>节点  </th>
+<th>os  </th>
+<th>IP   </th>
+<th>磁盘</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ceph1</td>
+<td>centos</td>
+<td>192.168.0.13</td>
+<td>vdc</td>
+<td>cephadm，mgr, mon,osd</td>
+</tr>
+<tr>
+<td>ceph2</td>
+<td>centos</td>
+<td>192.168.0.14</td>
+<td>vdc</td>
+<td>mon,osd</td>
+</tr>
+<tr>
+<td>ceph3</td>
+<td>centos</td>
+<td>192.168.0.16</td>
+<td>vdc</td>
+<td>mon,osd</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12修改hosts文件">1.2、修改hosts文件</h3>
+<ul>
+<li>hostnamectl set-hostname ceph1  #节点1上执行</li>
+<li>hostnamectl set-hostname ceph2  #节点2上执行</li>
+<li>hostnamectl set-hostname ceph3  #节点3上执行</li>
+</ul>
+<h3 id="13配置hosts">1.3、配置hosts</h3>
+<ul>
+<li>三个节点都执行</li>
+</ul>
+<pre><code>cat &gt;&gt; /etc/hosts &lt;&lt;EOF  
+192.168.0.13 ceph1
+192.168.0.14 ceph2
+192.168.0.16 ceph3
+EOF
+</code></pre><h3 id="14关闭防火墙">1.4、关闭防火墙</h3>
+<ul>
+<li>三个节点都要执行</li>
+</ul>
+<pre><code>systemctl disable --now firewalld
+setenforce 0
+sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+</code></pre><h3 id="15时间同步">1.5、时间同步</h3>
+<pre><code>yum install -y chrony
+systemctl enable --now chronyd
 
-</code></pre><ul>
-<li>pv的yaml文件，pv其实就是把volume的配置声明从pod中分离出来。存储系统由运维人员管理，开发人员不知道底层配置，所以引入了pvc。</li>
-</ul>
-<pre><code>apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: cephfs
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  cephfs:
-    monitors:
-    - 192.168.0.1:6789
-    - 192.168.0.2:6789
-    - 192.168.0.3:6789
-    path: /opt/eshop_dir/eshop
-    user: admin
-    secretRef:
-      name: ceph-secret
-</code></pre><ul>
-<li>pvc的yaml文件，pvc会根据声明的大小、存储类型和accessMode等关键字查找pv，如果找到了匹配的pv，则会与之关联,而pod直接关联pvc。运维人员需要维护一堆pv，如果pv不够还需要手工创建新的pv，pv空闲还需要手动回收，所以引入了sc。</li>
-</ul>
-<pre><code>kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: cephfs
-spec:
-  accessModes:
-      - ReadWriteMany
-  resources:
-      requests:
-        storage: 8Gi
-</code></pre><ul>
-<li>storageclass类似声明了一个非常大的存储池，其中一个最重要参数是provisioner，这个provisioner可以aws-ebs，ceph和nfs等。</li>
-</ul>
-<pre><code>kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: aws-gp2
-provisioner: kubernetes.io/aws-ebs
-parameters:
-  type: gp2
-  fsType: ext4
-</code></pre><h2 id="2存储发展过程">2、存储发展过程</h2>
+以ceph1作为时间参考，以下在三个节点都操作，添加server ceph1 prefer
+vi /etc/chrony.conf
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server ceph1 prefer
+
+重启chrony
+systemctl restart chronyd
+</code></pre><h3 id="16dockerlvm2和python3安装">1.6、docker、lvm2和python3安装</h3>
+<pre><code>三个节点都需要执行：
+curl -fsSL get.docker.com -o get-docker.sh 
+sh get-docker.sh
+systemctl enable docker
+systemctl restart docker
+
+yum install -y python3
+
+yum -y install lvm2
+</code></pre><h2 id="2cephadm安装ceph1">2、cephadm安装(ceph1)</h2>
 <ul>
-<li>最初通过volume plugin实现，又称in-tree。</li>
-<li>1.8开始，新的插件形式支持外部存储系统，即FlexVolume,通过外部脚本集成外部存储接口。</li>
-<li>1.9开始，csi接入，存储厂商需要实现三个服务接口Identity Service、Controller Service、Node Service。</li>
+<li>官方下载方法</li>
 </ul>
-<pre><code>Identity service用于返回一些插件信息。
-Controller Service实现Volume的curd操作。
-Node Service运行在所有的Node节点，用于实现把volume挂载在当前Node节点的指定目录，该服务会监听一个socket，controller通过这个socket进行通信。
-</code></pre><ul>
-<li>云原生分布式存储（Container Attached Storage）CAS</li>
-</ul>
-<pre><code>1、重新设计一个分布式存储，像openebs/longhorn/PortWorx/StorageOS。
-2、已有的分布式存储包装管理，像Rook。
-3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
-</code></pre><h2 id="3存储分类">3、存储分类</h2>
-<h4 id="31-块存储">3.1 块存储</h4>
+<p><code>curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm</code></p>
 <ul>
-<li>比如我们使用的ceph，ceph通过rbd实现块存储，</li>
-<li>共享存储，共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。</li>
-<li>对象存储，Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。</li>
+<li>git下载</li>
 </ul>
-<h2 id="4各个存储fio性能测试供参考">4、各个存储fio性能测试，供参考。</h2>
-<p><img src="/img/storage-fio.png" alt="存储性能对比"></p></div>
+<p><code>git clone --single-branch --branch octopus https://github.com/ceph/ceph.git</code></p>
+<p><code>cp ceph/src/cephadm/cephadm ./</code></p>
+<ul>
+<li>cephadm安装(ceph1)</li>
+</ul>
+<pre><code>./cephadm add-repo --release octopus
+./cephadm install
+
+mkdir -p /etc/ceph
+cephadm bootstrap --mon-ip 192.168.0.13
+
+安装完成提示：
+
+             URL: https://ceph1:8443/
+            User: admin
+        Password: 86yvswzdzd
+
+INFO:cephadm:You can access the Ceph CLI with:
+
+        sudo /usr/sbin/cephadm shell --fsid 3861dbf4-fd47-11ea-a373-5254228af870 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+INFO:cephadm:Please consider enabling telemetry to help improve Ceph:
+
+        ceph telemetry on
+
+For more information see:
+
+        https://docs.ceph.com/docs/master/mgr/telemetry/
+
+INFO:cephadm:Bootstrap complete.
+</code></pre><ul>
+<li>
+<p>配置ceph.pub
+将ceph1的/etc/ceph/ceph.pub放入到ceph2和ceph3的.ssh/authorized_keys,ceph2和ceph3下root目录下没有.ssh，得先创建，最低权限为700，authorized_keys最低权限600。</p>
+</li>
+<li>
+<p>ceph指令生效</p>
+</li>
+</ul>
+<p><code>cephadm shell</code></p>
+<ul>
+<li>添加节点</li>
+</ul>
+<p><code>ceph orch host add ceph2</code></p>
+<p><code>ceph orch host add ceph3</code></p>
+<h2 id="3osd部署">3、OSD部署</h2>
+<ul>
+<li>cephadm shell下执行</li>
+<li>若块设备没显示，可加&ndash;refresh参数</li>
+</ul>
+<pre><code>[ceph: root@ceph1 /]# ceph orch device ls
+HOST   PATH      TYPE   SIZE  DEVICE_ID     MODEL  VENDOR  ROTATIONAL  AVAIL  REJECT REASONS
+ceph1  /dev/vdc  hdd   50.0G  vol-e801hi3v  n/a    0x1af4  1           True
+ceph1  /dev/vda  hdd   20.0G  i-2iwis9yr    n/a    0x1af4  1           False  locked
+ceph1  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&lt;5GB), locked
+ceph2  /dev/vdc  hdd   50.0G  vol-lqcchpox  n/a    0x1af4  1           True
+ceph2  /dev/vda  hdd   20.0G  i-r53b2flp    n/a    0x1af4  1           False  locked
+ceph2  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  locked, Insufficient space (&lt;5GB)
+ceph3  /dev/vdc  hdd    100G  vol-p0eksa5m  n/a    0x1af4  1           True
+ceph3  /dev/vda  hdd   20.0G  i-f6njdmtq    n/a    0x1af4  1           False  locked
+ceph3  /dev/vdb  hdd   4096M                n/a    0x1af4  1           False  Insufficient space (&lt;5GB), locked
+[ceph: root@ceph1 /]#
+
+devcice确认true后，执行
+[ceph: root@ceph1 /]# ceph orch apply osd --all-available-devices
+Scheduled osd.all-available-devices update...
+</code></pre><ul>
+<li>查看集群状态,ceph方式及运行容器方式</li>
+</ul>
+<pre><code>ceph方式：
+[ceph: root@ceph1 /]# ceph -s
+  cluster:
+    id:     af1f33f0-fd69-11ea-8530-5254228af870
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 66s)
+    mgr: ceph1.rbarkj(active, since 12m), standbys: ceph2.uzdnki
+    osd: 3 osds: 3 up (since 14s), 3 in (since 14s)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 1 objects, 0 B
+    usage:   3.0 GiB used, 197 GiB / 200 GiB avail
+    pgs:     1 active+clean
+
+容器方式：
+[root@ceph1 ceph]# docker ps -a
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+b417841153a9        ceph/ceph:v15                &quot;/usr/bin/ceph-osd -…&quot;   5 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-osd.2
+9dbd720f4a6f        prom/prometheus:v2.18.1      &quot;/bin/prometheus --c…&quot;   6 minutes ago       Up 5 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-prometheus.ceph1
+f860282adf85        prom/alertmanager:v0.20.0    &quot;/bin/alertmanager -…&quot;   6 minutes ago       Up 6 minutes                            ceph-af1f33f0-fd69-11ea-8530-5254228af870-alertmanager.ceph1
+a6cb4b354f46        ceph/ceph-grafana:6.6.2      &quot;/bin/sh -c 'grafana…&quot;   16 minutes ago      Up 16 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-grafana.ceph1
+b745f57895f3        prom/node-exporter:v0.18.1   &quot;/bin/node_exporter …&quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-node-exporter.ceph1
+b00c1a2c7ef6        ceph/ceph:v15                &quot;/usr/bin/ceph-crash…&quot;   17 minutes ago      Up 17 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-crash.ceph1
+99c703f18f67        ceph/ceph:v15                &quot;/usr/bin/ceph-mgr -…&quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mgr.ceph1.rbarkj
+e972d3d3f13a        ceph/ceph:v15                &quot;/usr/bin/ceph-mon -…&quot;   18 minutes ago      Up 18 minutes                           ceph-af1f33f0-fd69-11ea-8530-5254228af870-mon.ceph1
+
+</code></pre><h3 id="参考">参考</h3>
+<ul>
+<li><a href="https://docs.ceph.com/en/latest/cephadm/install/">https://docs.ceph.com/en/latest/cephadm/install/</a></li>
+</ul></div>
 	</section>
 
 
@@ -383,7 +492,7 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1413 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1232 words in this page.
 	</div>
 </div>
 
@@ -394,49 +503,19 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/pmem-versus-block-storage-performance/">
+    <a class="flex-grow-0" href="/post/k8s-storage-summary/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        Pmem与块存储性能对比
+        k8s分布式存储总结
     </a>
     
-    
-    <a class="flex-grow-0" href="/post/storage-summary/">
-        存储总结
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
     
 </div>
 <div >
 
 
-
-<div class="font-serif pb-2 flex align-start leading-loose">
-	<span class="heading pr-6 leading-loose">Related</span>
-	<span >
-		
-			<a href="/post/pmem-versus-block-storage-performance/">Pmem与块存储性能对比</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/netapp-stored-on-kubesphere-practice/">netapp存储在kubesphere上的实践</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere-does-cluster-migration-based-on-velero/">Kubesphere基于Velero做集群的迁移</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/">kubesphere2-1-HA环境，一个master或者两个master宕机恢复</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/">kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s-openebs-install/">openebs基于k8s安装</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s-rook-install/">rook基于k8s安装</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s-default-storage-class-installer/">k8s-default-Storage-Class搭建</a>
-		
-</span>
-</div>
 
 </div>
 <hr />
