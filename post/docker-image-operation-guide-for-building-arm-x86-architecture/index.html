@@ -146,7 +146,17 @@ onload='renderMathInElement(document.body);'></script>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/image'>image</a>
+	
+	
+	
 
+	
+	&nbsp;&nbsp;
 	
 
 	
@@ -154,16 +164,39 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/iptables'>iptables</a>&nbsp;&#47;
+		href='/tags/arm'>arm</a>&nbsp;&#47;
 	
 	<a class="post-taxonomy-tag text-eucalyptus-500"
-		href='/tags/linux-tools'>Linux tools</a>
+		href='/tags/amd'>amd</a>&nbsp;&#47;
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/buildx'>buildx</a>
 	
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2019-08-13T00:00:00Z">2019-8-13 00:00</time>
+		datetime="2019-10-13T00:00:00Z">2019-10-13 00:00</time>
 </div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1启动一台ubuntu的机器并安装docker-1903">1.	启动一台ubuntu的机器，并安装docker 19.03</a></li>
+    <li><a href="#2运行下列命令安装并测试qemu">2.	运行下列命令安装并测试qemu</a></li>
+    <li><a href="#3--启用docker--buildx-命令">3.	  启用docker  buildx 命令</a></li>
+    <li><a href="#4创建新的builder实例默认的docker实例不支持镜像导出">4.	创建新的builder实例（默认的docker实例不支持镜像导出）</a></li>
+    <li><a href="#5执行构建命令以ks-installer为例">5.	执行构建命令（以ks-installer为例）</a></li>
+    <li><a href="#6-构建并保存为tar-文件">6.	 构建并保存为tar 文件</a></li>
+    <li><a href="#7--多架构镜像管理">7.  多架构镜像管理</a></li>
+    <li><a href="#更多参考">更多参考</a></li>
+  </ul>
+</nav>
+</div>
+</details>
 
 <hr />
 
@@ -229,6 +262,43 @@ ce366ad696cb                 linux/arm64                       111.13 MB
 </ul>
 <p><code>docker buildx build  --output=type=docker,dest=/root/ks-installer.tar --platform  linux/arm64 -t lilinlinlin/ks-installer:2.1.0-arm64 ./pkg/db/</code></p>
 <p>构建tar包时需要注意output的类型需要是docker，而不是tar</p>
+<h2 id="7--多架构镜像管理">7.  多架构镜像管理</h2>
+<p>相同镜像格式代表arm64和amd64的镜像。</p>
+<ul>
+<li>确保docker manifest命令被使能</li>
+</ul>
+<pre><code>#  ~/.docker/config.json中添加  &quot;experimental&quot;: &quot;enabled&quot;
+
+cat ~/.docker/config.json
+{
+    &quot;experimental&quot;: &quot;enabled&quot;
+}
+</code></pre><ul>
+<li>
+<p>将多架构镜像push到dockerhub中
+docker push lilinlinlin/ks-installer-amd64:v3.0.0
+docker push lilinlinlin/ks-installer-arm64:v3.0.0</p>
+</li>
+<li>
+<p>创建对应镜像的 manifest list,特别重要</p>
+</li>
+</ul>
+<pre><code>docker manifest create lilinlinlin/ks-installer:v3.0.0  \
+                       lilinlinlin/ks-installer-amd64:v3.0.0 \
+                       lilinlinlin/ks-installer-arm64:v3.0.0 --amend
+</code></pre><ul>
+<li>查看修正manifest list内容,可以查看到arm和amd架构的字样</li>
+</ul>
+<pre><code> docker manifest inspect lilinlinlin/ks-installer:v3.0.0
+
+ 如果相关信息不正确可使用annotate命令修正 
+docker manifest annotate --arch arm64 \
+       lilinlinlin/ks-installer:v3.0.0 \
+       lilinlinlin/ks-installer-arm64:v3.0.0
+</code></pre><ul>
+<li>上传manifest list至dockerhub
+docker manifest push lilinlinlin/ks-installer:v3.0.0</li>
+</ul>
 <h2 id="更多参考">更多参考</h2>
 <p><a href="https://github.com/docker/buildx">https://github.com/docker/buildx</a>
 <a href="https://github.com/multiarch/qemu-user-static">https://github.com/multiarch/qemu-user-static</a>
@@ -313,7 +383,7 @@ ce366ad696cb                 linux/arm64                       111.13 MB
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 764 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1003 words in this page.
 	</div>
 </div>
 
@@ -324,17 +394,17 @@ ce366ad696cb                 linux/arm64                       111.13 MB
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/iperf-cognition-as-a-network-speed-measurement-tool/">
+    <a class="flex-grow-0" href="/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        测量网络速度工具之iperf认知
+        centos、ubuntu和pip离线依赖包的制作和使用方法
     </a>
     
     
-    <a class="flex-grow-0" href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">
-        提前预防K8s集群资源不足的处理方式配置
+    <a class="flex-grow-0" href="/post/k8s1-15-install/">
+        k8s1.15安装
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
@@ -344,41 +414,6 @@ ce366ad696cb                 linux/arm64                       111.13 MB
 <div >
 
 
-
-<div class="font-serif pb-2 flex align-start leading-loose">
-	<span class="heading pr-6 leading-loose">Related</span>
-	<span >
-		
-			<a href="/post/helm-deployment-and-guide/">k8s之helm部署及用法</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubekey-source-code-interpretation/">kubekey源码解读</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/kubernetes-compliance-certification-submission-instructions/">kubernetes一致性认证的提交操作指南</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tcpdump-package-capture-tutorial/">tcpdump抓包实战教程</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/ubuntu-quickly-installs-wecenter/">ubuntu快速安装wecenter</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/">基于keepalived-haproxy部署kubesphere高可用方案</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/tools-to-troubleshoot-linux-servers/">排查linux服务器的工具</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/">提前预防K8s集群资源不足的处理方式配置</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/iperf-cognition-as-a-network-speed-measurement-tool/">测量网络速度工具之iperf认知</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/">脚本化触发Kubernetes集群事件的工具-Shell-operator</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s-service-cognize/">k8s-service-认知</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/k8s-configmap-cognize/">k8s-ConfigMap认知</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/docker-deploy-mysql5-7/">docker部署mysql5.7</a>&nbsp;&nbsp;&#47;&nbsp;
-		
-			<a href="/post/asciinema/">终端录屏软件入门</a>
-		
-</span>
-</div>
 
 </div>
 <hr />

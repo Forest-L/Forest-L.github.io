@@ -108,12 +108,18 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 &lt;pre&gt;&lt;code&gt;1、重新设计一个分布式存储，像openebs/longhorn/PortWorx/StorageOS。
 2、已有的分布式存储包装管理，像Rook。
 3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3存储分类&#34;&gt;3、存储分类&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3分布式存储分类&#34;&gt;3、分布式存储分类&lt;/h2&gt;
 &lt;h4 id=&#34;31-块存储&#34;&gt;3.1 块存储&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;比如我们使用的ceph，ceph通过rbd实现块存储，&lt;/li&gt;
-&lt;li&gt;共享存储，共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。&lt;/li&gt;
-&lt;li&gt;对象存储，Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
+&lt;li&gt;比如我们使用的ceph，ceph通过rbd实现块存储&lt;a href=&#34;https://kubesphereio.com/post/k8s-rook-install/&#34;&gt;rook搭建&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;32-共享存储&#34;&gt;3.2 共享存储&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs搭建&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;33-对象存储&#34;&gt;3.3 对象存储&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
 &lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
@@ -1769,50 +1775,61 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
-      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
-&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+      <description>&lt;h2 id=&#34;rook介绍&#34;&gt;rook介绍&lt;/h2&gt;
+&lt;p&gt;Rook是目前开源中比较流行的云原生的存储编排系统，专注于如何实现把ceph运行在Kubernetes平台上。将之前手工执行部署、初始化、配置、扩展、升级、迁移、灾难恢复、监控以及资源管理等转变为自动触发。比如集群增加一块磁盘，rook能自动初始化为一个OSD，并自动加入到合适的故障中，这个osd在kubernetes中是以pod形式运行的。&lt;/p&gt;
+&lt;h2 id=&#34;1部署&#34;&gt;1、部署&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
-&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
-&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;li&gt;Rook-Ceph底层存储可以是：卷、分区、block模式的pv。主要包括三部分：CRD、Operator、Cluster。&lt;/li&gt;
+&lt;li&gt;下载rook安装文件并部署&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
-&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;节点  &lt;/th&gt;
-&lt;th&gt;os  &lt;/th&gt;
-&lt;th&gt;IP   &lt;/th&gt;
-&lt;th&gt;磁盘&lt;/th&gt;
-&lt;th&gt;角色&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph1&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.13&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph2&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.14&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph3&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.16&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;git clone --single-branch --branch release-1.3 https://github.com/rook/rook.git
+
+cd cluster/examples/kubernetes/ceph
+
+注意：若是重装需清空node节点的/var/lib/rook下的文件， 并且要保证挂载的卷或者分区是没有文件系统的
+
+部署：
+(1) CRD:    kubectl create -f common.yaml
+(2) Operator:   kubectl create -f operator.yaml
+(3) Cluster:    kubectl create -f cluster.yaml
+
+[root@node1 ~]# kubectl get pod -n rook-ceph
+NAME                                              READY   STATUS      RESTARTS   AGE
+csi-cephfsplugin-l5rw5                            3/3     Running     0          8m33s
+csi-cephfsplugin-lrzfj                            3/3     Running     0          22m
+csi-cephfsplugin-mqbg8                            3/3     Running     0          53m
+csi-cephfsplugin-provisioner-58888b54f5-fj8tf     5/5     Running     5          53m
+csi-cephfsplugin-provisioner-58888b54f5-p2vpt     5/5     Running     9          53m
+csi-rbdplugin-5mmsl                               3/3     Running     0          8m34s
+csi-rbdplugin-d4966                               3/3     Running     0          53m
+csi-rbdplugin-mcsxw                               3/3     Running     0          22m
+csi-rbdplugin-provisioner-6ddbf76966-498gn        6/6     Running     11         53m
+csi-rbdplugin-provisioner-6ddbf76966-z2vfq        6/6     Running     6          53m
+rook-ceph-crashcollector-node1-69666f444d-5bgh9   1/1     Running     0          5m41s
+rook-ceph-crashcollector-node2-6c5b88dcf5-th4xk   1/1     Running     0          6m4s
+rook-ceph-crashcollector-node3-54b5c58544-hz6m8   1/1     Running     0          22m
+rook-ceph-mgr-a-5d85bd689f-g2dfh                  1/1     Running     0          5m41s
+rook-ceph-mon-a-76c84f876b-m62d7                  1/1     Running     0          6m38s
+rook-ceph-mon-b-6dc744d5b8-bspvh                  1/1     Running     0          6m22s
+rook-ceph-mon-c-67f5987779-4l8vf                  1/1     Running     0          6m4s
+rook-ceph-operator-6659fb4ddd-wdxnp               1/1     Running     3          55m
+rook-ceph-osd-0-57954bcb4f-8b48j                  1/1     Running     0          4m59s
+rook-ceph-osd-1-7c59f96f47-xnfpc                  1/1     Running     0          4m48s
+rook-ceph-osd-prepare-node1-hrzg6                 1/1     Running     0          5m38s
+rook-ceph-osd-prepare-node2-c5wcl                 0/1     Completed   0          5m38s
+rook-ceph-osd-prepare-node3-gkt7g                 0/1     Completed   0          5m38s
+rook-discover-6ll64                               1/1     Running     0          8m34s
+rook-discover-bvbsh                               1/1     Running     0          22m
+rook-discover-cm5ls                               1/1     Running     0          54m
+说明
+
+(1) csi-cephfsplugin-*, csi-rbdplugin-* :   ceph-FS 和ceph-rbd CSI
+(2) rook-ceph-crashcollector-*:  crash 收集器
+(3) rook-ceph-mgr-*:  管理后台
+(4) root-ceph-mon-*: Mon监视器，维护集群中的各种状态
+(5) rook-ceph-osd-*: ceph-OSD，主要功能是数据的存储，本例中每个盘会起一个OSD
+(6) rook-discorer-*:  检测符合要求的存储设备
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
 &lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;

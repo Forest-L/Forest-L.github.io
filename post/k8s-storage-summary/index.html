@@ -184,7 +184,7 @@ onload='renderMathInElement(document.body);'></script>
   <ul>
     <li><a href="#1pvpvc和sc来源">1、pv、pvc和sc来源</a></li>
     <li><a href="#2存储发展过程">2、存储发展过程</a></li>
-    <li><a href="#3存储分类">3、存储分类</a>
+    <li><a href="#3分布式存储分类">3、分布式存储分类</a>
       <ul>
         <li></li>
       </ul>
@@ -294,12 +294,18 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 <pre><code>1、重新设计一个分布式存储，像openebs/longhorn/PortWorx/StorageOS。
 2、已有的分布式存储包装管理，像Rook。
 3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
-</code></pre><h2 id="3存储分类">3、存储分类</h2>
+</code></pre><h2 id="3分布式存储分类">3、分布式存储分类</h2>
 <h4 id="31-块存储">3.1 块存储</h4>
 <ul>
-<li>比如我们使用的ceph，ceph通过rbd实现块存储，</li>
-<li>共享存储，共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。</li>
-<li>对象存储，Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。</li>
+<li>比如我们使用的ceph，ceph通过rbd实现块存储<a href="https://kubesphereio.com/post/k8s-rook-install/">rook搭建</a></li>
+</ul>
+<h4 id="32-共享存储">3.2 共享存储</h4>
+<ul>
+<li>共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。<a href="https://kubesphereio.com/post/linux-nfs-install/">nfs搭建</a></li>
+</ul>
+<h4 id="33-对象存储">3.3 对象存储</h4>
+<ul>
+<li>Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。</li>
 </ul>
 <h2 id="4各个存储fio性能测试供参考">4、各个存储fio性能测试，供参考。</h2>
 <p><img src="/img/storage-fio.png" alt="存储性能对比"></p></div>
@@ -383,7 +389,7 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1413 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1426 words in this page.
 	</div>
 </div>
 

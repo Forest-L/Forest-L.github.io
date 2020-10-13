@@ -315,12 +315,18 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 &lt;pre&gt;&lt;code&gt;1、重新设计一个分布式存储，像openebs/longhorn/PortWorx/StorageOS。
 2、已有的分布式存储包装管理，像Rook。
 3、CAS：每个volume都由一个轻量级的controller来管理，这个controller可以是一个单独的pod；这个controller与使用该volume的应用pod在同一个node；不同的volume的数据使用多个独立的controller pod进行管理。
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3存储分类&#34;&gt;3、存储分类&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3分布式存储分类&#34;&gt;3、分布式存储分类&lt;/h2&gt;
 &lt;h4 id=&#34;31-块存储&#34;&gt;3.1 块存储&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;比如我们使用的ceph，ceph通过rbd实现块存储，&lt;/li&gt;
-&lt;li&gt;共享存储，共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。&lt;/li&gt;
-&lt;li&gt;对象存储，Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
+&lt;li&gt;比如我们使用的ceph，ceph通过rbd实现块存储&lt;a href=&#34;https://kubesphereio.com/post/k8s-rook-install/&#34;&gt;rook搭建&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;32-共享存储&#34;&gt;3.2 共享存储&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;共享文件系统存储即提供文件系统存储接口，我们最常用的共享文件系统存储如NFS、CIFS、GlusterFS等，Ceph通过CephFS实现共享文件系统存储。&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs搭建&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;33-对象存储&#34;&gt;3.3 对象存储&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
 &lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
@@ -909,6 +915,110 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
     </item>
     
     <item>
+      <title>构建arm-x86架构的docker-image操作指南</title>
+      <link>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
+      <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
+      <description>&lt;h1 id=&#34;构建armx86架构的docker-image操作指南&#34;&gt;构建arm/x86架构的docker image操作指南&lt;/h1&gt;
+&lt;p&gt;由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。&lt;/p&gt;
+&lt;h2 id=&#34;1启动一台ubuntu的机器并安装docker-1903&#34;&gt;1.	启动一台ubuntu的机器，并安装docker 19.03&lt;/h2&gt;
+&lt;p&gt;在测试过程中发现 Centos7.5 有下面的问题，这里我们直接绕过
+&lt;a href=&#34;https://github.com/multiarch/qemu-user-static/issues/38&#34;&gt;issue&lt;/a&gt;
+docker安装参考&lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/&#34;&gt;docker安装&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;2运行下列命令安装并测试qemu&#34;&gt;2.	运行下列命令安装并测试qemu&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;查看机器的架构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;uname -m
+x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;正常测试docker启动一个arm镜像容器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm -t arm64v8/ubuntu uname -m
+standard_init_linux.go:211: exec user process caused &amp;quot;exec format error&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;添加特权模式安装qemu，且启动一个arm镜像容器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker run --rm -t arm64v8/ubuntu uname -m
+aarch64
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3--启用docker--buildx-命令&#34;&gt;3.	  启用docker  buildx 命令&lt;/h2&gt;
+&lt;p&gt;docker buildx 为跨平台构建 docker 镜像所使用的命令。目前为实验特性，可以设置dokcer cli的配置，将实验特性开启。&lt;/p&gt;
+&lt;p&gt;将下面配置添加到CLI配置文件当中~/.docker/config.json&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;4创建新的builder实例默认的docker实例不支持镜像导出&#34;&gt;4.	创建新的builder实例（默认的docker实例不支持镜像导出）&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;docker buildx create --name ks-all&lt;/code&gt;
+&lt;code&gt;docker buildx use ks-all&lt;/code&gt;
+&lt;code&gt;docker buildx inspect --bootstrap&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;执行下面命令可以看到 builder 已经创建好，并且支持多种平台的构建。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker buildx ls
+NAME/NODE DRIVER/ENDPOINT             STATUS  PLATFORMS
+ks-all *  docker-container
+  ks-all0 unix:///var/run/docker.sock running linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+default   docker
+  default default                     running linux/amd64, linux/386
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;5执行构建命令以ks-installer为例&#34;&gt;5.	执行构建命令（以ks-installer为例）&lt;/h2&gt;
+&lt;p&gt;在 ks-installer目录下执行命令可以构建 arm64与amd64的镜像，并自动推送到镜像仓库中。
+&lt;code&gt;docker buildx build -f /root/ks-installer/Dockerfile --output=type=registry --platform linux/arm64  -t lilinlinlin/ks-installer:2.1.0-arm64 .&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;(需要注意现在 ks-installer 的 Dockerfile中 go build 命令带有 GOOS GOARCH等，这些要删除)&lt;/p&gt;
+&lt;p&gt;构建成功之后，可以在dockerhub下图当中可以看到是支持两种arch&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DIGEST                       OS/ARCH                          COMPRESSED SIZE
+97dd2142cac6                 linux/amd64                       111.13 MB
+ce366ad696cb                 linux/arm64                       111.13 MB
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;6-构建并保存为tar-文件&#34;&gt;6.	 构建并保存为tar 文件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;可以参考 buildx 的官方文档
+&lt;a href=&#34;https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue&#34;&gt;https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;docker buildx build  --output=type=docker,dest=/root/ks-installer.tar --platform  linux/arm64 -t lilinlinlin/ks-installer:2.1.0-arm64 ./pkg/db/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;构建tar包时需要注意output的类型需要是docker，而不是tar&lt;/p&gt;
+&lt;h2 id=&#34;7--多架构镜像管理&#34;&gt;7.  多架构镜像管理&lt;/h2&gt;
+&lt;p&gt;相同镜像格式代表arm64和amd64的镜像。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;确保docker manifest命令被使能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;#  ~/.docker/config.json中添加  &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+
+cat ~/.docker/config.json
+{
+    &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;将多架构镜像push到dockerhub中
+docker push lilinlinlin/ks-installer-amd64:v3.0.0
+docker push lilinlinlin/ks-installer-arm64:v3.0.0&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;创建对应镜像的 manifest list,特别重要&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker manifest create lilinlinlin/ks-installer:v3.0.0  \
+                       lilinlinlin/ks-installer-amd64:v3.0.0 \
+                       lilinlinlin/ks-installer-arm64:v3.0.0 --amend
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看修正manifest list内容,可以查看到arm和amd架构的字样&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt; docker manifest inspect lilinlinlin/ks-installer:v3.0.0
+
+ 如果相关信息不正确可使用annotate命令修正 
+docker manifest annotate --arch arm64 \
+       lilinlinlin/ks-installer:v3.0.0 \
+       lilinlinlin/ks-installer-arm64:v3.0.0
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;上传manifest list至dockerhub
+docker manifest push lilinlinlin/ks-installer:v3.0.0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;更多参考&#34;&gt;更多参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/docker/buildx&#34;&gt;https://github.com/docker/buildx&lt;/a&gt;
+&lt;a href=&#34;https://github.com/multiarch/qemu-user-static&#34;&gt;https://github.com/multiarch/qemu-user-static&lt;/a&gt;
+&lt;a href=&#34;https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux&#34;&gt;https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>openebs基于k8s安装</title>
       <link>https://Forest-L.github.io/post/k8s-openebs-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
@@ -1121,50 +1231,61 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
-      <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
-&lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
+      <description>&lt;h2 id=&#34;rook介绍&#34;&gt;rook介绍&lt;/h2&gt;
+&lt;p&gt;Rook是目前开源中比较流行的云原生的存储编排系统，专注于如何实现把ceph运行在Kubernetes平台上。将之前手工执行部署、初始化、配置、扩展、升级、迁移、灾难恢复、监控以及资源管理等转变为自动触发。比如集群增加一块磁盘，rook能自动初始化为一个OSD，并自动加入到合适的故障中，这个osd在kubernetes中是以pod形式运行的。&lt;/p&gt;
+&lt;h2 id=&#34;1部署&#34;&gt;1、部署&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;OSD 用于集群中所有数据与对象的存储，处理集群数据的复制、恢复、回填、再均衡，并向其他osd守护进程发送心跳，然后向 Monitor 提供一些监控信息。&lt;/li&gt;
-&lt;li&gt;Monitor 监控整个集群的状态，维护集群的 cluster MAP 二进制表，保证集群数据的一致性。&lt;/li&gt;
-&lt;li&gt;MDS (可选) 为 Ceph 文件系统提供元数据计算、缓存与同步。MDS 进程并不是必须的进程，只有需要使用 CephFS 时，才需要配置 MDS 节点。&lt;/li&gt;
+&lt;li&gt;Rook-Ceph底层存储可以是：卷、分区、block模式的pv。主要包括三部分：CRD、Operator、Cluster。&lt;/li&gt;
+&lt;li&gt;下载rook安装文件并部署&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;1环境准备&#34;&gt;1、环境准备&lt;/h2&gt;
-&lt;h3 id=&#34;11节点规划&#34;&gt;1.1、节点规划&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;节点  &lt;/th&gt;
-&lt;th&gt;os  &lt;/th&gt;
-&lt;th&gt;IP   &lt;/th&gt;
-&lt;th&gt;磁盘&lt;/th&gt;
-&lt;th&gt;角色&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph1&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.13&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;cephadm，mgr, mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph2&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.14&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;ceph3&lt;/td&gt;
-&lt;td&gt;centos&lt;/td&gt;
-&lt;td&gt;192.168.0.16&lt;/td&gt;
-&lt;td&gt;vdc&lt;/td&gt;
-&lt;td&gt;mon,osd&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;git clone --single-branch --branch release-1.3 https://github.com/rook/rook.git
+
+cd cluster/examples/kubernetes/ceph
+
+注意：若是重装需清空node节点的/var/lib/rook下的文件， 并且要保证挂载的卷或者分区是没有文件系统的
+
+部署：
+(1) CRD:    kubectl create -f common.yaml
+(2) Operator:   kubectl create -f operator.yaml
+(3) Cluster:    kubectl create -f cluster.yaml
+
+[root@node1 ~]# kubectl get pod -n rook-ceph
+NAME                                              READY   STATUS      RESTARTS   AGE
+csi-cephfsplugin-l5rw5                            3/3     Running     0          8m33s
+csi-cephfsplugin-lrzfj                            3/3     Running     0          22m
+csi-cephfsplugin-mqbg8                            3/3     Running     0          53m
+csi-cephfsplugin-provisioner-58888b54f5-fj8tf     5/5     Running     5          53m
+csi-cephfsplugin-provisioner-58888b54f5-p2vpt     5/5     Running     9          53m
+csi-rbdplugin-5mmsl                               3/3     Running     0          8m34s
+csi-rbdplugin-d4966                               3/3     Running     0          53m
+csi-rbdplugin-mcsxw                               3/3     Running     0          22m
+csi-rbdplugin-provisioner-6ddbf76966-498gn        6/6     Running     11         53m
+csi-rbdplugin-provisioner-6ddbf76966-z2vfq        6/6     Running     6          53m
+rook-ceph-crashcollector-node1-69666f444d-5bgh9   1/1     Running     0          5m41s
+rook-ceph-crashcollector-node2-6c5b88dcf5-th4xk   1/1     Running     0          6m4s
+rook-ceph-crashcollector-node3-54b5c58544-hz6m8   1/1     Running     0          22m
+rook-ceph-mgr-a-5d85bd689f-g2dfh                  1/1     Running     0          5m41s
+rook-ceph-mon-a-76c84f876b-m62d7                  1/1     Running     0          6m38s
+rook-ceph-mon-b-6dc744d5b8-bspvh                  1/1     Running     0          6m22s
+rook-ceph-mon-c-67f5987779-4l8vf                  1/1     Running     0          6m4s
+rook-ceph-operator-6659fb4ddd-wdxnp               1/1     Running     3          55m
+rook-ceph-osd-0-57954bcb4f-8b48j                  1/1     Running     0          4m59s
+rook-ceph-osd-1-7c59f96f47-xnfpc                  1/1     Running     0          4m48s
+rook-ceph-osd-prepare-node1-hrzg6                 1/1     Running     0          5m38s
+rook-ceph-osd-prepare-node2-c5wcl                 0/1     Completed   0          5m38s
+rook-ceph-osd-prepare-node3-gkt7g                 0/1     Completed   0          5m38s
+rook-discover-6ll64                               1/1     Running     0          8m34s
+rook-discover-bvbsh                               1/1     Running     0          22m
+rook-discover-cm5ls                               1/1     Running     0          54m
+说明
+
+(1) csi-cephfsplugin-*, csi-rbdplugin-* :   ceph-FS 和ceph-rbd CSI
+(2) rook-ceph-crashcollector-*:  crash 收集器
+(3) rook-ceph-mgr-*:  管理后台
+(4) root-ceph-mon-*: Mon监视器，维护集群中的各种状态
+(5) rook-ceph-osd-*: ceph-OSD，主要功能是数据的存储，本例中每个盘会起一个OSD
+(6) rook-discorer-*:  检测符合要求的存储设备
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;12修改hosts文件&#34;&gt;1.2、修改hosts文件&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;hostnamectl set-hostname ceph1  #节点1上执行&lt;/li&gt;
 &lt;li&gt;hostnamectl set-hostname ceph2  #节点2上执行&lt;/li&gt;

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>buildx on 一切皆有可能</title>
+    <link>https://Forest-L.github.io/tags/buildx/</link>
+    <description>Recent content in buildx on 一切皆有可能</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <copyright>Copyright © 2008–2020</copyright>
+    <lastBuildDate>Sun, 13 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://Forest-L.github.io/tags/buildx/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>构建arm-x86架构的docker-image操作指南</title>
+      <link>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
+      <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
+      <description>&lt;h1 id=&#34;构建armx86架构的docker-image操作指南&#34;&gt;构建arm/x86架构的docker image操作指南&lt;/h1&gt;
+&lt;p&gt;由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。&lt;/p&gt;
+&lt;h2 id=&#34;1启动一台ubuntu的机器并安装docker-1903&#34;&gt;1.	启动一台ubuntu的机器，并安装docker 19.03&lt;/h2&gt;
+&lt;p&gt;在测试过程中发现 Centos7.5 有下面的问题，这里我们直接绕过
+&lt;a href=&#34;https://github.com/multiarch/qemu-user-static/issues/38&#34;&gt;issue&lt;/a&gt;
+docker安装参考&lt;a href=&#34;https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/&#34;&gt;docker安装&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;2运行下列命令安装并测试qemu&#34;&gt;2.	运行下列命令安装并测试qemu&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;查看机器的架构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;uname -m
+x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;正常测试docker启动一个arm镜像容器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm -t arm64v8/ubuntu uname -m
+standard_init_linux.go:211: exec user process caused &amp;quot;exec format error&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;添加特权模式安装qemu，且启动一个arm镜像容器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker run --rm -t arm64v8/ubuntu uname -m
+aarch64
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;3--启用docker--buildx-命令&#34;&gt;3.	  启用docker  buildx 命令&lt;/h2&gt;
+&lt;p&gt;docker buildx 为跨平台构建 docker 镜像所使用的命令。目前为实验特性，可以设置dokcer cli的配置，将实验特性开启。&lt;/p&gt;
+&lt;p&gt;将下面配置添加到CLI配置文件当中~/.docker/config.json&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;4创建新的builder实例默认的docker实例不支持镜像导出&#34;&gt;4.	创建新的builder实例（默认的docker实例不支持镜像导出）&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;docker buildx create --name ks-all&lt;/code&gt;
+&lt;code&gt;docker buildx use ks-all&lt;/code&gt;
+&lt;code&gt;docker buildx inspect --bootstrap&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;执行下面命令可以看到 builder 已经创建好，并且支持多种平台的构建。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker buildx ls
+NAME/NODE DRIVER/ENDPOINT             STATUS  PLATFORMS
+ks-all *  docker-container
+  ks-all0 unix:///var/run/docker.sock running linux/amd64, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/386, linux/arm/v7, linux/arm/v6
+default   docker
+  default default                     running linux/amd64, linux/386
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;5执行构建命令以ks-installer为例&#34;&gt;5.	执行构建命令（以ks-installer为例）&lt;/h2&gt;
+&lt;p&gt;在 ks-installer目录下执行命令可以构建 arm64与amd64的镜像，并自动推送到镜像仓库中。
+&lt;code&gt;docker buildx build -f /root/ks-installer/Dockerfile --output=type=registry --platform linux/arm64  -t lilinlinlin/ks-installer:2.1.0-arm64 .&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;(需要注意现在 ks-installer 的 Dockerfile中 go build 命令带有 GOOS GOARCH等，这些要删除)&lt;/p&gt;
+&lt;p&gt;构建成功之后，可以在dockerhub下图当中可以看到是支持两种arch&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;DIGEST                       OS/ARCH                          COMPRESSED SIZE
+97dd2142cac6                 linux/amd64                       111.13 MB
+ce366ad696cb                 linux/arm64                       111.13 MB
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;6-构建并保存为tar-文件&#34;&gt;6.	 构建并保存为tar 文件&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;可以参考 buildx 的官方文档
+&lt;a href=&#34;https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue&#34;&gt;https://github.com/docker/buildx#-o---outputpath-typetypekeyvalue&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;docker buildx build  --output=type=docker,dest=/root/ks-installer.tar --platform  linux/arm64 -t lilinlinlin/ks-installer:2.1.0-arm64 ./pkg/db/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;构建tar包时需要注意output的类型需要是docker，而不是tar&lt;/p&gt;
+&lt;h2 id=&#34;7--多架构镜像管理&#34;&gt;7.  多架构镜像管理&lt;/h2&gt;
+&lt;p&gt;相同镜像格式代表arm64和amd64的镜像。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;确保docker manifest命令被使能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;#  ~/.docker/config.json中添加  &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+
+cat ~/.docker/config.json
+{
+    &amp;quot;experimental&amp;quot;: &amp;quot;enabled&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;将多架构镜像push到dockerhub中
+docker push lilinlinlin/ks-installer-amd64:v3.0.0
+docker push lilinlinlin/ks-installer-arm64:v3.0.0&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;创建对应镜像的 manifest list,特别重要&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;docker manifest create lilinlinlin/ks-installer:v3.0.0  \
+                       lilinlinlin/ks-installer-amd64:v3.0.0 \
+                       lilinlinlin/ks-installer-arm64:v3.0.0 --amend
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;查看修正manifest list内容,可以查看到arm和amd架构的字样&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt; docker manifest inspect lilinlinlin/ks-installer:v3.0.0
+
+ 如果相关信息不正确可使用annotate命令修正 
+docker manifest annotate --arch arm64 \
+       lilinlinlin/ks-installer:v3.0.0 \
+       lilinlinlin/ks-installer-arm64:v3.0.0
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;上传manifest list至dockerhub
+docker manifest push lilinlinlin/ks-installer:v3.0.0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;更多参考&#34;&gt;更多参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/docker/buildx&#34;&gt;https://github.com/docker/buildx&lt;/a&gt;
+&lt;a href=&#34;https://github.com/multiarch/qemu-user-static&#34;&gt;https://github.com/multiarch/qemu-user-static&lt;/a&gt;
+&lt;a href=&#34;https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux&#34;&gt;https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/getting-started-with-docker-for-arm-on-linux&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

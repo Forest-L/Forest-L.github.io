@@ -168,6 +168,31 @@
   </url>
   
   <url>
+    <loc>https://Forest-L.github.io/tags/amd/</loc>
+    <lastmod>2019-10-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/arm/</loc>
+    <lastmod>2019-10-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/tags/buildx/</loc>
+    <lastmod>2019-10-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/categories/image/</loc>
+    <lastmod>2019-10-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</loc>
+    <lastmod>2019-10-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://Forest-L.github.io/tags/apt-get/</loc>
     <lastmod>2019-10-10T00:00:00+00:00</lastmod>
   </url>
@@ -269,11 +294,6 @@
   
   <url>
     <loc>https://Forest-L.github.io/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</loc>
-    <lastmod>2019-08-13T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</loc>
     <lastmod>2019-08-13T00:00:00+00:00</lastmod>
   </url>
   
