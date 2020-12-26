@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | K8s中可预测的需求</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">K8s中可预测的需求</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>K8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2020-12-26T15:38:59&#43;08:00">2020-12-26 15:38</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#存在问题">存在问题</a></li>
+    <li><a href="#解决方案">解决方案</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#讨论">讨论</a></li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>在共享云环境中成功部署、管理和共存应用的基础，取决于识别和声明应用资源需求和运行时依赖性。这个Predictable Demands模式是关于你应该如何声明应用需求，无论是硬性的运行时依赖还是资源需求。声明你的需求对于Kubernetes在集群中为你的应用找到合适的位置至关重要。</p>
+<h2 id="存在问题">存在问题</h2>
+<p>Kubernetes可以管理用不同编程语言编写的应用，只要该应用可以在容器中运行。然而，不同的语言有不同的资源需求。通常情况下，编译后的语言运行速度更快，而且经常是
+与即时运行时或解释语言相比，需要更少的内存。考虑到很多同类别的现代编程语言对资源的要求都差不多，从资源消耗的角度来看，更重要的是领域、应用的业务逻辑和实际实现细节。</p>
+<p>很难预测容器可能需要多少资源才能发挥最佳功能，而知道服务运行的预期资源是开发人员（通过测试发现）。有些服务的CPU和内存消耗情况是固定的，有些服务则是瞬间的。有些服务需要持久性存储来存储数据；有些传统服务需要在主机上固定端口号才能正常工作。定义所有这些应用特性并将其传递给管理平台是云原生应用的基本前提。</p>
+<p>除了资源需求外，应用运行时还对平台管理的能力有依赖性，如数据存储或应用配置。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>了解容器的运行时要求很重要，主要有两个原因。首先，在定义了所有的运行时依赖和资源需求设想后，Kubernetes可以智能地决定在集群上的哪里运行容器以获得最有效的硬件利用率。在大量优先级不同的进程共享资源的环境中，要想成功共存，唯一的办法就是提前了解每个进程的需求。然而，智能投放只是硬币的一面。</p>
+<p>容器资源配置文件必不可少的第二个原因是容量规划。根据具体的服务需求和服务总量，我们可以针对不同的环境做一些容量规划，得出性价比最高的主机配置文件，来满足整个集群的需求。服务资源配置文件和容量规划相辅相成，才能长期成功地进行集群管理。</p>
+<p>在深入研究资源配置文件之前，我们先来看看如何声明运行时依赖关系。</p>
+<h4 id="运行时依赖">运行时依赖</h4>
+<p>最常见的运行时依赖之一是用于保存应用程序状态的文件存储。容器文件系统是短暂的，当容器关闭时就会丢失。Kubernetes提供了volume作为Pod级的存储实用程序，可以在容器重启后幸存。</p>
+<p>最直接的卷类型是emptyDir，只要Pod存活，它就会存活，当Pod被删除时，它的内容也会丢失。卷需要有其他类型的存储机制支持，才能有一个在Pod重启后仍能存活的卷。如果你的应用程序需要向这种长时间的存储设备读写文件，你必须在容器定义中使用volumes明确声明这种依赖性。
+如例1-1所示。</p>
+<pre><code>如例1-1，依赖于PV
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    volumeMounts:
+    - mountPath:&quot;/logs&quot;
+      name: log-volume
+  volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      claimName: random-generator-log
+</code></pre><p>调度器会评估Pod所需要的卷类型，这将影响Pod的调度位置。如果Pod需要的卷不是由集群上的任何节点提供的，那么Pod根本不会被调度。卷是运行时依赖性的一个例子，它影响Pod可以运行什么样的基础设施，以及Pod是否可以被调度。</p>
+<p>当你要求Kubernetes通过hostPort方式暴露容器端口为主机上特定端口时，也会发生类似的依赖关系。hostPort的使用在节点上创建了另一个运行时依赖性，并限制了Pod的调度位置。 hostPort在集群中的每个节点上保留了端口，并限制每个节点最多调度一个Pod。由于端口冲突，你可以扩展到Kubernetes集群中有多少节点就有多少Pod。</p>
+<p>另一种类型的依赖是配置。几乎每个应用程序都需要一些配置信息，Kubernetes提供的推荐解决方案是通过ConfigMaps。你的服务需要有一个消耗设置的策略&ndash;无论是通过环境变量还是文件系统。无论是哪种情况，这都会引入你的容器对名为ConfigMaps的运行时依赖性。如果没有创建所有预期的 ConfigMaps，则容器被调度在节点上，但它们不会启动。ConfigMaps和Secrets在第19章Configuratio资源中进行了更详细的解释，例1-2展示了如何将这些资源用作运行时依赖。</p>
+<pre><code>实例1-2所示，依赖于ConfigMap
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    env:
+    - name: PATTERN
+      valueFrom:
+        configMapKeyRef:
+          name: random-generator-config
+          key: pattern
+</code></pre><p>与ConfigMaps类似的概念是Secrets，它提供了一种略微更安全的方式将特定环境的配置分发到容器中。使用Secret的方式与使用ConfigMap的方式相同，它引入了从容器到namespace的相同依赖性。</p>
+<p>虽然ConfigMap和Secret对象的创建是我们必须执行的简单管理任务，但集群节点提供了存储和端口。其中一些依赖性限制了Pod被调度的位置（如果有的话），而其他依赖性则限制了Pod的运行。
+可能会阻止Pod的启动。在设计带有这种依赖关系的容器化应用程序时，一定要考虑它们创建之后运行时的约束。</p>
+<h4 id="资源配置文件">资源配置文件</h4>
+<p>指定容器的依赖性，如ConfigMap、Secret和卷，是很直接的。我们需要更多的思考和实验来确定容器的资源需求。在Kubernetes的上下文中，计算资源被定义为可以被容器请求、分配给容器并从容器中获取的东西。资源分为可压缩的（即可以节制的，如CPU，或网络带宽）和不可压缩的（即不能节制的，如内存）。</p>
+<p>区分可压缩资源和不可压缩资源很重要。如果你的容器消耗了太多的可压缩资源（如CPU），它们就会被节流，但如果它们使用了太多的不可压缩资源（如内存），它们就会被杀死（因为没有其他方法可以要求应用程序释放分配的内存）。</p>
+<p>根据你的应用程序的性质和实现细节，你必须指定所需资源的最小量（称为请求）和它可以增长到的最大量（限制）。每个容器定义都可以以请求和限制的形式指定它所需要的CPU和内存量。在一个高层次上，请求/限制的概念类似于软/硬限制。例如，同样地，我们通过使用-Xms和-Xmx命令行选项来定义Java应用程序的堆大小。</p>
+<p>调度器将Pod调度到节点时，使用的是请求量（但不是限制）。对于一个给定的Pod，调度器只考虑那些仍有足够能力容纳Pod及其所有请求资源量相加容器的节点。从这个意义上说，每个容器的请求字段会影响到Pod可以被调度或不被调度的位置。例1-3显示了如何为Pod指定这种限制。</p>
+<pre><code>实例1-3，资源限制
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec: 
+  containers: 
+  - image: k8spatterns/random-generator:1.0   name: random-generator 
+    resources:
+      requests:  
+        cpu: 100m 
+        memory: 100Mi 
+      limits:  
+        cpu: 200m 
+        memory: 200Mi
+</code></pre><p>根据您是指定请求、限制，还是两者都指定，平台提供不同的服务质量（QoS）。</p>
+<h5 id="best-effort">Best-Effort</h5>
+<p>没有为其容器设置任何请求和限制的Pod。这样的Pod被认为是最低优先级的，当Pod的节点用完不可压缩资源时，会首先被干掉。</p>
+<h5 id="burstable">Burstable</h5>
+<p>已定义请求和限制的Pod，但它们并不相等（而且限制比预期的请求大）。这样的Pod有最小的资源保证，但也愿意在可用的情况下消耗更多的资源，直至其极限。当节点面临不可压缩的资源压力时，如果没有Best-Effort Pods剩余，这些Pod很可能被干掉。</p>
+<h5 id="guaranteed">Guaranteed</h5>
+<p>拥有同等数量请求和限制资源的Pod。这些是优先级最高的Pod，保证不会在Best-Effort和Burstable Pods之前被干掉。</p>
+<p>所以你为容器定义的资源特性或省略资源特性会直接影响到它的QoS，并定义了Pod在资源不足时的相对重要性。在定义你的Pod资源需求时，要考虑到这个后果。</p>
+<h4 id="pod优先级">Pod优先级</h4>
+<p>我们解释了容器资源声明如何也定义了Pod的QoS，并影响Kubelet在资源不足时干掉Pod中容器的顺序。另一个相关的功能，在写这篇文章的时候还在测试阶段，就是Pod优先和优先权。Pod优先级允许表明一个Pod相对于其他Pod的重要性，这影响了Pod的调度顺序。让我们在例子1-4中看到它的作用。</p>
+<pre><code>实例1-4，pod优先级
+apiVersion: scheduling.k8s.io/v1beta1
+kind: PriorityClass
+metadata: 
+  name: high-priority 
+value: 1000 
+globalDefault: false
+description: This is a very high priority Pod class
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: random-generator 
+  labels: 
+    env: random-generator
+spec: 
+  containers: 
+  - image: k8spatterns/random-generator:1.0 
+    name: random-generator   
+  priorityClassName: high-priority
+</code></pre><p>我们创建了一个PriorityClass，这是一个非命名空间的对象，用于定义一个基于整数的优先级。我们的PriorityClass被命名为high-priority，优先级为1,000。现在我们可以通过它的名字将这个优先级分配给Pods，如priorityClassName：high-riority。PriorityClass是一种表示Pods相对重要性的机制，数值越高表示Pods越重要。</p>
+<p>启用Pod Priority功能后，它会影响调度器将Pod调度在节点上的顺序。首先，优先权进入许可控制器使用priorityClass Name字段来填充新Pod的优先权值。当有多个Pod等待调度时，调度器按最高优先级对待放Pod队列进行排序。在调度队列中，任何待定的Pod都会被选在其他优先级较低的待定Pod之前，如果没有阻止其调度的约束条件，该Pod就会被调度。</p>
+<p>下面是关键部分。如果没有足够容量的节点来调度Pod，调度器可以从节点上抢占（移除）优先级较低的Pod，以释放资源，调度优先级较高的Pod。因此，如果满足其他所有调度要求，优先级较高的Pod可能比优先级较低的Pod更早被调度。这种算法有效地使集群管理员能够控制哪些Pod是更关键的工作负载，并通过允许调度器驱逐优先级较低的Pod，以便在工作节点上为优先级较高的Pod腾出空间，将它们放在第一位。如果一个Pod不能被调度，调度器就会继续调度其他优先级较低的Pod。</p>
+<p>Pod QoS（前面已经讨论过了）和Pod优先级是两个正交的特性，它们之间没有联系，只有一点点重叠。QoS主要被Kubelet用来在可用计算资源较少时保持节点稳定性。==Kubelet在驱逐前首先考虑QoS，然后考虑Pods的PriorityClass。另一方面，调度器驱逐逻辑在选择抢占目标时完全忽略了Pods的QoS==。调度器试图挑选一组优先级最低的Pod，满足优先级较高的Pod等待调度的需求。</p>
+<p>当Pod具有指定的优先级时，它可能会对其他被驱逐的Pod产生不良影响。例如，当一个Pod的优雅终止策略受到重视，第10章中讨论的PodDisruptionBudget，单服务没有得到保证，这可能会打破一个依赖多数Pod数的较低优先级集群应用。</p>
+<p>另一个问题是恶意或不知情的用户创建了优先级最高的Pods，并驱逐了所有其他Pods。为了防止这种情况发生，ResourceQuota已经扩展到支持PriorityClass，较大的优先级数字被保留给通常不应该被抢占或驱逐的关键系统Pods。</p>
+<p>总而言之，Pod优先级应谨慎使用，因为用户指定的数字优先级，指导调度器和Kubelet调度或干掉哪些Pod，会受到用户的影响。任何改变都可能影响许多Pod，并可能阻止平台提供可预测的服务级别协议。</p>
+<h4 id="项目资源">项目资源</h4>
+<p>Kubernetes是一个自助服务平台，开发者可以在指定的隔离环境上运行他们认为合适的应用。然而，在一个共享的多租户平台中工作，也需要存在特定的边界和控制单元，以防止一些用户消耗平台的所有资源。其中一个这样的工具是ResourceQuota，它为限制命名空间中的聚合资源消耗提供了约束。通过ResourceQuotas，集群管理员可以限制消耗的计算资源（CPU、内存）和存储的总和。它还可以限制命名空间中创建的对象（如ConfigMaps、Secrets、Pods或Services）的总数。</p>
+<p>这方面的另一个有用的工具是LimitRange，它允许为每种类型的资源设置资源使用限制。除了指定不同资源类型的最小和最大允许量以及这些资源的默认值外，还可以控制请求和限制之间的比例，也就是所谓的超额承诺水平。表1-1给出了如何选择请求和限额的可能值的例子。</p>
+<pre><code>表1-1. Limit和request ranges
+Type       Resource  Min    Max  Default limit  Default request  Lim/req ratio  
+Container  CPU       500m   2    500m           250m             4
+Container  Memory    250Mi  2Gi  500Mi          250Mi            4
+</code></pre><p>LimitRanges对于控制容器资源配置非常有用，这样就不会出现需要的资源超过集群节点所能提供的资源的容器。它还可以防止集群用户创建消耗大量资源的容器，使节点不能为其他容器分配资源。考虑到请求(而不是限制)是调度器用来调度的主要容器特性，LimitRequestRatio允许你控制容器的请求和限制之间的差距有多大。在请求和限制之间有很大的综合差距，会增加节点上超负荷的机会，并且当许多容器同时需要比最初请求更多的资源时，可能会降低应用性能。</p>
+<h4 id="容量规划">容量规划</h4>
+<p>考虑到容器在不同的环境中可能会有不同的资源情况，以及不同数量的实例，显然，多用途环境的容量规划并不简单。例如，为了获得最佳的硬件利用率，在一个非生产集群上，你可能主要拥有Best-Effort和Burstable容器。在这样的动态环境中，很多容器都是同时启动和关闭的，即使有容器在资源不足的时候被平台干掉，也不会致命。在生产集群上，我们希望事情更加稳定和可预测，容器可能主要是Guaranteed类型，还有一些Burstable。如果一个容器被杀死，那很可能是一个信号，说明集群的容量应该增加。</p>
+<p>当然，在现实生活中，你使用Kubernetes这样的平台，更可能的原因是还有很多服务需要管理，有些服务即将退出，有些服务还在设计开发阶段。即使是一个不断移动的目标，根据前面描述的类似方法，我们可以计算出每个环境中所有服务所需要的资源总量。</p>
+<h2 id="讨论">讨论</h2>
+<p>容器不仅对隔离进程和作为打包方式有用。在确定了资源概况后，它们也是成功进行产能规划的基石。进行一些早期测试，以发现每个容器的资源需求，并将该信息作为未来产能规划和预测的基础。</p>
+<p>然而，更重要的是，资源配置文件是应用程序与Kubernetes沟通的方式，以协助调度和管理决策。如果你的应用不提供任何请求或限制，Kubernetes能做的就是把你的容器当作不透明的盒子，当集群满了的时候就会丢掉。所以，每一个应用或多或少都要考虑和提供这些资源声明。</p>
+<p>现在你已经知道了如何确定我们应用的大小，在第3章 &ldquo;声明式部署 &ldquo;中，你将学习多种策略来让我们的应用在Kubernetes上安装和更新。</p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 5533 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/storage-summary/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        存储总结
+    </a>
+    
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/cka-test-experience/">CkA考试经验</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1.16-installed-on-centos-system/">K8s1.16在centos安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/add-public-ip-to-kubernetes-apiserver-operation-guide/">添加公网ip到kubernetes的apiserver操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

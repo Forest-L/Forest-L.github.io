@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Tue, 06 Oct 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 26 Dec 2020 15:38:59 +0800</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s</title>
+      <link>https://Forest-L.github.io/tags/k8s/</link>
+      <pubDate>Sat, 26 Dec 2020 15:38:59 +0800</pubDate>
+      
+      <guid>https://Forest-L.github.io/tags/k8s/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>lvs</title>
@@ -27,15 +36,6 @@
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
       <guid>https://Forest-L.github.io/tags/vg/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>K8s</title>
-      <link>https://Forest-L.github.io/tags/k8s/</link>
-      <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
-      
-      <guid>https://Forest-L.github.io/tags/k8s/</guid>
       <description></description>
     </item>
     
