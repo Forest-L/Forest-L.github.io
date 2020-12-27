@@ -7,10 +7,103 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Sat, 26 Dec 2020 15:38:59 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 27 Dec 2020 19:08:06 +0800</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s中声明式的部署</title>
+      <link>https://Forest-L.github.io/post/declarative-deployment/</link>
+      <pubDate>Sun, 27 Dec 2020 19:08:06 +0800</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/declarative-deployment/</guid>
+      <description>&lt;p&gt;声明式Deployment模式的核心是Kubernetes 的Deployment资源。这个抽象封装了一组容器的升级和回滚过程，并使其执行成为一种可重复和自动化的活动。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;我们可以以自助服务的方式将隔离的环境作为命名空间进行调配，并通过调度器将服务调度在这些环境中，只需最少的人工干预。但是随着微服务的数量越来越多，不断地用新的版本更新和更换也成了越来越大的负担。&lt;/p&gt;
+&lt;p&gt;将服务升级到下一个版本涉及的活动包括启动新版本的Pod，优雅地停止旧版本的Pod，等待并验证它已经成功启动，有时在失败的情况下将其全部回滚到以前的版本。这些活动的执行方式有两种，一种是允许有一定的停机时间，但不允许同时运行并发的服务版本，另一种是没有停机时间，但在更新过程中由于两个版本的服务都在运行，导致资源使用量增加。手动执行这些步骤可能会导致人为错误，而正确地编写脚本则需要花费大量的精力，这两点都会使发布过程迅速变成瓶颈。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;幸运的是，Kubernetes也已经自动完成了这项活动。使用Deployment的概念，我们可以描述我们的应用程序应该如何更新，使用不同的策略，并调整更新过程的各个方面。如果您考虑到每次发布周期都要为每个微服务实例进行多次部署的话（根据团队和项目的不同，可能从几分钟到几个月），这是Kubernetes的另一个省力的自动化。&lt;/p&gt;
+&lt;p&gt;在第2章中，我们已经看到，为了有效地完成工作，调度器需要主机上有足够的资源、适当的调度策略以及容器充分定义了资源配置文件。同样，为了使部署正确地完成其工作，它希望容器成为良好的云原生。部署的核心是可预测地启动和停止一组Pod的能力。为了达到预期的工作效果，容器本身通常会监听和符合生命周期事件（如SIGTERM；请参见第5章，托管生命周期），并且还提供第4章云原生中所述的健康检查endpoints，即健康探针，以指示它们是否成功启动。&lt;/p&gt;
+&lt;p&gt;如果一个容器准确地覆盖了这两个领域，平台就可以干净利落地关闭旧的容器，并通过启动更新的实例来替换它们。然后，更新过程的所有剩余方面都可以以声明的方式定义，并作为一个原子动作执行，具有预定义的步骤和预期的结果。让我们看看容器更新行为的选项吧&lt;/p&gt;
+&lt;p&gt;==注意：==&lt;/p&gt;
+&lt;h4 id=&#34;使用-kubectl-进行命令式-rolling-updates已被废弃&#34;&gt;使用 kubectl 进行命令式 Rolling Updates已被废弃&lt;/h4&gt;
+&lt;p&gt;Kubernetes从一开始就支持滚动更新。最早的实现是势在必行的，客户端kubectl告诉服务器每个更新步骤要做什么。&lt;/p&gt;
+&lt;p&gt;虽然kubectl rolling-update 命令仍然存在，但由于这种命令式的方法存在以下缺点，所以它已经被高度废弃。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;kubectl rolling-update 不是描述预期的最终状态，而是发布命令让系统进入预期状态。&lt;/li&gt;
+&lt;li&gt;替换容器和ReplicationControllers的整个协调逻辑由kubectl执行，它在发生更新过程时，会监控并与API服务器交互，将固有服务器端的责任转移到客户端。&lt;/li&gt;
+&lt;li&gt;您可能需要不止一条命令来使系统进入期望状态。这些命令必须是自动的，并且在不同的环境中可以重复使用。&lt;/li&gt;
+&lt;li&gt;随着时间的推移，别人可能会覆盖你的修改。&lt;/li&gt;
+&lt;li&gt;更新过程必须记录下来，并在服务推进的同时保持更新。&lt;/li&gt;
+&lt;li&gt;要想知道我们部署了什么，唯一的方法就是检查系统的状态。有时候，当前系统的状态可能并不是理想的状态，在这种情况下，我们必须使部署文档相互关联。&lt;/li&gt;
+&lt;li&gt;取而代之的是，引入Deployment资源对象来支持声明式更新，完全由Kubernetes后端管理。由于声明式更新有如此多的优势，而命令式更新支持终将消失，我们在这个模式中只关注声明式更新。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;rolling-deployment&#34;&gt;Rolling Deployment&lt;/h4&gt;
+&lt;p&gt;Kubernetes中更新应用的声明方式是通过Deployment的概念。在幕后，Deployment创建了一个ReplicaSet，支持基于集合的标签选择器。同时，Deployment抽象允许通过RollingUpdate（默认）和Recreate等策略来塑造更新过程行为。例1-1显示了Deployment配置的滚动更新策略重要部分。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;例1-1，Deployment for a rolling update
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: random-generator
+spec: 
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    selector:
+      matchLabels:
+        app: random-generator
+    template:
+      metadata:
+        labels:
+          app: random-generator
+      spec: 
+        containers:
+        - image: k8spatterns/random-generator:1.0
+          name: random-generator 
+          readinessProbe:
+            exec:
+              command: [&amp;quot;stat&amp;quot;,&amp;quot;/random-generator-ready&amp;quot; ]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;滚动更新（RollingUpdate）策略行为确保了更新过程中没有停机时间。在幕后，Deployment实现类似这样的动作来执行，通过创建新的ReplicaSets和用新容器替换旧容器。通过Deployment，这里有一个增强是可以控制新容器滚动的速度。Deployment对象允许你通过maxSurge和maxUnavailable字段来控制可用和超出Pod的范围。图1-1展示了滚动更新过程。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyrd6sisrj30eh04s3z1.jpg&#34; alt=&#34;image&#34;&gt;&lt;/p&gt;
+&lt;p&gt;要触发声明式更新，你有三个选项:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 kubectl replace 将整个部署替换为新版本的部署。&lt;/li&gt;
+&lt;li&gt;补丁(kubectl patch)或交互式编辑(kubectl edit)部署，以设置新版本的新容器镜像。&lt;/li&gt;
+&lt;li&gt;使用 kubectl set image 来设置部署中的新镜像。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;请参阅我们的示例仓库中的完整示例，其中演示了这些命令的用法，并展示了如何使用kubectl rollout监控或回滚升级。&lt;/p&gt;
+&lt;p&gt;除了解决前面提到的命令部署服务方式的弊端外，Deployment还带来了以下好处：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Deployment是一个Kubernetes资源对象，其状态完全由Kubernetes内部管理。整个更新过程在服务器端进行，无需客户端交互。&lt;/li&gt;
+&lt;li&gt;Deployment的声明性使您可以看到已部署的状态应该是怎样的，而不是到达那里的必要步骤。&lt;/li&gt;
+&lt;li&gt;Deployment定义是一个可执行的对象，在上生产之前会在多个环境中进行测试。&lt;/li&gt;
+&lt;li&gt;更新过程也会被完全记录下来，版本上有暂停、继续和回滚到以前版本的选项。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;fixed-deployment&#34;&gt;Fixed Deployment&lt;/h4&gt;
+&lt;p&gt;滚动更新（RollingUpdate）策略对于在更新过程中确保零停机时间非常有用。然而，这种方法的副作用是，在更新过程中，容器的两个版本同时运行。这可能会给服务消费者带来问题，特别是当更新过程在服务API中引入了向后不兼容的变化，而客户端又无法处理这些变化时。对于这种情况，有Recreate策略，如图1-2所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glys496y3lj30eg052t9b.jpg&#34; alt=&#34;fixed Deployment.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Recreate策略的效果是将maxUnavailable设置为已声明的复制数。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这一系列操作的结果是，当所有拥有旧版本的容器被停止时，会有一些停机时间，而且没有新的容器准备好处理传入的请求。从积极的一面来看，不会有两个版本的容器同时运行，简化了服务消费者的生活，一次只处理一个版本。&lt;/p&gt;
+&lt;h4 id=&#34;蓝绿发布&#34;&gt;蓝绿发布&lt;/h4&gt;
+&lt;p&gt;蓝绿部署是一种用于在最小化停机时间和降低风险的生产环境中部署软件的发布策略。Kubernetes&amp;rsquo;Deployment抽象是一个基本概念，它可以让你定义Kubernetes如何将不可变容器从一个版本过渡到另一个版本。我们可以将Deployment基元作为一个构件，与其他Kubernetes基元一起，实现这种更高级的蓝绿部署的发布策略。&lt;/p&gt;
+&lt;p&gt;如果没有使用Service Mesh或Knative等扩展，则需要手动完成蓝绿部署。技术上，它的工作原理是通过创建第二个Deployment，容器的最新版本（我们称它为绿色）还没有服务于任何请求。在这一阶段，原始Deployment中的旧Pod副本（称为蓝色）仍在运行并服务于实时请求。&lt;/p&gt;
+&lt;p&gt;一旦我们确信新版本的Pods是健康的，并且准备好处理实时请求，我们就会将流量从旧的Pod副本切换到新的副本。Kubernetes中的这个活动可以通过更新服务选择器来匹配新容器（标记为绿色）来完成。如图1-3所示，一旦绿色容器处理了所有的流量，就可以删除蓝色容器，释放资源用于未来的蓝绿部署。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glysteayffj30f105bmxr.jpg&#34; alt=&#34;蓝绿发布.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;蓝绿方式的一个好处是，只有一个版本的应用在服务请求，这降低了Service消费者处理多个并发版本的复杂性。缺点是它需要两倍的应用容量，同时蓝色和绿色容器都在运行。另外，在过渡期间，可能会出现长时间运行的进程和数据库状态漂移的重大并发症。&lt;/p&gt;
+&lt;h4 id=&#34;金丝雀发布&#34;&gt;金丝雀发布&lt;/h4&gt;
+&lt;p&gt;金丝雀发布是一种通过用新的实例替换一小部分旧的实例来软性地将一个应用程序的新版本部署到生产中的方法。这种技术通过只让部分消费者达到更新的版本来降低将新版本引入生产的风险。当我们对新版本的服务以及它在小样本用户中的表现感到满意时，我们就用新版本替换所有的旧实例。图1-4显示了一个金丝雀版本的运行情况。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyt4zxuo9j30ey0580t8.jpg&#34; alt=&#34;金丝雀发布.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在Kubernetes中，可以通过为新的容器版本（最好使用Deployment）创建一个新的ReplicaSet来实现这一技术，该ReplicaSet的副本数量较少，可以作为Canary实例使用。在这个阶段，服务应该将一些消费者引导到更新的Pod实例上。一旦我们确信使用新 ReplicaSet 的一切都能按预期工作，我们就会将新的 ReplicaSet 规模化，旧的 ReplicaSet 则降为零。从某种程度上来说，我们是在进行一个可控的、经过用户测试的增量式推广。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;Deoloyment本质是 Kubernetes 将手动更新应用程序的繁琐过程转化为可重复和自动化的声明式活动的一个例子。开箱即用的部署策略（rolling和recreate）控制用新容器替换旧容器，而发布策略（bluegreen和金丝雀）则控制新版本如何提供给服务消费者。后两种发布策略是基于人对过渡触发器的决定，因此不是完全自动化的，而是需要人的交互。图1-5显示了部署和发布策略的摘要，显示了过渡期间的实例数。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyw6xng8fj30d70a1dgn.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;每个软件都是不同的，部署复杂的系统通常需要额外的步骤和检查。本章讨论的技术涵盖了Pod更新过程，但不包括更新和回滚其他Pod依赖项，如ConfigMaps、Secrete或其他依赖服务。&lt;/p&gt;
+&lt;p&gt;截至目前，Kubernetes有一个建议，允许在部署过程中使用钩子。Pre和Post钩子将允许在Kubernetes执行部署策略之前和之后执行自定义命令。这些命令可以在部署进行时执行额外的操作，另外还可以中止、重试或继续部署。这些命令是向新的自动化部署和发布策略迈出的良好一步。目前，一种行之有效的方法是用脚本化去更高层次上编写更新过程，本节中讨论的Deployment和其他属性来管理服务及其依赖关系的更新过程。&lt;/p&gt;
+&lt;p&gt;无论你使用何种部署策略，Kubernetes都必须知道你的应用Pod何时启动并运行，以执行所需的步骤序列达到定义的目标部署状态。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>K8s中可预测的需求</title>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>一切皆有可能  | K8s中声明式的部署</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="一切皆有可能" class="heading font-cursive icon">一切皆有可能</a>
+	</h2>
+</div>
+<h1 class="pt-2">K8s中声明式的部署</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>K8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2020-12-27T19:08:06&#43;08:00">2020-12-27 19:08</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#存在问题">存在问题</a></li>
+    <li><a href="#解决方案">解决方案</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#讨论">讨论</a></li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>声明式Deployment模式的核心是Kubernetes 的Deployment资源。这个抽象封装了一组容器的升级和回滚过程，并使其执行成为一种可重复和自动化的活动。</p>
+<h2 id="存在问题">存在问题</h2>
+<p>我们可以以自助服务的方式将隔离的环境作为命名空间进行调配，并通过调度器将服务调度在这些环境中，只需最少的人工干预。但是随着微服务的数量越来越多，不断地用新的版本更新和更换也成了越来越大的负担。</p>
+<p>将服务升级到下一个版本涉及的活动包括启动新版本的Pod，优雅地停止旧版本的Pod，等待并验证它已经成功启动，有时在失败的情况下将其全部回滚到以前的版本。这些活动的执行方式有两种，一种是允许有一定的停机时间，但不允许同时运行并发的服务版本，另一种是没有停机时间，但在更新过程中由于两个版本的服务都在运行，导致资源使用量增加。手动执行这些步骤可能会导致人为错误，而正确地编写脚本则需要花费大量的精力，这两点都会使发布过程迅速变成瓶颈。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>幸运的是，Kubernetes也已经自动完成了这项活动。使用Deployment的概念，我们可以描述我们的应用程序应该如何更新，使用不同的策略，并调整更新过程的各个方面。如果您考虑到每次发布周期都要为每个微服务实例进行多次部署的话（根据团队和项目的不同，可能从几分钟到几个月），这是Kubernetes的另一个省力的自动化。</p>
+<p>在第2章中，我们已经看到，为了有效地完成工作，调度器需要主机上有足够的资源、适当的调度策略以及容器充分定义了资源配置文件。同样，为了使部署正确地完成其工作，它希望容器成为良好的云原生。部署的核心是可预测地启动和停止一组Pod的能力。为了达到预期的工作效果，容器本身通常会监听和符合生命周期事件（如SIGTERM；请参见第5章，托管生命周期），并且还提供第4章云原生中所述的健康检查endpoints，即健康探针，以指示它们是否成功启动。</p>
+<p>如果一个容器准确地覆盖了这两个领域，平台就可以干净利落地关闭旧的容器，并通过启动更新的实例来替换它们。然后，更新过程的所有剩余方面都可以以声明的方式定义，并作为一个原子动作执行，具有预定义的步骤和预期的结果。让我们看看容器更新行为的选项吧</p>
+<p>==注意：==</p>
+<h4 id="使用-kubectl-进行命令式-rolling-updates已被废弃">使用 kubectl 进行命令式 Rolling Updates已被废弃</h4>
+<p>Kubernetes从一开始就支持滚动更新。最早的实现是势在必行的，客户端kubectl告诉服务器每个更新步骤要做什么。</p>
+<p>虽然kubectl rolling-update 命令仍然存在，但由于这种命令式的方法存在以下缺点，所以它已经被高度废弃。</p>
+<ul>
+<li>kubectl rolling-update 不是描述预期的最终状态，而是发布命令让系统进入预期状态。</li>
+<li>替换容器和ReplicationControllers的整个协调逻辑由kubectl执行，它在发生更新过程时，会监控并与API服务器交互，将固有服务器端的责任转移到客户端。</li>
+<li>您可能需要不止一条命令来使系统进入期望状态。这些命令必须是自动的，并且在不同的环境中可以重复使用。</li>
+<li>随着时间的推移，别人可能会覆盖你的修改。</li>
+<li>更新过程必须记录下来，并在服务推进的同时保持更新。</li>
+<li>要想知道我们部署了什么，唯一的方法就是检查系统的状态。有时候，当前系统的状态可能并不是理想的状态，在这种情况下，我们必须使部署文档相互关联。</li>
+<li>取而代之的是，引入Deployment资源对象来支持声明式更新，完全由Kubernetes后端管理。由于声明式更新有如此多的优势，而命令式更新支持终将消失，我们在这个模式中只关注声明式更新。</li>
+</ul>
+<h4 id="rolling-deployment">Rolling Deployment</h4>
+<p>Kubernetes中更新应用的声明方式是通过Deployment的概念。在幕后，Deployment创建了一个ReplicaSet，支持基于集合的标签选择器。同时，Deployment抽象允许通过RollingUpdate（默认）和Recreate等策略来塑造更新过程行为。例1-1显示了Deployment配置的滚动更新策略重要部分。</p>
+<pre><code>例1-1，Deployment for a rolling update
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: random-generator
+spec: 
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    selector:
+      matchLabels:
+        app: random-generator
+    template:
+      metadata:
+        labels:
+          app: random-generator
+      spec: 
+        containers:
+        - image: k8spatterns/random-generator:1.0
+          name: random-generator 
+          readinessProbe:
+            exec:
+              command: [&quot;stat&quot;,&quot;/random-generator-ready&quot; ]
+</code></pre><p>滚动更新（RollingUpdate）策略行为确保了更新过程中没有停机时间。在幕后，Deployment实现类似这样的动作来执行，通过创建新的ReplicaSets和用新容器替换旧容器。通过Deployment，这里有一个增强是可以控制新容器滚动的速度。Deployment对象允许你通过maxSurge和maxUnavailable字段来控制可用和超出Pod的范围。图1-1展示了滚动更新过程。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1glyrd6sisrj30eh04s3z1.jpg" alt="image"></p>
+<p>要触发声明式更新，你有三个选项:</p>
+<ul>
+<li>使用 kubectl replace 将整个部署替换为新版本的部署。</li>
+<li>补丁(kubectl patch)或交互式编辑(kubectl edit)部署，以设置新版本的新容器镜像。</li>
+<li>使用 kubectl set image 来设置部署中的新镜像。</li>
+</ul>
+<p>请参阅我们的示例仓库中的完整示例，其中演示了这些命令的用法，并展示了如何使用kubectl rollout监控或回滚升级。</p>
+<p>除了解决前面提到的命令部署服务方式的弊端外，Deployment还带来了以下好处：</p>
+<ul>
+<li>Deployment是一个Kubernetes资源对象，其状态完全由Kubernetes内部管理。整个更新过程在服务器端进行，无需客户端交互。</li>
+<li>Deployment的声明性使您可以看到已部署的状态应该是怎样的，而不是到达那里的必要步骤。</li>
+<li>Deployment定义是一个可执行的对象，在上生产之前会在多个环境中进行测试。</li>
+<li>更新过程也会被完全记录下来，版本上有暂停、继续和回滚到以前版本的选项。</li>
+</ul>
+<h4 id="fixed-deployment">Fixed Deployment</h4>
+<p>滚动更新（RollingUpdate）策略对于在更新过程中确保零停机时间非常有用。然而，这种方法的副作用是，在更新过程中，容器的两个版本同时运行。这可能会给服务消费者带来问题，特别是当更新过程在服务API中引入了向后不兼容的变化，而客户端又无法处理这些变化时。对于这种情况，有Recreate策略，如图1-2所示。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1glys496y3lj30eg052t9b.jpg" alt="fixed Deployment.png"></p>
+<p>Recreate策略的效果是将maxUnavailable设置为已声明的复制数。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这一系列操作的结果是，当所有拥有旧版本的容器被停止时，会有一些停机时间，而且没有新的容器准备好处理传入的请求。从积极的一面来看，不会有两个版本的容器同时运行，简化了服务消费者的生活，一次只处理一个版本。</p>
+<h4 id="蓝绿发布">蓝绿发布</h4>
+<p>蓝绿部署是一种用于在最小化停机时间和降低风险的生产环境中部署软件的发布策略。Kubernetes&rsquo;Deployment抽象是一个基本概念，它可以让你定义Kubernetes如何将不可变容器从一个版本过渡到另一个版本。我们可以将Deployment基元作为一个构件，与其他Kubernetes基元一起，实现这种更高级的蓝绿部署的发布策略。</p>
+<p>如果没有使用Service Mesh或Knative等扩展，则需要手动完成蓝绿部署。技术上，它的工作原理是通过创建第二个Deployment，容器的最新版本（我们称它为绿色）还没有服务于任何请求。在这一阶段，原始Deployment中的旧Pod副本（称为蓝色）仍在运行并服务于实时请求。</p>
+<p>一旦我们确信新版本的Pods是健康的，并且准备好处理实时请求，我们就会将流量从旧的Pod副本切换到新的副本。Kubernetes中的这个活动可以通过更新服务选择器来匹配新容器（标记为绿色）来完成。如图1-3所示，一旦绿色容器处理了所有的流量，就可以删除蓝色容器，释放资源用于未来的蓝绿部署。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1glysteayffj30f105bmxr.jpg" alt="蓝绿发布.png"></p>
+<p>蓝绿方式的一个好处是，只有一个版本的应用在服务请求，这降低了Service消费者处理多个并发版本的复杂性。缺点是它需要两倍的应用容量，同时蓝色和绿色容器都在运行。另外，在过渡期间，可能会出现长时间运行的进程和数据库状态漂移的重大并发症。</p>
+<h4 id="金丝雀发布">金丝雀发布</h4>
+<p>金丝雀发布是一种通过用新的实例替换一小部分旧的实例来软性地将一个应用程序的新版本部署到生产中的方法。这种技术通过只让部分消费者达到更新的版本来降低将新版本引入生产的风险。当我们对新版本的服务以及它在小样本用户中的表现感到满意时，我们就用新版本替换所有的旧实例。图1-4显示了一个金丝雀版本的运行情况。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1glyt4zxuo9j30ey0580t8.jpg" alt="金丝雀发布.png"></p>
+<p>在Kubernetes中，可以通过为新的容器版本（最好使用Deployment）创建一个新的ReplicaSet来实现这一技术，该ReplicaSet的副本数量较少，可以作为Canary实例使用。在这个阶段，服务应该将一些消费者引导到更新的Pod实例上。一旦我们确信使用新 ReplicaSet 的一切都能按预期工作，我们就会将新的 ReplicaSet 规模化，旧的 ReplicaSet 则降为零。从某种程度上来说，我们是在进行一个可控的、经过用户测试的增量式推广。</p>
+<h2 id="讨论">讨论</h2>
+<p>Deoloyment本质是 Kubernetes 将手动更新应用程序的繁琐过程转化为可重复和自动化的声明式活动的一个例子。开箱即用的部署策略（rolling和recreate）控制用新容器替换旧容器，而发布策略（bluegreen和金丝雀）则控制新版本如何提供给服务消费者。后两种发布策略是基于人对过渡触发器的决定，因此不是完全自动化的，而是需要人的交互。图1-5显示了部署和发布策略的摘要，显示了过渡期间的实例数。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1glyw6xng8fj30d70a1dgn.jpg" alt=""></p>
+<p>每个软件都是不同的，部署复杂的系统通常需要额外的步骤和检查。本章讨论的技术涵盖了Pod更新过程，但不包括更新和回滚其他Pod依赖项，如ConfigMaps、Secrete或其他依赖服务。</p>
+<p>截至目前，Kubernetes有一个建议，允许在部署过程中使用钩子。Pre和Post钩子将允许在Kubernetes执行部署策略之前和之后执行自定义命令。这些命令可以在部署进行时执行额外的操作，另外还可以中止、重试或继续部署。这些命令是向新的自动化部署和发布策略迈出的良好一步。目前，一种行之有效的方法是用脚本化去更高层次上编写更新过程，本节中讨论的Deployment和其他属性来管理服务及其依赖关系的更新过程。</p>
+<p>无论你使用何种部署策略，Kubernetes都必须知道你的应用Pod何时启动并运行，以执行所需的步骤序列达到定义的目标部署状态。</p></div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 4112 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/predictable-demands/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        K8s中可预测的需求
+    </a>
+    
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/predictable-demands/">K8s中可预测的需求</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/cka-test-experience/">CkA考试经验</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1.16-installed-on-centos-system/">K8s1.16在centos安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/add-public-ip-to-kubernetes-apiserver-operation-guide/">添加公网ip到kubernetes的apiserver操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>
