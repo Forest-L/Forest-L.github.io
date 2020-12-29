@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on 一切皆有可能</title>
+    <title>Posts on 李林博客</title>
     <link>https://Forest-L.github.io/post/</link>
-    <description>Recent content in Posts on 一切皆有可能</description>
+    <description>Recent content in Posts on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
@@ -76,7 +76,8 @@ spec:
 &lt;p&gt;除了记录到标准流中，将退出容器的原因记录到/dev/termination-log也是一个好的做法。这个位置是容器在永久消失之前陈述其最后意愿的地方。图1-1显示了容器如何与运行时平台通信的可能选项。
 &lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1a8dibrjj30ah03dwel.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;容器通过将其视为黑盒，为包装和运行应用程序提供了一种统一的方式。然而，任何旨在成为云原生产品的容器都必须为运行时环境提供API，以观察容器的健康状况并采取相应行动。这种支持是以统一的方式实现容器更新和生命周期自动化的基本前提，从而提高系统的弹性和用户体验。在实际操作中，这意味着，作为最起码的要求，你的容器化应用程序必须为不同类型的健康检查（liveness和readiness）提供API。&lt;/p&gt;
-&lt;p&gt;即使是表现更好的应用程序也必须提供其他手段，让管理平台通过集成跟踪和度量收集库（如OpenTracing或Prometheus）来观察容器化应用程序的状态。把你的应用当作一个黑盒子，但要实现所有必要的API，以帮助平台以最好的方式观察和管理你的应用。&lt;/p&gt;</description>
+&lt;p&gt;即使是表现更好的应用程序也必须提供其他手段，让管理平台通过集成跟踪和度量收集库（如OpenTracing或Prometheus）来观察容器化应用程序的状态。把你的应用当作一个黑盒子，但要实现所有必要的API，以帮助平台以最好的方式观察和管理你的应用。&lt;/p&gt;
+</description>
     </item>
     
     <item>
