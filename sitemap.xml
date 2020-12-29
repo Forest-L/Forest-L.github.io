@@ -8,7 +8,22 @@
   </url>
   
   <url>
+    <loc>https://Forest-L.github.io/categories/</loc>
+    <lastmod>2020-12-29T13:34:44+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://Forest-L.github.io/tags/k8s/</loc>
+    <lastmod>2020-12-29T13:34:44+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/post/health-probe/</loc>
+    <lastmod>2020-12-29T13:34:44+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://Forest-L.github.io/categories/kubernetes/</loc>
     <lastmod>2020-12-29T13:34:44+08:00</lastmod>
   </url>
   
@@ -33,11 +48,6 @@
   </url>
   
   <url>
-    <loc>https://Forest-L.github.io/post/health-probe/</loc>
-    <lastmod>2020-12-29T13:34:44+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://Forest-L.github.io/post/declarative-deployment/</loc>
     <lastmod>2020-12-27T19:08:06+08:00</lastmod>
   </url>
@@ -45,11 +55,6 @@
   <url>
     <loc>https://Forest-L.github.io/post/predictable-demands/</loc>
     <lastmod>2020-12-26T15:38:59+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://Forest-L.github.io/categories/</loc>
-    <lastmod>2020-10-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
