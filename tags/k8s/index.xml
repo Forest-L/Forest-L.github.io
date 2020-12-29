@@ -7,10 +7,77 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Sun, 27 Dec 2020 19:08:06 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 29 Dec 2020 13:34:44 +0800</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>健康检查</title>
+      <link>https://Forest-L.github.io/post/health-probe/</link>
+      <pubDate>Tue, 29 Dec 2020 13:34:44 +0800</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/health-probe/</guid>
+      <description>&lt;p&gt;健康探针模式是关于应用程序如何将其健康状态传达给Kubernetes。为了实现完全自动化，云原生应用必须具有高度的可观察性，允许推断其状态，以便Kubernetes能够检测应用是否已经启动，是否准备好服务的请求。这些观察结果会影响Pods的生命周期管理以及流量被路由到应用程序的方式。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;Kubernetes会定期检查容器进程状态，如果发现问题就会重新启动。然而，从实践中我们知道，检查进程状态并不足以决定应用程序的健康状况。在很多情况下，一个应用程序挂起了，但它的进程仍然在运行。例如，一个Java应用程序可能会抛出一个OutOfMemoryError，但JVM进程仍在运行。或者，一个应用程序可能会因为运行到一个无限循环、死锁或一些冲击（缓存、堆、进程）而冻结。为了检测这类情况，Kubernetes需要一种可靠的方法来检查应用程序的健康状况。也就是说，并不是要了解应用的内部工作情况，而是一种检查，表明应用是否按照预期运行，是否能够为消费者提供服务。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;软件业已经接受了这样一个事实，即不可能写出无错误的代码。此外，在使用分布式应用程序时，发生故障的机会就更多了。因此，处理故障的重点已经从避免故障转移到检测故障和恢复上。检测故障并不是一个简单的任务，不能对所有的应用统一执行，因为所有的应用对故障的定义都不同。而且，各种类型的故障需要不同的纠正措施。只要有足够的时间，暂时性的故障可能会自我恢复，而其他一些故障可能需要重新启动应用程序。让我们看看Kubernetes用来检测和纠正故障的检查。&lt;/p&gt;
+&lt;h4 id=&#34;进程健康检查&#34;&gt;进程健康检查&lt;/h4&gt;
+&lt;p&gt;进程健康检查是Kubelet不断对容器进程进行的最简单的健康检查。如果容器进程没有运行，就会重新启动探测。因此，即使没有任何其他的健康检查，应用程序也会因为这个通用检查而变得更加健壮。如果你的应用程序能够检测到任何类型的故障并关闭自己，那么进程健康检查就是你所需要的全部内容.然而，对于大多数情况下，这还不够，其他类型的健康检查也是必要的。&lt;/p&gt;
+&lt;h4 id=&#34;liveness-probes&#34;&gt;Liveness Probes&lt;/h4&gt;
+&lt;p&gt;如果你的应用程序运行到一些死锁，从进程健康检查的角度来看，它仍然被认为是健康的。为了根据你的==应用业务逻辑来检测==这种问题和任何其他类型的故障，Kubernetes有==liveness probes==&amp;ndash;由Kubelet代理定期执行检查，询问你的容器确认它仍然是健康的。重要的是要从外部而不是应用程序本身执行健康检查，因为一些故障可能会阻止应用程序看门狗报告其故障。关于纠正措施，这种健康检查类似于进程健康检查，因为如果检测到故障，容器就会重新启动。然而，在使用什么方法检查应用程序健康状况方面，它提供了更多的灵活性，如下所示。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;HTTP探针通过容器IP地址执行HTTP GET请求，并期望得到一个介于200和399之间的成功的HTTP响应代码。&lt;/li&gt;
+&lt;li&gt;TCP Socket探针假设TCP连接成功。&lt;/li&gt;
+&lt;li&gt;Exec探针在容器内核命名空间中执行一个任意命令，并期望有一个成功的退出代码（0）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;1.1 容器中配置liveness probe
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-liveness-check
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0 
+    name: random-generator
+    env:
+    - name: DELAY_STARTUP
+      value:&amp;quot;20&amp;quot; 
+    ports:
+    - containerPort: 8080
+    protocol: TCP
+    livenessProbe:
+      httpGet:
+      path: /actuator/health
+      port: 8080
+    initialDelaySeconds: 30
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;根据您的应用程序的性质，您可以选择最适合您的方法。由您的实现来决定您的应用程序何时被认为是健康的或不健康的。然而，请记住，没有通过健康检查的结果是重启你的容器。如果重启你的容器没有帮助，那么健康检查失败没有任何好处，因为Kubernetes会重启你的容器而不解决根本问题。&lt;/p&gt;
+&lt;h4 id=&#34;readiness-probes&#34;&gt;Readiness Probes&lt;/h4&gt;
+&lt;p&gt;Liveness检查对于保持应用程序的健康非常有用，它可以杀死不健康的容器，并用新的容器替换它们。但有时一个容器可能并不健康，重启它可能也无济于事。最常见的例子是当一个容器还在启动，还没有准备好处理任何请求。或者是一个容器超载了，它的延迟在增加，你希望它暂时屏蔽掉额外的负载。&lt;/p&gt;
+&lt;p&gt;对于这种场景，Kubernetes有Readiness探针。执行就绪性Readiness检查的方法与有效性检查（HTTP、TCP、Exec）相同，但纠正措施不同。失败的Readiness探针不是重启容器，而是导致容器从服务端点中移除，并且不接收任何新的流量。当容器准备就绪时，Readiness针会发出信号，以便它在受到服务请求的冲击之前有一段时间进行热身。它对于在后期阶段屏蔽服务的流量也很有用，因为Readiness探测会定期执行，类似于Liveness检查。例1-2展示了如何通过探测已运行的应用的内部文件是否存在来实现Readiness探测。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1-2 容器中配置readiness probe
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-readiness-check
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    readinessProbe:
+      exec:  command: [ &amp;quot;stat&amp;quot;, &amp;quot;/var/run/random-generator-ready&amp;quot; ]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;同样，由你对健康检查的实现来决定你的应用程序什么时候准备好做它的工作，什么时候应该让它自己去做。进程健康检查和liveness检查的目的是通过重启容器从故障中恢复，而readiness检查则是为你的应用程序争取时间，并期望它自己恢复。请记住，Kubernetes试图阻止你的容器接收新的请求（例如，当它正在关闭时），无论readiness检查是否在收到SIGTERM信号后仍然通过。&lt;/p&gt;
+&lt;p&gt;在许多情况下，您可以同时执行liveness和readiness探针检查。然而，readiness探针的存在为您的容器提供了启动时间。只有通过了readiness检查，部署才被视为成功，因此，例如，使用旧版本的Pods可以作为滚动更新的一部分被终止。&lt;/p&gt;
+&lt;p&gt;liveness和readiness探针是云原生应用程序自动化的基本构件。应用框架，如Spring执行器、WildFly Swarm健康检查、Karaf健康检查或Java的MicroProfile规范都提供了健康探针的实现。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;为了实现完全自动化，云原生应用必须具有高度可观察性，为管理平台提供读取和解释应用健康状况的方法，并在必要时采取纠正措施。健康检查在部署、自愈、扩展等活动的自动化中起着基础作用。然而，对于应用健康，您的应用程序还可以通过其他手段提供更多可见性。&lt;/p&gt;
+&lt;p&gt;显而易见的、老的方法是通过日志记录来实现这一目的。对于容器来说，一个好的做法是记录任何重大的系统出错和系统错误事件，并将这些日志收集到一个中心位置以便进一步分析。日志通常不是用来采取自动行动的，而是用来提出告警和进一步调查。日志更有用的方面是对故障的事后分析和检测不明显的错误。&lt;/p&gt;
+&lt;p&gt;除了记录到标准流中，将退出容器的原因记录到/dev/termination-log也是一个好的做法。这个位置是容器在永久消失之前陈述其最后意愿的地方。图1-1显示了容器如何与运行时平台通信的可能选项。
+&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1a8dibrjj30ah03dwel.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;容器通过将其视为黑盒，为包装和运行应用程序提供了一种统一的方式。然而，任何旨在成为云原生产品的容器都必须为运行时环境提供API，以观察容器的健康状况并采取相应行动。这种支持是以统一的方式实现容器更新和生命周期自动化的基本前提，从而提高系统的弹性和用户体验。在实际操作中，这意味着，作为最起码的要求，你的容器化应用程序必须为不同类型的健康检查（liveness和readiness）提供API。&lt;/p&gt;
+&lt;p&gt;即使是表现更好的应用程序也必须提供其他手段，让管理平台通过集成跟踪和度量收集库（如OpenTracing或Prometheus）来观察容器化应用程序的状态。把你的应用当作一个黑盒子，但要实现所有必要的API，以帮助平台以最好的方式观察和管理你的应用。&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>K8s中声明式的部署</title>
