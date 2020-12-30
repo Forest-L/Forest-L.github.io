@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>李林博客  | K8s中健康检查设计模式</title>
+	<title>李林博客  | K8s中生命周期管理设计模式</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -142,7 +142,7 @@ onload='renderMathInElement(document.body);'></script>
 		<a href="https://Forest-L.github.io/" title="李林博客" class="heading font-cursive icon">李林博客</a>
 	</h2>
 </div>
-<h1 class="pt-2">K8s中健康检查设计模式</h1>
+<h1 class="pt-2">K8s中生命周期管理设计模式</h1>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
@@ -169,7 +169,7 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2020-12-29T13:34:44&#43;08:00">2020-12-29 13:34</time>
+		datetime="2020-12-30T20:32:48&#43;08:00">2020-12-30 20:32</time>
 </div>
 
 <details class="toc" open>
@@ -200,65 +200,71 @@ onload='renderMathInElement(document.body);'></script>
 
 <article>
 	<section class="mx-auto content">
-		<div class="c-rich-text"><p>健康探针模式是关于应用程序如何将其健康状态传达给Kubernetes。为了实现完全自动化，云原生应用必须具有高度的可观察性，允许推断其状态，以便Kubernetes能够检测应用是否已经启动，是否准备好服务的请求。这些观察结果会影响Pods的生命周期管理以及流量被路由到应用程序的方式。</p>
+		<div class="c-rich-text"><p>由云原生平台管理的容器化应用对其生命周期没有控制权，要想成为优秀的云原生化 ，它们必须监听管理平台发出的事件，并相应地调整其生命周期。托管生命周期模式描述了应用程序如何能够并且应该对这些生命周期事件做出反应。</p>
 <h2 id="存在问题">存在问题</h2>
-<p>Kubernetes会定期检查容器进程状态，如果发现问题就会重新启动。然而，从实践中我们知道，检查进程状态并不足以决定应用程序的健康状况。在很多情况下，一个应用程序挂起了，但它的进程仍然在运行。例如，一个Java应用程序可能会抛出一个OutOfMemoryError，但JVM进程仍在运行。或者，一个应用程序可能会因为运行到一个无限循环、死锁或一些冲击（缓存、堆、进程）而冻结。为了检测这类情况，Kubernetes需要一种可靠的方法来检查应用程序的健康状况。也就是说，并不是要了解应用的内部工作情况，而是一种检查，表明应用是否按照预期运行，是否能够为消费者提供服务。</p>
+<p>健康探针我们解释了为什么容器要为不同的健康检查提供API。健康检查API是平台不断探查以获取应用洞察力的只读endpoints。它是平台从应用中提取信息的一种机制。</p>
+<p>除了监控容器的状态外，平台有时可能会发出命令，并期望应用程序对此做出反应。在策略和外部因素的驱动下，云原生平台可能会在任何时刻决定启动或停止其管理的应用程序。容器化应用要决定哪些事件是重要的，要做出反应以及如何反应。但实际上，这是一个API，平台是用来和应用进行通信和发送命令的。另外，如果应用程序不需要这项服务，他们可以自由地从生命周期管理中获益，或者忽略它。</p>
 <h2 id="解决方案">解决方案</h2>
-<p>软件业已经接受了这样一个事实，即不可能写出无错误的代码。此外，在使用分布式应用程序时，发生故障的机会就更多了。因此，处理故障的重点已经从避免故障转移到检测故障和恢复上。检测故障并不是一个简单的任务，不能对所有的应用统一执行，因为所有的应用对故障的定义都不同。而且，各种类型的故障需要不同的纠正措施。只要有足够的时间，暂时性的故障可能会自我恢复，而其他一些故障可能需要重新启动应用程序。让我们看看Kubernetes用来检测和纠正故障的检查。</p>
-<h4 id="进程健康检查">进程健康检查</h4>
-<p>进程健康检查是Kubelet不断对容器进程进行的最简单的健康检查。如果容器进程没有运行，就会重新启动探测。因此，即使没有任何其他的健康检查，应用程序也会因为这个通用检查而变得更加健壮。如果你的应用程序能够检测到任何类型的故障并关闭自己，那么进程健康检查就是你所需要的全部内容.然而，对于大多数情况下，这还不够，其他类型的健康检查也是必要的。</p>
-<h4 id="liveness-probes">Liveness Probes</h4>
-<p>如果你的应用程序运行到一些死锁，从进程健康检查的角度来看，它仍然被认为是健康的。为了根据你的==应用业务逻辑来检测==这种问题和任何其他类型的故障，Kubernetes有==liveness probes==&ndash;由Kubelet代理定期执行检查，询问你的容器确认它仍然是健康的。重要的是要从外部而不是应用程序本身执行健康检查，因为一些故障可能会阻止应用程序看门狗报告其故障。关于纠正措施，这种健康检查类似于进程健康检查，因为如果检测到故障，容器就会重新启动。然而，在使用什么方法检查应用程序健康状况方面，它提供了更多的灵活性，如下所示。</p>
-<ul>
-<li>HTTP探针通过容器IP地址执行HTTP GET请求，并期望得到一个介于200和399之间的成功的HTTP响应代码。</li>
-<li>TCP Socket探针假设TCP连接成功。</li>
-<li>Exec探针在容器内核命名空间中执行一个任意命令，并期望有一个成功的退出代码（0）。</li>
-</ul>
-<pre><code>1.1 容器中配置liveness probe
+<p>我们看到，只检查进程状态并不能很好地显示应用程序的健康状况。这就是为什么有不同的API来监控容器的健康状况。同样，只使用进程模型来运行和停止一个进程是不够好的。现实世界中的应用需要更多的细粒度交互和生命周期管理能力。有些应用需要帮助预热，有些应用需要优雅而不带缓存的关闭程序。对于这种和其他用例，一些事件，如图1-1所示，由平台发出，容器可以监听并在需要时做出反应。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm1kg6aoq6j309i03bmx8.jpg" alt="生命周期.png"></p>
+<p>应用程序的部署单元是一个Pod。你已经知道，一个Pod由一个或多个容器组成。在Pod层面，还有其他的构造，比如init容器、init Container（以及defer-containers，截止到目前还在提案阶段），可以帮助管理容器的生命周期。我们在本章中描述的事件和钩子都是应用在单个容器级别而不是Pod级别。</p>
+<h4 id="sigterm-signal">SIGTERM Signal</h4>
+<p>每当Kubernetes决定关闭一个容器时，无论是因为它所属的Pod正在关闭，还是仅仅是一个失败的liveness探测导致容器重新启动，容器都会收到一个SIGTERM信号。SIGTERM是在Kubernetes发出更突然的SIGKILL信号之前，温柔地戳一下容器，让它干净利落地关闭。一旦收到SIGTERM信号，应用程序应该尽快关闭。对于一些应用来说，这可能是一个快速的终止，而其他一些应用可能必须完成其飞行中的请求，释放开放的连接，并清理临时文件，这可能需要稍长的时间。在所有的情况下，对SIGTERM做出反应是以正确时刻和干净的方式关闭容器。</p>
+<h4 id="sigkill-signal">SIGKILL Signal</h4>
+<p>如果容器进程在发出SIGTERM信号后还没有关闭，则会被下面的SIGKILL信号强制关闭。Kubernetes不会立即发送SIGKILL信号，而是在发出SIGTERM信号后默认等待30秒的宽限期。这个宽限期可以使用.spec.terminalGracePeriodSeconds字段为每个Pod定义，但不能保证，因为它可以在向Kubernetes发出命令时被覆盖。这里的目的应该是设计和实现容器化应用，使其具有短暂性的快速启动和关闭进程。</p>
+<h4 id="poststart-hook">Poststart Hook</h4>
+<p>只使用过程信号来管理生命周期是有一定局限性的。这就是为什么Kubernetes提供了额外的生命周期钩子，如postStart和preStop。包含postStart钩子的Pod清单看起来像例5-1中的那个。</p>
+<pre><code>实例1-1，容器中配置poststart hook
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-with-liveness-check
-spec:
-  containers:
-  - image: k8spatterns/random-generator:1.0 
-    name: random-generator
-    env:
-    - name: DELAY_STARTUP
-      value:&quot;20&quot; 
-    ports:
-    - containerPort: 8080
-    protocol: TCP
-    livenessProbe:
-      httpGet:
-      path: /actuator/health
-      port: 8080
-    initialDelaySeconds: 30
-</code></pre><p>根据您的应用程序的性质，您可以选择最适合您的方法。由您的实现来决定您的应用程序何时被认为是健康的或不健康的。然而，请记住，没有通过健康检查的结果是重启你的容器。如果重启你的容器没有帮助，那么健康检查失败没有任何好处，因为Kubernetes会重启你的容器而不解决根本问题。</p>
-<h4 id="readiness-probes">Readiness Probes</h4>
-<p>Liveness检查对于保持应用程序的健康非常有用，它可以杀死不健康的容器，并用新的容器替换它们。但有时一个容器可能并不健康，重启它可能也无济于事。最常见的例子是当一个容器还在启动，还没有准备好处理任何请求。或者是一个容器超载了，它的延迟在增加，你希望它暂时屏蔽掉额外的负载。</p>
-<p>对于这种场景，Kubernetes有Readiness探针。执行就绪性Readiness检查的方法与有效性检查（HTTP、TCP、Exec）相同，但纠正措施不同。失败的Readiness探针不是重启容器，而是导致容器从服务端点中移除，并且不接收任何新的流量。当容器准备就绪时，Readiness针会发出信号，以便它在受到服务请求的冲击之前有一段时间进行热身。它对于在后期阶段屏蔽服务的流量也很有用，因为Readiness探测会定期执行，类似于Liveness检查。例1-2展示了如何通过探测已运行的应用的内部文件是否存在来实现Readiness探测。</p>
-<pre><code>1-2 容器中配置readiness probe
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pod-with-readiness-check
+  name: post-start-hook
 spec:
   containers:
   - image: k8spatterns/random-generator:1.0
     name: random-generator
-    readinessProbe:
-      exec:  command: [ &quot;stat&quot;, &quot;/var/run/random-generator-ready&quot; ]
-</code></pre><p>同样，由你对健康检查的实现来决定你的应用程序什么时候准备好做它的工作，什么时候应该让它自己去做。进程健康检查和liveness检查的目的是通过重启容器从故障中恢复，而readiness检查则是为你的应用程序争取时间，并期望它自己恢复。请记住，Kubernetes试图阻止你的容器接收新的请求（例如，当它正在关闭时），无论readiness检查是否在收到SIGTERM信号后仍然通过。</p>
-<p>在许多情况下，您可以同时执行liveness和readiness探针检查。然而，readiness探针的存在为您的容器提供了启动时间。只有通过了readiness检查，部署才被视为成功，因此，例如，使用旧版本的Pods可以作为滚动更新的一部分被终止。</p>
-<p>liveness和readiness探针是云原生应用程序自动化的基本构件。应用框架，如Spring执行器、WildFly Swarm健康检查、Karaf健康检查或Java的MicroProfile规范都提供了健康探针的实现。</p>
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - sh
+          - -c
+          - sleep 30 &amp;&amp; echo &quot;Wake up!&quot; &gt; /tmp/postStart_done
+</code></pre><p>postStart命令在这里等待30秒。sleep只是模拟任何可能在这里运行的冗长启动代码。另外，它在这里使用一个触发器文件与主应用程序同步，主应用程序是并行启动的。</p>
+<p>postStart 命令在容器创建后与主容器的进程异步执行。即使许多应用程序的初始化和预热逻辑可以作为容器启动步骤的一部分来实现，postStart仍然涵盖了一些用例。postStart动作是一个阻塞调用，容器状态保持为Waiting，直到postStart处理程序完成，这又使Pod状态保持为Pending状态。postStart的这种性质可以用来延迟容器的启动状态，同时给容器主进程初始化的时间。</p>
+<p>postStart的另一个用途是当Pod不满足某些前提条件时，防止容器启动。例如，当postStart钩子通过返回一个非零的退出代码来指示错误时，主容器进程会被Kubernetes杀死。</p>
+<p>postStart和preStophook调用机制类似于所述的健康探针，并支持这些处理程序类型。</p>
+<ul>
+<li>exec  直接在容器中运行指令</li>
+<li>httpGet  对一个Pod容器监听的端口执行HTTP GET请求。</li>
+</ul>
+<p>你必须非常小心地执行postStart钩子中的关键逻辑，因为它的执行没有保证。由于钩子是与容器进程并行运行的，所以钩子有可能在容器启动之前就被执行了。另外，钩子的目的是至少有一次语义，所以实现必须照顾到重复的执行。另一个需要注意的方面是，平台不会对没有到达处理程序的HTTP请求失败执行任何重试尝。</p>
+<h4 id="prestop-hook">Prestop Hook</h4>
+<p>preStop 钩子是在容器被终止之前向其发送的阻塞调用，它与 SIGTERM 信号具有相同的语义，在无法对 SIGTERM 作出反应时，应使用它来优雅关闭容器。它与SIGTERM信号具有相同的语义，当无法对SIGTERM作出反应时，它应该被用来启动容器的优雅关闭。例 1-2 中的 preStop 动作必须在删除容器的调用被发送到容器运行时之前完成，后者会触发 SIGTERM 通知。</p>
+<pre><code>1-2. 容器中配置preStop Hook
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pre-stop-hook
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    lifecycle:
+      preStop:
+        httpGet:
+          port: 8080
+          path: /shutdown
+</code></pre><p>即使preStop正在阻塞，按住它或返回一个不成功的结果并不能阻止容器被删除和进程被杀死。preStop只是一个方便的替代SIGTERM信号的优雅应用，仅此而已。它还提供了与我们之前介绍的postStart钩子相同的处理程序类型和保证。</p>
+<h4 id="other-lifecycle-controls">Other Lifecycle Controls</h4>
+<p>在本章中，到目前为止，我们已经关注了当容器生命周期事件发生时允许执行命令的钩子。但另一种机制不是在容器层面，而是在Pod层面，允许执行初始化指令。</p>
+<p>Init容器，深入浅出，但这里我们简单介绍一下，将其与生命周期钩子进行比较。与普通的应用容器不同，init容器按顺序运行，一直运行到完成，并且在Pod中任何一个应用容器启动之前运行。这些保证允许使用init容器进行Pod级初始化任务。生命周期钩子和init容器都以不同的粒度（分别在容器级和Pod级）运行，可以在某些情况下交替使用，或者在其他情况下相互补充。表1-1总结了两者的主要区别。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm1mmjpp7zj30gj05omy0.jpg" alt=""></p>
+<p>除了当你需要特定的时间保证时，使用哪种机制没有严格的规定。我们可以完全跳过生命周期钩子和初始化容器，使用bash脚本来执行特定的操作，作为容器启动或关闭命令的一部分。这是有可能的，但它会将容器与脚本紧密耦合，并将其变成维护的噩梦。</p>
+<p>我们还可以使用 Kubernetes 生命周期钩子来执行本章所述的一些动作。另外，我们还可以更进一步，运行使用init容器执行各个动作的容器。在这个序列中，这些选项越来越需要更多的提升，但同时也提供了更强的保障，并实现了重用。</p>
+<p>理解容器和Pod生命周期的阶段和可用钩子对于创建Kubernetes管理的应用来说是至关重要的。</p>
 <h2 id="讨论">讨论</h2>
-<p>为了实现完全自动化，云原生应用必须具有高度可观察性，为管理平台提供读取和解释应用健康状况的方法，并在必要时采取纠正措施。健康检查在部署、自愈、扩展等活动的自动化中起着基础作用。然而，对于应用健康，您的应用程序还可以通过其他手段提供更多可见性。</p>
-<p>显而易见的、老的方法是通过日志记录来实现这一目的。对于容器来说，一个好的做法是记录任何重大的系统出错和系统错误事件，并将这些日志收集到一个中心位置以便进一步分析。日志通常不是用来采取自动行动的，而是用来提出告警和进一步调查。日志更有用的方面是对故障的事后分析和检测不明显的错误。</p>
-<p>除了记录到标准流中，将退出容器的原因记录到/dev/termination-log也是一个好的做法。这个位置是容器在永久消失之前陈述其最后意愿的地方。图1-1显示了容器如何与运行时平台通信的可能选项。
-<img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm1a8dibrjj30ah03dwel.jpg" alt=""></p>
-<p>容器通过将其视为黑盒，为包装和运行应用程序提供了一种统一的方式。然而，任何旨在成为云原生产品的容器都必须为运行时环境提供API，以观察容器的健康状况并采取相应行动。这种支持是以统一的方式实现容器更新和生命周期自动化的基本前提，从而提高系统的弹性和用户体验。在实际操作中，这意味着，作为最起码的要求，你的容器化应用程序必须为不同类型的健康检查（liveness和readiness）提供API。</p>
-<p>即使是表现更好的应用程序也必须提供其他手段，让管理平台通过集成跟踪和度量收集库（如OpenTracing或Prometheus）来观察容器化应用程序的状态。把你的应用当作一个黑盒子，但要实现所有必要的API，以帮助平台以最好的方式观察和管理你的应用。</p>
+<p>云原生平台提供的主要好处之一是能够在潜在的不可靠的云基础设施之上可靠和可预测地运行和扩展应用程序。这些平台为在其上运行的应用程序提供了一系列限制和共识。为了有利于应用程序，云原生平台提供的所有功能都遵守这些机制。处理和响应这些事件可以确保您的应用程序可以优雅地启动和关闭，对消费服务的影响最小。目前，在其基本形式下，这意味着容器应该像任何设计良好的POSIX进程一样行为。在未来，可能会有更多的事件给应用程序提示，当它即将被放大，或要求释放资源以防止被关闭。重要的是要进入这样的思维模式：应用程序的生命周期不再由人控制，而是由平台完全自动化。</p>
 </div>
 	</section>
 
@@ -340,7 +346,7 @@ spec:
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2968 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 3080 words in this page.
 	</div>
 </div>
 
@@ -351,21 +357,14 @@ spec:
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/declarative-deployment/">
+    <a class="flex-grow-0" href="/post/health-probe/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        K8s中声明式的部署设计模式
+        K8s中健康检查设计模式
     </a>
     
-    
-    <a class="flex-grow-0" href="/post/managed-lifecycle/">
-        K8s中生命周期管理设计模式
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
     
 </div>
 <div >
@@ -375,6 +374,8 @@ spec:
 <div class="font-serif pb-2 flex align-start leading-loose">
 	<span class="heading pr-6 leading-loose">Related</span>
 	<span >
+		
+			<a href="/post/health-probe/">K8s中健康检查设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		
 			<a href="/post/declarative-deployment/">K8s中声明式的部署设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		

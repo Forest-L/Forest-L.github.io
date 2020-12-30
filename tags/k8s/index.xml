@@ -7,10 +7,84 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Tue, 29 Dec 2020 13:34:44 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 30 Dec 2020 20:32:48 +0800</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s中生命周期管理设计模式</title>
+      <link>https://Forest-L.github.io/post/managed-lifecycle/</link>
+      <pubDate>Wed, 30 Dec 2020 20:32:48 +0800</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/managed-lifecycle/</guid>
+      <description>&lt;p&gt;由云原生平台管理的容器化应用对其生命周期没有控制权，要想成为优秀的云原生化 ，它们必须监听管理平台发出的事件，并相应地调整其生命周期。托管生命周期模式描述了应用程序如何能够并且应该对这些生命周期事件做出反应。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;健康探针我们解释了为什么容器要为不同的健康检查提供API。健康检查API是平台不断探查以获取应用洞察力的只读endpoints。它是平台从应用中提取信息的一种机制。&lt;/p&gt;
+&lt;p&gt;除了监控容器的状态外，平台有时可能会发出命令，并期望应用程序对此做出反应。在策略和外部因素的驱动下，云原生平台可能会在任何时刻决定启动或停止其管理的应用程序。容器化应用要决定哪些事件是重要的，要做出反应以及如何反应。但实际上，这是一个API，平台是用来和应用进行通信和发送命令的。另外，如果应用程序不需要这项服务，他们可以自由地从生命周期管理中获益，或者忽略它。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;我们看到，只检查进程状态并不能很好地显示应用程序的健康状况。这就是为什么有不同的API来监控容器的健康状况。同样，只使用进程模型来运行和停止一个进程是不够好的。现实世界中的应用需要更多的细粒度交互和生命周期管理能力。有些应用需要帮助预热，有些应用需要优雅而不带缓存的关闭程序。对于这种和其他用例，一些事件，如图1-1所示，由平台发出，容器可以监听并在需要时做出反应。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1kg6aoq6j309i03bmx8.jpg&#34; alt=&#34;生命周期.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;应用程序的部署单元是一个Pod。你已经知道，一个Pod由一个或多个容器组成。在Pod层面，还有其他的构造，比如init容器、init Container（以及defer-containers，截止到目前还在提案阶段），可以帮助管理容器的生命周期。我们在本章中描述的事件和钩子都是应用在单个容器级别而不是Pod级别。&lt;/p&gt;
+&lt;h4 id=&#34;sigterm-signal&#34;&gt;SIGTERM Signal&lt;/h4&gt;
+&lt;p&gt;每当Kubernetes决定关闭一个容器时，无论是因为它所属的Pod正在关闭，还是仅仅是一个失败的liveness探测导致容器重新启动，容器都会收到一个SIGTERM信号。SIGTERM是在Kubernetes发出更突然的SIGKILL信号之前，温柔地戳一下容器，让它干净利落地关闭。一旦收到SIGTERM信号，应用程序应该尽快关闭。对于一些应用来说，这可能是一个快速的终止，而其他一些应用可能必须完成其飞行中的请求，释放开放的连接，并清理临时文件，这可能需要稍长的时间。在所有的情况下，对SIGTERM做出反应是以正确时刻和干净的方式关闭容器。&lt;/p&gt;
+&lt;h4 id=&#34;sigkill-signal&#34;&gt;SIGKILL Signal&lt;/h4&gt;
+&lt;p&gt;如果容器进程在发出SIGTERM信号后还没有关闭，则会被下面的SIGKILL信号强制关闭。Kubernetes不会立即发送SIGKILL信号，而是在发出SIGTERM信号后默认等待30秒的宽限期。这个宽限期可以使用.spec.terminalGracePeriodSeconds字段为每个Pod定义，但不能保证，因为它可以在向Kubernetes发出命令时被覆盖。这里的目的应该是设计和实现容器化应用，使其具有短暂性的快速启动和关闭进程。&lt;/p&gt;
+&lt;h4 id=&#34;poststart-hook&#34;&gt;Poststart Hook&lt;/h4&gt;
+&lt;p&gt;只使用过程信号来管理生命周期是有一定局限性的。这就是为什么Kubernetes提供了额外的生命周期钩子，如postStart和preStop。包含postStart钩子的Pod清单看起来像例5-1中的那个。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;实例1-1，容器中配置poststart hook
+apiVersion: v1
+kind: Pod
+metadata:
+  name: post-start-hook
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - sh
+          - -c
+          - sleep 30 &amp;amp;&amp;amp; echo &amp;quot;Wake up!&amp;quot; &amp;gt; /tmp/postStart_done
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;postStart命令在这里等待30秒。sleep只是模拟任何可能在这里运行的冗长启动代码。另外，它在这里使用一个触发器文件与主应用程序同步，主应用程序是并行启动的。&lt;/p&gt;
+&lt;p&gt;postStart 命令在容器创建后与主容器的进程异步执行。即使许多应用程序的初始化和预热逻辑可以作为容器启动步骤的一部分来实现，postStart仍然涵盖了一些用例。postStart动作是一个阻塞调用，容器状态保持为Waiting，直到postStart处理程序完成，这又使Pod状态保持为Pending状态。postStart的这种性质可以用来延迟容器的启动状态，同时给容器主进程初始化的时间。&lt;/p&gt;
+&lt;p&gt;postStart的另一个用途是当Pod不满足某些前提条件时，防止容器启动。例如，当postStart钩子通过返回一个非零的退出代码来指示错误时，主容器进程会被Kubernetes杀死。&lt;/p&gt;
+&lt;p&gt;postStart和preStophook调用机制类似于所述的健康探针，并支持这些处理程序类型。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;exec  直接在容器中运行指令&lt;/li&gt;
+&lt;li&gt;httpGet  对一个Pod容器监听的端口执行HTTP GET请求。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;你必须非常小心地执行postStart钩子中的关键逻辑，因为它的执行没有保证。由于钩子是与容器进程并行运行的，所以钩子有可能在容器启动之前就被执行了。另外，钩子的目的是至少有一次语义，所以实现必须照顾到重复的执行。另一个需要注意的方面是，平台不会对没有到达处理程序的HTTP请求失败执行任何重试尝。&lt;/p&gt;
+&lt;h4 id=&#34;prestop-hook&#34;&gt;Prestop Hook&lt;/h4&gt;
+&lt;p&gt;preStop 钩子是在容器被终止之前向其发送的阻塞调用，它与 SIGTERM 信号具有相同的语义，在无法对 SIGTERM 作出反应时，应使用它来优雅关闭容器。它与SIGTERM信号具有相同的语义，当无法对SIGTERM作出反应时，它应该被用来启动容器的优雅关闭。例 1-2 中的 preStop 动作必须在删除容器的调用被发送到容器运行时之前完成，后者会触发 SIGTERM 通知。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1-2. 容器中配置preStop Hook
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pre-stop-hook
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    lifecycle:
+      preStop:
+        httpGet:
+          port: 8080
+          path: /shutdown
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;即使preStop正在阻塞，按住它或返回一个不成功的结果并不能阻止容器被删除和进程被杀死。preStop只是一个方便的替代SIGTERM信号的优雅应用，仅此而已。它还提供了与我们之前介绍的postStart钩子相同的处理程序类型和保证。&lt;/p&gt;
+&lt;h4 id=&#34;other-lifecycle-controls&#34;&gt;Other Lifecycle Controls&lt;/h4&gt;
+&lt;p&gt;在本章中，到目前为止，我们已经关注了当容器生命周期事件发生时允许执行命令的钩子。但另一种机制不是在容器层面，而是在Pod层面，允许执行初始化指令。&lt;/p&gt;
+&lt;p&gt;Init容器，深入浅出，但这里我们简单介绍一下，将其与生命周期钩子进行比较。与普通的应用容器不同，init容器按顺序运行，一直运行到完成，并且在Pod中任何一个应用容器启动之前运行。这些保证允许使用init容器进行Pod级初始化任务。生命周期钩子和init容器都以不同的粒度（分别在容器级和Pod级）运行，可以在某些情况下交替使用，或者在其他情况下相互补充。表1-1总结了两者的主要区别。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1mmjpp7zj30gj05omy0.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;除了当你需要特定的时间保证时，使用哪种机制没有严格的规定。我们可以完全跳过生命周期钩子和初始化容器，使用bash脚本来执行特定的操作，作为容器启动或关闭命令的一部分。这是有可能的，但它会将容器与脚本紧密耦合，并将其变成维护的噩梦。&lt;/p&gt;
+&lt;p&gt;我们还可以使用 Kubernetes 生命周期钩子来执行本章所述的一些动作。另外，我们还可以更进一步，运行使用init容器执行各个动作的容器。在这个序列中，这些选项越来越需要更多的提升，但同时也提供了更强的保障，并实现了重用。&lt;/p&gt;
+&lt;p&gt;理解容器和Pod生命周期的阶段和可用钩子对于创建Kubernetes管理的应用来说是至关重要的。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;云原生平台提供的主要好处之一是能够在潜在的不可靠的云基础设施之上可靠和可预测地运行和扩展应用程序。这些平台为在其上运行的应用程序提供了一系列限制和共识。为了有利于应用程序，云原生平台提供的所有功能都遵守这些机制。处理和响应这些事件可以确保您的应用程序可以优雅地启动和关闭，对消费服务的影响最小。目前，在其基本形式下，这意味着容器应该像任何设计良好的POSIX进程一样行为。在未来，可能会有更多的事件给应用程序提示，当它即将被放大，或要求释放资源以防止被关闭。重要的是要进入这样的思维模式：应用程序的生命周期不再由人控制，而是由平台完全自动化。&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>K8s中健康检查设计模式</title>
