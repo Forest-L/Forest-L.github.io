@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>李林博客  | K8s中自动调度设计模式</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="李林博客" class="heading font-cursive icon">李林博客</a>
+	</h2>
+</div>
+<h1 class="pt-2">K8s中自动调度设计模式</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/kubernetes'>Kubernetes</a>
+	
+	
+	
+
+	
+	&nbsp;&nbsp;
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>K8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2021-01-02T18:15:51&#43;08:00">2021-1-2 18:15</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#存在问题">存在问题</a></li>
+    <li><a href="#解决方案">解决方案</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#讨论">讨论</a></li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>Automated Placement是Kubernetes调度器的核心功能，用于将新的Pod分配给满足容器资源请求的节点，并遵从调度策略。该模式描述了Kubernetes的调度算法的原理以及从外部影响调度决策的方式。</p>
+<h2 id="存在问题">存在问题</h2>
+<p>一个合理规模的基于微服务的系统由几十个甚至几百个独立的进程组成。容器和Pods确实为打包和部署提供了很好的抽象实例，但并不能解决将这些进程调度在合适节点上的问题。随着微服务数量的庞大和不断增长，将它们单独分配和调度到节点上并不是一个可以管理的活动。</p>
+<p>容器之间有依赖性，对节点的依赖性，还有资源需求，所有这些也会随着时间的推移而变化。集群上的可用资源也会随着时间的推移而变化，通过收缩或扩展集群，或者被已经调度的容器消耗掉。我们调度容器的方式也会影响分布式系统的可用性、性能和容量。所有这些都使得将容器调度到节点上成为一个变化的目标，必须在变化中确定下来。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>在Kubernetes中，将Pod分配给节点是由调度器完成的。截至本文写作时，这是一个可配置性很强、仍在不断发展、变化很快的领域。在本章中，我们将介绍主要的调度控制机制、影响调度的驱动力、为什么要选择一种或另一种方案，以及由此产生的后果。Kubernetes调度器是一个有效且省时的工具。它在整个Kubernetes平台中起着基础性的作用，但与其他Kubernetes组件（API Server、Kubelet）类似，它可以单独运行，也可以完全不使用。</p>
+<p>在一个很高的层次上，Kubernetes调度器执行的主要操作是从API Server上监控每个新创建的Pod定义，并将其分配给一个节点。它为每一个Pod找到一个合适的节点（只要有这样的节点），无论是最初的应用调度、扩容，还是将应用从一个不健康的节点转移到一个更健康的节点时。它还考虑运行时的依赖性、资源需求和高可用性的指导策略，通过横向扩展Pod，也通过将附近的Pod进行性能和低延迟交互的方式来实现。然而，为了让调度器正确地完成它的工作，并允许声明式的调度，它需要有可用容量的节点，以及有声明式资源配置文件和指导策略的容器。让我们更详细地看看其中的每一个。</p>
+<h4 id="available-node-resources">Available Node Resources</h4>
+<p>首先，Kubernetes集群需要有足够资源容量的节点来运行新的Pod。每个节点都有可用于运行Pod的容量，调度器确保一个Pod所请求的资源之和小于可分配的节点容量。考虑到一个只专用于Kubernetes的节点，其容量使用例1-1中的公式计算。</p>
+<pre><code>实例1-1. node容量
+Allocatable[capacity for application pods] = Node Capacity[available capacity on a ndoe] - kube-Reserved[Kubernetes daemons like kubelet, container runtime] - System-Reserved[os system daemons like sshd udev]
+</code></pre><p>如果你没有为给操作系统和Kubernetes本身提供动力的系统守护进程预留资源，那么Pods的调度可能会达到节点的全部容量，这可能会导致Pods和系统守护进程争夺资源，导致节点上的资源不足问题。同时要记住，如果容器运行在非Kubernetes管理的节点上，反映在Kubernetes的节点容量计算中。</p>
+<p>这个限制的一个变通方法是运行一个空的Pod，它不做任何事情，只是对CPU和内存的资源请求与未跟踪容器的资源使用量相对应。创建这样的Pod只是为了表示和保留未跟踪容器的资源消耗量，帮助调度器建立更好的节点资源模型。</p>
+<h4 id="container-resource-demands">Container Resource Demands</h4>
+<p>高效的Pod调度的另一个重要要求是，容器有其运行时的依赖性和资源需求的定义。归根结底就是要让容器声明它们的资源概况（有请求和限制）和环境依赖性，如存储或端口。只有这样，Pod才会被合理地分配到节点上，并能在高峰期不影响彼此的运行。</p>
+<h4 id="调度策略">调度策略</h4>
+<p>最后一块拼图是拥有正确的过滤或优先级策略来满足你的特定应用需求。调度器配置了一套默认的判断和优先级策略，这对大多数应用来说已经足够了。在调度程序启动时，可以用不同的策略来覆盖它，如例1-2所示。</p>
+<pre><code>1-2. 调度策略
+{ 
+    &quot;kind&quot;:&quot;Policy&quot;,
+    &quot;apiVersion&quot;:&quot;v1&quot;,
+    &quot;predicates&quot;:[ 
+        {&quot;name&quot;:&quot;PodFitsHostPorts&quot;},
+        {&quot;name&quot;:&quot;PodFitsResources&quot;},
+        {&quot;name&quot;:&quot;NoDiskConflict&quot;},
+        {&quot;name&quot;:&quot;NoVolumeZoneConflict&quot;},
+        {&quot;name&quot;:&quot;MatchNodeSelector&quot;},
+        {&quot;name&quot;:&quot;HostName&quot;}
+    ],
+    &quot;priorities&quot;:[ 
+        {&quot;name&quot;:&quot;LeastRequestedPriority&quot;,&quot;weight&quot;:2},
+        {&quot;name&quot;:&quot;BalancedResourceAllocation&quot;,&quot;weight&quot;:1},
+        {&quot;name&quot;:&quot;ServiceSpreadingPriority&quot;,&quot;weight&quot;:2},
+        {&quot;name&quot;:&quot;EqualPriority&quot;,&quot;weight&quot;:1}
+    ]
+    
+}
+</code></pre><ul>
+<li>判断是过滤掉不合格节点的规则。例如，PodFitsHostsPortsschedules Pods只在那些还有这个端口的节点上请求某些固定的主机端口。</li>
+<li>优先级是根据偏好对可用节点进行排序的规则。例如，LeastRequestedPriority 给予请求资源较少的节点较高的优先级。</li>
+</ul>
+<p>考虑到除了配置默认调度器的策略外，还可以运行多个调度器，并允许Pod指定调度哪个调度器。你可以给它一个唯一的名字来启动另一个配置不同的调度器实例。然后在定义Pod时，只需在Pod规范中添加字段.spec.scheduleName，并将你的自定义调度器名称添加到Pod规范中，Pod就会只被自定义调度器接收。</p>
+<h4 id="调度过程">调度过程</h4>
+<p>Pods根据调度策略被分配到具有一定容量的节点上。为了完整起见，图1-1在高层次上直观地展示了这些元素是如何结合在一起的，以及Pod在被调度时经历的主要步骤。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm2qomk2ljj30cf08xq4c.jpg" alt="调度过程.png"></p>
+<p>一旦创建了一个尚未分配给节点的Pod，它就会被调度器挑选出来，连同所有可用的节点以及过滤和优先级策略集。在第一阶段，调度器应用过滤策略，并根据Pod的标准删除所有不合格的节点。在第二阶段，剩余的节点得到按权重排序。在最后一个阶段，Pod得到一个节点分配，这是调度过程的主要结果。</p>
+<p>在大多数情况下，最好是让调度程序来完成Pod到节点的分配，而不是微观管理调度逻辑。然而，在某些情况下，你可能想强制将一个Pod分配到一个特定的节点或一组节点。这种分配可以使用节点选择器来完成。.spec.nodeSelector是Pod字段，指定了一个键值对的映射，这些键值对必须作为标签存在于节点上，该节点才有资格运行Pod。例如，假设你想强制Pod运行在有SSD存储或GPU加速硬件的特定节点上。在例1-3中的Pod定义中，nodeSelector匹配disktype：ssd，只有标签为disktype=ssd的节点才有资格运行Pod。</p>
+<pre><code>1-3. Node基于可用disk类型选择
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+  nodeSelector:
+    disktype: ssd
+</code></pre><p>除了给节点指定自定义标签外，你还可以使用一些每个节点上都有的默认标签。每个节点都有一个唯一的kubernetes.io/hostname标签，可以通过其主机名将Pod调度在节点上。其他表示操作系统、架构和实例类型的默认标签对调度也很有用。</p>
+<h4 id="node-affinity">Node Affinity</h4>
+<p>Kubernetes支持许多更灵活的方式来配置调度过程。节点亲和力就是这样一个特性，它是前面介绍的节点选择器方法的泛化，允许将规则指定为必填或优先。必需的规则必须满足，Pod才会被调度到某个节点，而优先的规则只是通过增加匹配节点的权重来暗示偏好，而不是强制性的。此外，节点亲和性功能极大地扩展了你可以表达的约束类型，通过In、NotIn、Exists、DoesNotExist、Gt或Lt等运算符使语言更具表现力，例1-4演示了如何声明节点亲和性。</p>
+<pre><code>1.4 节点亲和性
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: numberCores
+            operator: Gt
+            values: [ &quot;3&quot; ]
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchFields:
+          - key: metadata.name
+            operator: NotIn
+            values: [ &quot;master&quot; ]
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+</code></pre><h4 id="pod-affinity-and-antiaffinity">Pod Affinity and Antiaffinity</h4>
+<p>节点亲和力是一种更强大的调度方式，当nodeSelector不够用时，应该优先考虑。这种机制允许根据标签或字段匹配来限制一个Pod可以运行的节点，但它不允许表达Pod之间的依赖关系来决定一个Pod的相对位置。它不允许表达Pod之间的依赖关系，来决定一个Pod相对于其他Pod应该调度在哪里。为了表达Pod应该如何分布以实现高可用性，或被打包并集中在一起以改善延迟，可以使用Pod亲和力和反亲和力。</p>
+<p>节点亲和力在节点粒度上工作，但Pods亲和力不限于节点，可以在多个拓扑层次上表达规则。使用==topologyKey字段和匹配的标==签，可以执行更细粒度的规则，这些规则结合了节点、机架、云提供商区域和区域等域的规则，如例1-5所示。</p>
+<pre><code>1-5. Pod亲和性
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            confidential: high
+        topologyKey: security-zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+        labelSelector:
+          matchLabels:
+            confidential: none
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+</code></pre><p>与节点亲和力类似，Pod亲和力和反亲和力也有硬性要求和软性要求，分别称为requiredDuringSchedulingIgnoredDuringExecution和preferredDuringSchedulingIgnoredDuringExecution。同样，和节点亲和力一样，字段名中也有IgnoredDuringExecution的后缀，这是为了将来的可扩展性而存在的。目前，如果节点变化和亲和力规则上的标签不再有效，Pods就会继续运行，但未来运行时的变化也可能被考虑在内。</p>
+<h4 id="taints-and-tolerations">Taints and Tolerations</h4>
+<p>一个更高级的功能是基于污点和容忍来控制Pods可以被调度和允许运行的地方。节点亲和力是Pods的一个属性，它允许Pods选择节点，而污点和容忍则相反。它们允许节点控制哪些Pods应该或不应该被调度在它们上面。污点是节点的一个特性，当它存在时，它阻止Pods调度到节点上，除非Pod对污点有容忍度。从这个意义上说，污点和容忍可以被认为是允许调度到节点上的一种选择，默认情况下，这些节点是不能被调度的，而亲和规则则是一种选择，通过明确选择在哪些节点上运行，从而排除所有非选择的节点。</p>
+<p>通过使用kubectl给一个节点添加污点：kubectl taint nodes master node-role.kubernetes.io/master=&quot;true&rdquo;:NoSchedule，其效果如例1-6所示。如例1-7所示，将匹配的toleration添加到Pod中。注意，例1-6中taints部分的key和effect的值和例1-7中tolerations:部分的值是一样的。</p>
+<pre><code>1.6 node污点
+apiVersion: v1
+kind: node
+metadata:
+  name: master
+spec:
+  taints:
+  - effect: NoSchedule
+  key: node-role.kubernetes.io/master
+  
+1.7 Pod忍受和node污点
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-generator
+spec:
+  containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+</code></pre><p>有防止在节点上调度的硬污点(effect=NoSchedule)，有尽量避免在节点上调度的软污点(effect=PreferNoSchedule)，还有可以从节点上驱逐已经运行的Pod的污点(effect=NoExecute)。</p>
+<p>污点和容忍允许复杂的用例，比如为一组专属的Pods设置专用节点，或者通过这些污点节点强制将Pods从有问题的节点驱逐出去。</p>
+<p>你可以根据应用的高可用性和性能需求来影响调度，但尽量不要对调度器限制太多，把自己退到一个角落里，不能再调度Pods，搁浅的资源太多。比如，如果你的容器资源需求粒度太粗，或者节点太小，最后可能会出现节点中的搁浅资源没有被利用的情况。</p>
+<p>在图1-2中，我们可以看到节点A有4GB的内存无法利用，因为没有CPU可以放置其他容器。创建具有较小resourcere quirements的容器可能有助于改善这种情况。另一个解决方案是使用Kubernetes descheduler，它有助于分解节点，提高节点的利用率。</p>
+<p>一旦Pod被分配到一个节点上，调度器的工作就完成了，它不会改变Pod调度的位置，除非在没有节点分配的情况下删除和重新创建Pod。正如你所看到的，随着时间的推移，这可能会导致资源碎片化和集群资源利用率低下。另一个潜在的问题是，当一个新的Pod被调度时，调度器的决策是基于其集群视图的。如果一个集群是动态的，节点的资源情况发生了变化，或者增加了新的节点，调度器就不会纠正之前的Pod调度情况。除了改变节点容量外，还可以改变节点上的标签，影响调度，但过去的调度也不会被修正。</p>
+<p>所有这些都是descheduler可以解决的场景。Kubernetes descheduler是一个可选的功能，通常在集群管理员决定是时候通过重新安排Pods来整理和分解集群时，它就会以Job的形式运行。descheduler带有一些预定义的策略，可以启用、调整或禁用。这些策略以文件的形式传递给descheduler Pod，目前，它们有以下几种。</p>
+<ul>
+<li>RemoveDuplicates<br>
+该策略可确保只有与 ReplicaSet 或Deployment 相关联的单个 Pod 在单个节点上运行。如果Pod数量超过一个，这些多余的Pod将被驱逐。该策略在节点变得不健康的情况下非常有用，管理控制器在其他健康节点上启动了新的Pod。当不健康的节点恢复并加入集群时，运行中的Pod数量超过了预期，descheduler可以帮助将数量恢复到预期的副本数。当调度策略和集群拓扑结构在初始调度后发生变化时，去除节点上的重复也可以帮助Pods在更多节点上均匀分布。</li>
+<li>LowNodeUtilization<br>
+该策略可以找到未被充分利用的节点，并从其他过度利用的节点上驱逐Pod，希望将这些Pod调度在未被充分利用的节点上，从而更好地分散和利用资源。未充分利用的节点被识别为CPU、内存或Pod数量低于配置阈值的节点。同样，过度利用的节点是指那些值大于配置的目标阈值的节点。介于这些值之间的任何节点都被适当利用，不受该策略的影响。</li>
+<li>RemovePodsViolatingInterPodAntiAffinity<br>
+这个策略驱逐的Pods违反了Pods间的反亲和规则，这可能发生在Pods被调度在节点上后添加反亲和规则时。</li>
+<li>RemovePodsViolatingNodeAffinity<br>
+这个策略是用来驱逐违反节点亲和规则的Pods的。</li>
+<li>Regardless of the policy used, the descheduler avoids evicting the followding：</li>
+</ul>
+<pre><code>标有scheduler.alpha.kubernetes.io/critical-pod注释的临界Pods。
+非ReplicaSet，Deployment和Job管理的pod。
+DaemonSet管理的pod。
+Pods使用本地存储。
+有PodDisruptionBudget的pods，驱逐将违反其规则。
+Deschedule Pod本身（通过将自身标记为关键Pod实现）。
+</code></pre><p>当然，所有的驱逐都会尊从Pods的QoS水平，先选择Best-EffortsPods,然后是Burstable Pods，最后是Guaranteed Pods作为驱逐的候选者。</p>
+<h2 id="讨论">讨论</h2>
+<p>调度是一个你希望尽可能少干预的领域。可预测的需求，并声明容器的所有有源需求，调度器会做它的工作，并将Pod放置在最合适的节点上。然而，当这还不够的时候，有多种方法可以引导调度器朝向所需的部署拓扑。综上所述，从简单到复杂，以下方法控制了Pod调度（请记住，截至本文撰写时，这个列表会随着Kubernetes的每一个其他版本而改变）。</p>
+<ul>
+<li>nodeName<br>
+最简单硬形式为Pod到节点。这个字段最好由调度器填充，它由策略驱动，而不是手动分配节点。将Pod分配到节点上，极大地限制了Pod的调度范围。这让我们回到了前Kubernetes时代，当时我们明确指定了运行应用的节点。</li>
+<li>nodeSelector<br>
+指定键值对的映射。为了使Pod有资格在节点上运行，Pod必须有指定的键值对作为节点上的标签。在Pod和节点上贴上一些有意义的标签后（无论如何你都应该这么做），节点选择器是控制调度器选择的最简单可接受的机制之一。</li>
+<li>Default scheduling alteration<br>
+默认的调度器负责将新的Pod调度到集群内的节点上，而且它做得很合理。但是，如果有必要，可以改变这个调度器的过滤和优先策略列表、顺序和权重。</li>
+<li>Pod affinity and antiaffinity<br>
+这些规则允许一个Pod表现对其他Pod的依赖性，例如，一个应用的延迟要求、高可用性、安全约束等。</li>
+<li>Node affinity<br>
+这个规则允许Pod向节点表现依赖性。例如，考虑节点的硬件、位置等。</li>
+<li>Taints and tolerations<br>
+Taints和tolerations允许节点控制哪些Pods应该或不应该被调度在它们上面。例如，为一组Pod致力一个节点，甚至在运行时驱逐Pod。Taints和Tolerations的另一个优点是，如果你通过添加带有新标签的新节点来扩展Kubernetes集群，你不需要在所有Pod上添加新标签，而只需要在应该放在新节点上的Pod上添加。</li>
+<li>Custom scheduler<br>
+如果前面的方法都不够好，或者你有复杂的调度需求，你也可以写你的自定义调度器。自定义的调度器可以代替标准的Kubernetes调度器运行，也可以和标准的Kubernetes调度器一起运行。Ahybrid的做法是有一个 &ldquo;调度扩展器 &ldquo;进程，标准Kubernetes调度器在做调度决策时，会调用这个进程作为最后的通道。这样你就不用实现一个完整的调度器，而只需要提供HTTP API来过滤和优先处理节点。拥有自己的调度器的好处是，你可以考虑Kubernetes集群之外的因素，比如硬件成本、网络延迟和更好的利用率，同时将Pod分配给节点。你也可以在使用默认调度器的同时使用多个自定义调度器，并为每个Pod配置使用哪个调度器。每个调度器可以有一套不同的策略，专门用于Pod的子集。</li>
+</ul>
+<p>正如你所看到的，有很多方法可以控制Pod的放置，选择正确的方法或结合多种方法是很有挑战性的。本章的启示是：确定容器资源配置文件的大小和声明，给Pod和节点打上相应的标签，最后，只对Kubernetes调度器做最小的干预。</p>
+</div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 6590 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/managed-lifecycle/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        K8s中生命周期管理设计模式
+    </a>
+    
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/managed-lifecycle/">K8s中生命周期管理设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/health-probe/">K8s中健康检查设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/declarative-deployment/">K8s中声明式的部署设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/predictable-demands/">K8s中可预测的需求设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/cka-test-experience/">CkA考试经验</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1.16-installed-on-centos-system/">K8s1.16在centos安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/add-public-ip-to-kubernetes-apiserver-operation-guide/">添加公网ip到kubernetes的apiserver操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>
