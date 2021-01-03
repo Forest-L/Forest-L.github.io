@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>李林博客  | K8s中批量Job设计模式</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://Forest-L.github.io/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://Forest-L.github.io/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://Forest-L.github.io/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/Forest-L.github.io\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://Forest-L.github.io/fonts/exampleFont.woff2') format('woff2'),
+				url('https://Forest-L.github.io/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://Forest-L.github.io/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://Forest-L.github.io/" title="李林博客" class="heading font-cursive icon">李林博客</a>
+	</h2>
+</div>
+<h1 class="pt-2">K8s中批量Job设计模式</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/kubernetes'>Kubernetes</a>
+	
+	
+	
+
+	
+	&nbsp;&nbsp;
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>K8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2021-01-03T16:00:45&#43;08:00">2021-1-3 16:00</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#存在问题">存在问题</a></li>
+    <li><a href="#解决方案">解决方案</a></li>
+    <li><a href="#讨论">讨论</a></li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>Batch Job模式适合管理孤立的原子工作单元。它基于Job抽象，在分布式环境中可靠地运行短暂的Pod，直到完成。</p>
+<h2 id="存在问题">存在问题</h2>
+<p>Kubernetes中管理和运行容器的主要基元是Pod。创建Pod的方式有不同的特点。</p>
+<ul>
+<li>Bare Pod<br>
+可以手动创建一个Pod来运行容器。然而，当这种Pod运行的节点出现故障时，Pod不会被重新启动。不鼓励以这种方式运行Pod，除非出于开发或测试目的。这种机制也被称为非托管或裸露的Pod。</li>
+<li>ReplicaSet<br>
+该控制器用于创建和管理预期连续运行的Pod的生命周期（例如，运行一个Web服务器容器）。在任何给定时间中，它维护一组稳定的副本Pods运行，并保证指定数量相同的Pods可用。</li>
+<li>DaemonSet<br>
+控制器以单个Pod方式运行在每个节点上。通常用于管理平台功能，如监控、日志收集、存储容器等。</li>
+</ul>
+<p>这些Pod的一个共同点是，它们代表了长期运行的进程，并不是要在一段时间后停止。然而，在某些情况下，需要可靠地执行一个预定义的限定的工作，然后关闭容器。对于这个任务，Kubernetes提供了Job资源。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>Kubernetes Job类似于ReplicaSet，因为它创建了一个或多个Pod，并确保它们成功运行。然而，不同的是，一旦预期数量的Pod成功终止，该作业就被认为是完成的，不再启动额外的Pod。一个Job定义看起来像例 1-1。</p>
+<pre><code>1.1 Job实例
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: random-generator
+spec:
+  completions: 5
+  parallelism: 2
+  template:
+    metadata:
+      name: random-generator
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - image: k8spatterns/random-generator:1.0
+        name: random-generator
+        command: [ &quot;java&quot;, &quot;-cp&quot;, &quot;/&quot;, &quot;RandomRunner&quot;, &quot;/numbers.txt&quot;, &quot;10000&quot; ]
+        
+        
+Job应该运行五个Pods来完成，这五个Pods必须全部成功。
+有两个pod是并行的。
+</code></pre><p>Job 和 ReplicaSet 定义之间的一个重要区别是 .spec.template.spec.restartPolicy。ReplicaSet的默认值是Always，这对于必须始终保持运行的长期进程来说是有意义的。对于一个Job来说，不允许使用 Always 值，唯一可能的选项是 OnFailure 或Never。</p>
+<p>那么，为什么还要创建一个Job及只运行一次Pod，而不是使用裸Pod呢？使用Job提供了许多可靠性和可扩展性的优势，使其成为首选。</p>
+<ul>
+<li>一个Job不是一个短暂的内存中的任务，而是一个持久的任务，可以在集群重启后存活下来。</li>
+<li>当一个作业完成时，它不会被删除，但会被保留以用于跟踪。作为Job的一部分创建的Pods也不会被删除，但可用于检查（例如，检查容器日志）。对于裸露的Pods也是如此，但只适用于restartPolicy: OnFailure。</li>
+<li>一个Job可能需要执行多次。使用.spec.completions字段可以指定一个Pod在Job本身完成之前应该成功完成多少次。</li>
+<li>当一个Job必须多次完成时（通过.spec.completions设置），它也可以通过同时启动多个Pod来扩展和执行。这可以通过指定.spec.parallelism字段来实现。</li>
+<li>如果节点出现故障，或者当Pod因某种原因被驱逐，而仍在运行时，调度器会将Pod调度在一个新的健康节点上并重新运行。裸露的Pod将保持在失败的状态，因为现有的Pod永远不会被移动到其他节点上。</li>
+</ul>
+<p>所有这些都使得Job基元对于那些需要对单位工作的完成进行一些保证的场景具有吸引力。在Job的行为中起主要作用的两个字段是：</p>
+<ul>
+<li>.spec.completions<br>
+指定应运行多少个Pods来完成一个Job。</li>
+<li>.spec.parallelism<br>
+指定多少个Pod副本可以并行运行。设置较高的数字并不能保证较高的并行性，实际的Pod数量可能仍然少于（在某些特殊的情况下，更多）所需的数量（例如，由于节流、资源配额、剩余的完成量不够以及其他原因）。将此字段设置为 0，可以有效地暂停作业。</li>
+</ul>
+<p>图1-1显示了例1-1中定义的完成数为5，并行度为2的Batch Job的处理方式。</p>
+<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm51lqx1f7j30du0590t5.jpg" alt="批量job.png"></p>
+<p>根据这两个参数，有以下几种类型的Job：</p>
+<ul>
+<li>Single Pod Job<br>
+当您不考虑.spec.completions和.spec.parallelism或将它们设置为默认值1时，就会选择这种类型。这样的Job只启动一个Pod，一旦单个Pod成功终止（退出代码为0），就会完成。</li>
+<li>Fixed completion count Jobs<br>
+当你指定.spec.completions的数字大于1时，这个数量的Pod必须成功。您可以选择设置.spec.parallelism，或者将其保留为默认值1。这样的Job在.spec.completions数量的Pods成功完成后，就被认为是完成了。例1-1展示了这种模式的运行情况，当我们事先知道Jobs的数量，并且单个工作项的处理成本证明了使用专用Pod的合理性时，这是最好的选择。</li>
+<li>Work queue Jobs<br>
+当您不使用 .spec.completions 并将 .spec.parallelism 设置为大于 1 的整数时，您就拥有了一个并行Job的工作队列。当至少有一个Pod成功终止，并且所有其他Pod也终止时，一个工作队列Job就被认为已经完成。这种设置需要Pods之间相互协调，确定每个Pods正在进行的工作，这样才能以协调的方式完成。例如，当队列中存储了固定但未知数量的工作项目时，并行的Pods可以逐个拾取这些项目进行工作。第一个检测到队列为空并成功退出的Pod表示Job完成。Job控制器也会等待所有其他Pod终止。由于一个Pod处理多个工作项目，这种Job类型是细化工作项目的最佳选择&ndash;当每个工作项目的一个Pod的开销是不合理的。</li>
+</ul>
+<p>如果你有无限的工作项流需要处理，其他控制器（如ReplicaSet）是管理处理这些工作项目的Pod的更好选择。</p>
+<h2 id="讨论">讨论</h2>
+<p>Job抽象是一个非常基本但也是基本的基元，其他基元（如 CronJobs）都是基于这个基元。Job有助于将孤立的工作单元转化为可靠和可扩展的执行单元。然而，Job 并不决定如何将可单独处理的工作项映射到 Jobs 或 Pods 中。这是你必须在考虑每个选项的利弊后确定的事情。</p>
+<ul>
+<li>One Job per work item<br>
+这个选项有创建Kubernetes Jobs的开销，也为平台管理大量消耗资源的Job。当每个工作项目都是一个复杂的任务时，必须记录、跟踪或缩放时，这个选项很有用。</li>
+<li>One Job for all work items<br>
+这个选项适用于大量的工作项目，这些项目不需要由平台独立跟踪和管理。在这种情况下，工作项目必须通过批处理框架从应用程序内部进行管理。</li>
+</ul>
+<p>Job 基元只为工作项目的调度提供了最基本的基础知识。任何复杂的实现都必须将Job基元与批处理应用框架（例如，在Java生态系统中，我们将Spring Batch和JBeret作为标准实现）结合起来，以达到预期的结果。</p>
+<p>不是所有的服务都必须一直运行。有些服务必须按需运行，有些必须在特定的时间运行，有些必须定期运行。使用Jobs可以只在需要的时候运行Pod，并且只在任务执行期间运行。Jobs被安排在具有所需容量的节点上，满足Pod调度策略和其他容器依赖性考虑。使用Jobs来执行短时任务，而不是使用长期运行的抽象（如ReplicaSet），可以为平台上的其他工作负载节省资源。所有这些都使得Jobs成为一个独特的基元，而Kubernetes则是一个支持多样化工作负载的平台。</p>
+</div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='http://github.com/' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='mailto:anon@example.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2744 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/automated-placement/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        K8s中自动调度设计模式
+    </a>
+    
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/automated-placement/">K8s中自动调度设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/managed-lifecycle/">K8s中生命周期管理设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/health-probe/">K8s中健康检查设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/declarative-deployment/">K8s中声明式的部署设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/predictable-demands/">K8s中可预测的需求设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/cka-test-experience/">CkA考试经验</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1.16-installed-on-centos-system/">K8s1.16在centos安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/add-public-ip-to-kubernetes-apiserver-operation-guide/">添加公网ip到kubernetes的apiserver操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>
