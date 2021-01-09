@@ -248,7 +248,7 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
 指定多少个Pod副本可以并行运行。设置较高的数字并不能保证较高的并行性，实际的Pod数量可能仍然少于（在某些特殊的情况下，更多）所需的数量（例如，由于节流、资源配额、剩余的完成量不够以及其他原因）。将此字段设置为 0，可以有效地暂停作业。</li>
 </ul>
 <p>图1-1显示了例1-1中定义的完成数为5，并行度为2的Batch Job的处理方式。</p>
-<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm51lqx1f7j30du0590t5.jpg" alt="批量job.png"></p>
+<p><img src="/img/batch-job.png" alt="批量job.png"></p>
 <p>根据这两个参数，有以下几种类型的Job：</p>
 <ul>
 <li>Single Pod Job<br>

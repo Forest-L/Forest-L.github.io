@@ -190,7 +190,7 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
 指定多少个Pod副本可以并行运行。设置较高的数字并不能保证较高的并行性，实际的Pod数量可能仍然少于（在某些特殊的情况下，更多）所需的数量（例如，由于节流、资源配额、剩余的完成量不够以及其他原因）。将此字段设置为 0，可以有效地暂停作业。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;图1-1显示了例1-1中定义的完成数为5，并行度为2的Batch Job的处理方式。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm51lqx1f7j30du0590t5.jpg&#34; alt=&#34;批量job.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/batch-job.png&#34; alt=&#34;批量job.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;根据这两个参数，有以下几种类型的Job：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Single Pod Job&lt;br&gt;
@@ -264,7 +264,7 @@ Allocatable[capacity for application pods] = Node Capacity[available capacity on
 &lt;p&gt;考虑到除了配置默认调度器的策略外，还可以运行多个调度器，并允许Pod指定调度哪个调度器。你可以给它一个唯一的名字来启动另一个配置不同的调度器实例。然后在定义Pod时，只需在Pod规范中添加字段.spec.scheduleName，并将你的自定义调度器名称添加到Pod规范中，Pod就会只被自定义调度器接收。&lt;/p&gt;
 &lt;h4 id=&#34;调度过程&#34;&gt;调度过程&lt;/h4&gt;
 &lt;p&gt;Pods根据调度策略被分配到具有一定容量的节点上。为了完整起见，图1-1在高层次上直观地展示了这些元素是如何结合在一起的，以及Pod在被调度时经历的主要步骤。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm2qomk2ljj30cf08xq4c.jpg&#34; alt=&#34;调度过程.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/scheduling-process.png&#34; alt=&#34;调度过程.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;一旦创建了一个尚未分配给节点的Pod，它就会被调度器挑选出来，连同所有可用的节点以及过滤和优先级策略集。在第一阶段，调度器应用过滤策略，并根据Pod的标准删除所有不合格的节点。在第二阶段，剩余的节点得到按权重排序。在最后一个阶段，Pod得到一个节点分配，这是调度过程的主要结果。&lt;/p&gt;
 &lt;p&gt;在大多数情况下，最好是让调度程序来完成Pod到节点的分配，而不是微观管理调度逻辑。然而，在某些情况下，你可能想强制将一个Pod分配到一个特定的节点或一组节点。这种分配可以使用节点选择器来完成。.spec.nodeSelector是Pod字段，指定了一个键值对的映射，这些键值对必须作为标签存在于节点上，该节点才有资格运行Pod。例如，假设你想强制Pod运行在有SSD存储或GPU加速硬件的特定节点上。在例1-3中的Pod定义中，nodeSelector匹配disktype：ssd，只有标签为disktype=ssd的节点才有资格运行Pod。&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;1-3. Node基于可用disk类型选择
@@ -417,7 +417,7 @@ Taints和tolerations允许节点控制哪些Pods应该或不应该被调度在�
 &lt;p&gt;除了监控容器的状态外，平台有时可能会发出命令，并期望应用程序对此做出反应。在策略和外部因素的驱动下，云原生平台可能会在任何时刻决定启动或停止其管理的应用程序。容器化应用要决定哪些事件是重要的，要做出反应以及如何反应。但实际上，这是一个API，平台是用来和应用进行通信和发送命令的。另外，如果应用程序不需要这项服务，他们可以自由地从生命周期管理中获益，或者忽略它。&lt;/p&gt;
 &lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
 &lt;p&gt;我们看到，只检查进程状态并不能很好地显示应用程序的健康状况。这就是为什么有不同的API来监控容器的健康状况。同样，只使用进程模型来运行和停止一个进程是不够好的。现实世界中的应用需要更多的细粒度交互和生命周期管理能力。有些应用需要帮助预热，有些应用需要优雅而不带缓存的关闭程序。对于这种和其他用例，一些事件，如图1-1所示，由平台发出，容器可以监听并在需要时做出反应。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1kg6aoq6j309i03bmx8.jpg&#34; alt=&#34;生命周期.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/lifecycle.png&#34; alt=&#34;生命周期.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;应用程序的部署单元是一个Pod。你已经知道，一个Pod由一个或多个容器组成。在Pod层面，还有其他的构造，比如init容器、init Container（以及defer-containers，截止到目前还在提案阶段），可以帮助管理容器的生命周期。我们在本章中描述的事件和钩子都是应用在单个容器级别而不是Pod级别。&lt;/p&gt;
 &lt;h4 id=&#34;sigterm-signal&#34;&gt;SIGTERM Signal&lt;/h4&gt;
 &lt;p&gt;每当Kubernetes决定关闭一个容器时，无论是因为它所属的Pod正在关闭，还是仅仅是一个失败的liveness探测导致容器重新启动，容器都会收到一个SIGTERM信号。SIGTERM是在Kubernetes发出更突然的SIGKILL信号之前，温柔地戳一下容器，让它干净利落地关闭。一旦收到SIGTERM信号，应用程序应该尽快关闭。对于一些应用来说，这可能是一个快速的终止，而其他一些应用可能必须完成其飞行中的请求，释放开放的连接，并清理临时文件，这可能需要稍长的时间。在所有的情况下，对SIGTERM做出反应是以正确时刻和干净的方式关闭容器。&lt;/p&gt;
@@ -470,7 +470,7 @@ spec:
 &lt;h4 id=&#34;other-lifecycle-controls&#34;&gt;Other Lifecycle Controls&lt;/h4&gt;
 &lt;p&gt;在本章中，到目前为止，我们已经关注了当容器生命周期事件发生时允许执行命令的钩子。但另一种机制不是在容器层面，而是在Pod层面，允许执行初始化指令。&lt;/p&gt;
 &lt;p&gt;Init容器，深入浅出，但这里我们简单介绍一下，将其与生命周期钩子进行比较。与普通的应用容器不同，init容器按顺序运行，一直运行到完成，并且在Pod中任何一个应用容器启动之前运行。这些保证允许使用init容器进行Pod级初始化任务。生命周期钩子和init容器都以不同的粒度（分别在容器级和Pod级）运行，可以在某些情况下交替使用，或者在其他情况下相互补充。表1-1总结了两者的主要区别。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1mmjpp7zj30gj05omy0.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/other-lifecycle.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;除了当你需要特定的时间保证时，使用哪种机制没有严格的规定。我们可以完全跳过生命周期钩子和初始化容器，使用bash脚本来执行特定的操作，作为容器启动或关闭命令的一部分。这是有可能的，但它会将容器与脚本紧密耦合，并将其变成维护的噩梦。&lt;/p&gt;
 &lt;p&gt;我们还可以使用 Kubernetes 生命周期钩子来执行本章所述的一些动作。另外，我们还可以更进一步，运行使用init容器执行各个动作的容器。在这个序列中，这些选项越来越需要更多的提升，但同时也提供了更强的保障，并实现了重用。&lt;/p&gt;
 &lt;p&gt;理解容器和Pod生命周期的阶段和可用钩子对于创建Kubernetes管理的应用来说是至关重要的。&lt;/p&gt;
@@ -541,7 +541,7 @@ spec:
 &lt;p&gt;为了实现完全自动化，云原生应用必须具有高度可观察性，为管理平台提供读取和解释应用健康状况的方法，并在必要时采取纠正措施。健康检查在部署、自愈、扩展等活动的自动化中起着基础作用。然而，对于应用健康，您的应用程序还可以通过其他手段提供更多可见性。&lt;/p&gt;
 &lt;p&gt;显而易见的、老的方法是通过日志记录来实现这一目的。对于容器来说，一个好的做法是记录任何重大的系统出错和系统错误事件，并将这些日志收集到一个中心位置以便进一步分析。日志通常不是用来采取自动行动的，而是用来提出告警和进一步调查。日志更有用的方面是对故障的事后分析和检测不明显的错误。&lt;/p&gt;
 &lt;p&gt;除了记录到标准流中，将退出容器的原因记录到/dev/termination-log也是一个好的做法。这个位置是容器在永久消失之前陈述其最后意愿的地方。图1-1显示了容器如何与运行时平台通信的可能选项。
-&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1gm1a8dibrjj30ah03dwel.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/health-check.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;容器通过将其视为黑盒，为包装和运行应用程序提供了一种统一的方式。然而，任何旨在成为云原生产品的容器都必须为运行时环境提供API，以观察容器的健康状况并采取相应行动。这种支持是以统一的方式实现容器更新和生命周期自动化的基本前提，从而提高系统的弹性和用户体验。在实际操作中，这意味着，作为最起码的要求，你的容器化应用程序必须为不同类型的健康检查（liveness和readiness）提供API。&lt;/p&gt;
 &lt;p&gt;即使是表现更好的应用程序也必须提供其他手段，让管理平台通过集成跟踪和度量收集库（如OpenTracing或Prometheus）来观察容器化应用程序的状态。把你的应用当作一个黑盒子，但要实现所有必要的API，以帮助平台以最好的方式观察和管理你的应用。&lt;/p&gt;
 </description>
@@ -603,7 +603,7 @@ spec:
             exec:
               command: [&amp;quot;stat&amp;quot;,&amp;quot;/random-generator-ready&amp;quot; ]
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;滚动更新（RollingUpdate）策略行为确保了更新过程中没有停机时间。在幕后，Deployment实现类似这样的动作来执行，通过创建新的ReplicaSets和用新容器替换旧容器。通过Deployment，这里有一个增强是可以控制新容器滚动的速度。Deployment对象允许你通过maxSurge和maxUnavailable字段来控制可用和超出Pod的范围。图1-1展示了滚动更新过程。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyrd6sisrj30eh04s3z1.jpg&#34; alt=&#34;image&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/RollingUpdate1.png&#34; alt=&#34;image&#34;&gt;&lt;/p&gt;
 &lt;p&gt;要触发声明式更新，你有三个选项:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;使用 kubectl replace 将整个部署替换为新版本的部署。&lt;/li&gt;
@@ -620,21 +620,21 @@ spec:
 &lt;/ul&gt;
 &lt;h4 id=&#34;fixed-deployment&#34;&gt;Fixed Deployment&lt;/h4&gt;
 &lt;p&gt;滚动更新（RollingUpdate）策略对于在更新过程中确保零停机时间非常有用。然而，这种方法的副作用是，在更新过程中，容器的两个版本同时运行。这可能会给服务消费者带来问题，特别是当更新过程在服务API中引入了向后不兼容的变化，而客户端又无法处理这些变化时。对于这种情况，有Recreate策略，如图1-2所示。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glys496y3lj30eg052t9b.jpg&#34; alt=&#34;fixed Deployment.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/RollingUpdate2.png&#34; alt=&#34;fixed Deployment.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Recreate策略的效果是将maxUnavailable设置为已声明的复制数。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这意味着它首先杀死当前版本的所有容器，然后在旧容器被驱逐时同时启动所有新容器。这一系列操作的结果是，当所有拥有旧版本的容器被停止时，会有一些停机时间，而且没有新的容器准备好处理传入的请求。从积极的一面来看，不会有两个版本的容器同时运行，简化了服务消费者的生活，一次只处理一个版本。&lt;/p&gt;
 &lt;h4 id=&#34;蓝绿发布&#34;&gt;蓝绿发布&lt;/h4&gt;
 &lt;p&gt;蓝绿部署是一种用于在最小化停机时间和降低风险的生产环境中部署软件的发布策略。Kubernetes&amp;rsquo;Deployment抽象是一个基本概念，它可以让你定义Kubernetes如何将不可变容器从一个版本过渡到另一个版本。我们可以将Deployment基元作为一个构件，与其他Kubernetes基元一起，实现这种更高级的蓝绿部署的发布策略。&lt;/p&gt;
 &lt;p&gt;如果没有使用Service Mesh或Knative等扩展，则需要手动完成蓝绿部署。技术上，它的工作原理是通过创建第二个Deployment，容器的最新版本（我们称它为绿色）还没有服务于任何请求。在这一阶段，原始Deployment中的旧Pod副本（称为蓝色）仍在运行并服务于实时请求。&lt;/p&gt;
 &lt;p&gt;一旦我们确信新版本的Pods是健康的，并且准备好处理实时请求，我们就会将流量从旧的Pod副本切换到新的副本。Kubernetes中的这个活动可以通过更新服务选择器来匹配新容器（标记为绿色）来完成。如图1-3所示，一旦绿色容器处理了所有的流量，就可以删除蓝色容器，释放资源用于未来的蓝绿部署。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glysteayffj30f105bmxr.jpg&#34; alt=&#34;蓝绿发布.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/Blue-Green-Release.png&#34; alt=&#34;蓝绿发布.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;蓝绿方式的一个好处是，只有一个版本的应用在服务请求，这降低了Service消费者处理多个并发版本的复杂性。缺点是它需要两倍的应用容量，同时蓝色和绿色容器都在运行。另外，在过渡期间，可能会出现长时间运行的进程和数据库状态漂移的重大并发症。&lt;/p&gt;
 &lt;h4 id=&#34;金丝雀发布&#34;&gt;金丝雀发布&lt;/h4&gt;
 &lt;p&gt;金丝雀发布是一种通过用新的实例替换一小部分旧的实例来软性地将一个应用程序的新版本部署到生产中的方法。这种技术通过只让部分消费者达到更新的版本来降低将新版本引入生产的风险。当我们对新版本的服务以及它在小样本用户中的表现感到满意时，我们就用新版本替换所有的旧实例。图1-4显示了一个金丝雀版本的运行情况。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyt4zxuo9j30ey0580t8.jpg&#34; alt=&#34;金丝雀发布.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/Canary-Release.png&#34; alt=&#34;金丝雀发布.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;在Kubernetes中，可以通过为新的容器版本（最好使用Deployment）创建一个新的ReplicaSet来实现这一技术，该ReplicaSet的副本数量较少，可以作为Canary实例使用。在这个阶段，服务应该将一些消费者引导到更新的Pod实例上。一旦我们确信使用新 ReplicaSet 的一切都能按预期工作，我们就会将新的 ReplicaSet 规模化，旧的 ReplicaSet 则降为零。从某种程度上来说，我们是在进行一个可控的、经过用户测试的增量式推广。&lt;/p&gt;
 &lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
 &lt;p&gt;Deoloyment本质是 Kubernetes 将手动更新应用程序的繁琐过程转化为可重复和自动化的声明式活动的一个例子。开箱即用的部署策略（rolling和recreate）控制用新容器替换旧容器，而发布策略（bluegreen和金丝雀）则控制新版本如何提供给服务消费者。后两种发布策略是基于人对过渡触发器的决定，因此不是完全自动化的，而是需要人的交互。图1-5显示了部署和发布策略的摘要，显示了过渡期间的实例数。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://ww1.sinaimg.cn/large/006bbiLEgy1glyw6xng8fj30d70a1dgn.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/Release.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;
 &lt;p&gt;每个软件都是不同的，部署复杂的系统通常需要额外的步骤和检查。本章讨论的技术涵盖了Pod更新过程，但不包括更新和回滚其他Pod依赖项，如ConfigMaps、Secrete或其他依赖服务。&lt;/p&gt;
 &lt;p&gt;截至目前，Kubernetes有一个建议，允许在部署过程中使用钩子。Pre和Post钩子将允许在Kubernetes执行部署策略之前和之后执行自定义命令。这些命令可以在部署进行时执行额外的操作，另外还可以中止、重试或继续部署。这些命令是向新的自动化部署和发布策略迈出的良好一步。目前，一种行之有效的方法是用脚本化去更高层次上编写更新过程，本节中讨论的Deployment和其他属性来管理服务及其依赖关系的更新过程。&lt;/p&gt;
 &lt;p&gt;无论你使用何种部署策略，Kubernetes都必须知道你的应用Pod何时启动并运行，以执行所需的步骤序列达到定义的目标部署状态。&lt;/p&gt;</description>
