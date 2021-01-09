@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>李林博客  | K8s中批量Job设计模式</title>
+	<title>李林博客  | K8s中定时Job设计模式</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -142,7 +142,7 @@ onload='renderMathInElement(document.body);'></script>
 		<a href="https://Forest-L.github.io/" title="李林博客" class="heading font-cursive icon">李林博客</a>
 	</h2>
 </div>
-<h1 class="pt-2">K8s中批量Job设计模式</h1>
+<h1 class="pt-2">K8s中定时Job设计模式</h1>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
@@ -169,7 +169,7 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2021-01-03T16:00:45&#43;08:00">2021-1-3 16:00</time>
+		datetime="2021-01-09T17:44:37&#43;08:00">2021-1-9 17:44</time>
 </div>
 
 <details class="toc" open>
@@ -196,79 +196,45 @@ onload='renderMathInElement(document.body);'></script>
 
 <article>
 	<section class="mx-auto content">
-		<div class="c-rich-text"><p>Batch Job模式适合管理孤立的原子工作单元。它基于Job抽象，在分布式环境中可靠地运行短暂的Pod，直到完成。</p>
+		<div class="c-rich-text"><p>定时Job模式通过添加时间维度扩展了批次Job模式，并允许由当时事件触发执行一个工作单元。</p>
 <h2 id="存在问题">存在问题</h2>
-<p>Kubernetes中管理和运行容器的主要基元是Pod。创建Pod的方式有不同的特点。</p>
-<ul>
-<li>Bare Pod<br>
-可以手动创建一个Pod来运行容器。然而，当这种Pod运行的节点出现故障时，Pod不会被重新启动。不鼓励以这种方式运行Pod，除非出于开发或测试目的。这种机制也被称为非托管或裸露的Pod。</li>
-<li>ReplicaSet<br>
-该控制器用于创建和管理预期连续运行的Pod的生命周期（例如，运行一个Web服务器容器）。在任何给定时间中，它维护一组稳定的副本Pods运行，并保证指定数量相同的Pods可用。</li>
-<li>DaemonSet<br>
-控制器以单个Pod方式运行在每个节点上。通常用于管理平台功能，如监控、日志收集、存储容器等。</li>
-</ul>
-<p>这些Pod的一个共同点是，它们代表了长期运行的进程，并不是要在一段时间后停止。然而，在某些情况下，需要可靠地执行一个预定义的限定的工作，然后关闭容器。对于这个任务，Kubernetes提供了Job资源。</p>
+<p>在分布式系统和微服务的世界里，使用HTTP和轻量级消息传递的实时和事件驱动的应用交互是一个明显的趋势。然而，无论软件开发的最新趋势如何，Job调度有着悠久的历史，而且它仍然具有相关性。==定时Job通常用于自动化系统维护或管理任务==。它们也适用于需要定期执行特定任务的业务应用，这里的典型例子是通过文件传输进行业务对业务的集成，通过数据库轮询进行应用集成，发送新闻信邮件，以及清理和归档旧文件。</p>
+<p>对于系统维护而言，传统方法处理周期性Job是使用专门的调度软件或Cron。然而，对于简单的用例来说，专门的软件可能会很昂贵，而且在单一服务器上运行的Cron作业很难维护，而且是一个单一的故障点。这就是为什么，很多时候，开发人员倾向于实现既能处理调度方面的问题，又能处理需要执行的业务逻辑的解决方案。例如，在Java世界中，Quartz、Spring Batch等库以及带有ScheduledThreadPoolExecutor类的自定义实现都可以运行时间性任务。但与Cron类似，这种方法的主要难点是使调度能力具有弹性和高可用，从而导致资源的高消耗。另外，采用这种方法，基于时间的任务调度器是应用程序的一部分，要使调度器高度可用，整个应用程序必须高度可用。通常情况下，这涉及到运行多个应用实例，同时要保证只有一个实例是活跃的，并调度作业&ndash;这就涉及到领导者选举和其他分布式系统的挑战。</p>
+<p>最后，一个简单的服务，每天要复制几个文件一次，最后可能需要多个节点，分布式的领导选举机制等等。Kubernetes CronJob的实现解决了这些问题，它允许使用著名的Cron格式对Job资源进行调度，让开发者只专注于实现要执行的工作，而不是时间调度方面。</p>
 <h2 id="解决方案">解决方案</h2>
-<p>Kubernetes Job类似于ReplicaSet，因为它创建了一个或多个Pod，并确保它们成功运行。然而，不同的是，一旦预期数量的Pod成功终止，该作业就被认为是完成的，不再启动额外的Pod。一个Job定义看起来像例 1-1。</p>
-<pre><code>1.1 Job实例
-apiVersion: batch/v1
-kind: Job
-metadata:
+<p>在Batch Job中，我们看到了Kubernetes Jobs的用例和功能。所有这些也适用于本章，因为CronJob基元建立在Job之上。CronJob实例类似于Unix crontab（cron表）的一行，管理Job的时间方面。它允许在指定的时间点周期性地执行一个Job。见例1-1的示例定义。</p>
+<pre><code>1-1. CronJob
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata: 
   name: random-generator
-spec:
-  completions: 5
-  parallelism: 2
-  template:
-    metadata:
-      name: random-generator
+spec: 
+  # Every three minutes
+  schedule:&quot;*/3****&quot;
+  jobTemplate:
     spec:
-      restartPolicy: OnFailure
-      containers:
-      - image: k8spatterns/random-generator:1.0
-        name: random-generator
-        command: [ &quot;java&quot;, &quot;-cp&quot;, &quot;/&quot;, &quot;RandomRunner&quot;, &quot;/numbers.txt&quot;, &quot;10000&quot; ]
-        
-        
-Job应该运行五个Pods来完成，这五个Pods必须全部成功。
-有两个pod是并行的。
-</code></pre><p>Job 和 ReplicaSet 定义之间的一个重要区别是 .spec.template.spec.restartPolicy。ReplicaSet的默认值是Always，这对于必须始终保持运行的长期进程来说是有意义的。对于一个Job来说，不允许使用 Always 值，唯一可能的选项是 OnFailure 或Never。</p>
-<p>那么，为什么还要创建一个Job及只运行一次Pod，而不是使用裸Pod呢？使用Job提供了许多可靠性和可扩展性的优势，使其成为首选。</p>
+      template:
+        spec:
+          containers:
+          - image: k8spatterns/random-generator:1.0
+            name: random-generator command: [ &quot;java&quot;, &quot;-cp&quot;, &quot;/&quot;, &quot;RandomRunner&quot;, &quot;/numbers.txt&quot;, &quot;10000&quot; ]
+          restartPolicy: OnFailure
+</code></pre><p>除了Job规格外，CronJob还有额外的字段来定义它的时间方面：</p>
 <ul>
-<li>一个Job不是一个短暂的内存中的任务，而是一个持久的任务，可以在集群重启后存活下来。</li>
-<li>当一个作业完成时，它不会被删除，但会被保留以用于跟踪。作为Job的一部分创建的Pods也不会被删除，但可用于检查（例如，检查容器日志）。对于裸露的Pods也是如此，但只适用于restartPolicy: OnFailure。</li>
-<li>一个Job可能需要执行多次。使用.spec.completions字段可以指定一个Pod在Job本身完成之前应该成功完成多少次。</li>
-<li>当一个Job必须多次完成时（通过.spec.completions设置），它也可以通过同时启动多个Pod来扩展和执行。这可以通过指定.spec.parallelism字段来实现。</li>
-<li>如果节点出现故障，或者当Pod因某种原因被驱逐，而仍在运行时，调度器会将Pod调度在一个新的健康节点上并重新运行。裸露的Pod将保持在失败的状态，因为现有的Pod永远不会被移动到其他节点上。</li>
+<li>.spec.schedule<br>
+Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运行）。</li>
+<li>.spec.startingDeadlineSeconds<br>
+如果任务错过了预定时间，启动任务的最后期限（以秒为单位）。在某些使用情况下，一个任务只有在一定的时间范围内执行才有效，如果执行晚了就没有用了。例如，如果一个Job因为缺乏计算资源或其他缺失的依赖关系而没有在预期的时间内执行，那么最好跳过一次执行，因为它应该处理的数据已经过时了。</li>
+<li>.spec.concurrencyPolicy<br>
+指定如何管理同一 CronJob 创建的作业的并发执行。默认行为Allow会创建新的Job实例，即使之前的Job还没有完成。如果这不是所需的行为，可以在当前作业尚未完成的情况下，使用 Forbidor 跳过下一次运行，取消当前正在运行的作业，并使用 Replace 启动一个新的作业。</li>
+<li>.spec.suspend<br>
+暂停所有后续执行，但不影响已经开始的执行。</li>
+<li>.spec.successfulJobsHistoryLimit and .spec.failedJobsHistoryLimit<br>
+指定应保留多少个已完成和未完成的Job的字段，以便进行审计。</li>
 </ul>
-<p>所有这些都使得Job基元对于那些需要对单位工作的完成进行一些保证的场景具有吸引力。在Job的行为中起主要作用的两个字段是：</p>
-<ul>
-<li>.spec.completions<br>
-指定应运行多少个Pods来完成一个Job。</li>
-<li>.spec.parallelism<br>
-指定多少个Pod副本可以并行运行。设置较高的数字并不能保证较高的并行性，实际的Pod数量可能仍然少于（在某些特殊的情况下，更多）所需的数量（例如，由于节流、资源配额、剩余的完成量不够以及其他原因）。将此字段设置为 0，可以有效地暂停作业。</li>
-</ul>
-<p>图1-1显示了例1-1中定义的完成数为5，并行度为2的Batch Job的处理方式。</p>
-<p><img src="http://ww1.sinaimg.cn/large/006bbiLEgy1gm51lqx1f7j30du0590t5.jpg" alt="批量job.png"></p>
-<p>根据这两个参数，有以下几种类型的Job：</p>
-<ul>
-<li>Single Pod Job<br>
-当您不考虑.spec.completions和.spec.parallelism或将它们设置为默认值1时，就会选择这种类型。这样的Job只启动一个Pod，一旦单个Pod成功终止（退出代码为0），就会完成。</li>
-<li>Fixed completion count Jobs<br>
-当你指定.spec.completions的数字大于1时，这个数量的Pod必须成功。您可以选择设置.spec.parallelism，或者将其保留为默认值1。这样的Job在.spec.completions数量的Pods成功完成后，就被认为是完成了。例1-1展示了这种模式的运行情况，当我们事先知道Jobs的数量，并且单个工作项的处理成本证明了使用专用Pod的合理性时，这是最好的选择。</li>
-<li>Work queue Jobs<br>
-当您不使用 .spec.completions 并将 .spec.parallelism 设置为大于 1 的整数时，您就拥有了一个并行Job的工作队列。当至少有一个Pod成功终止，并且所有其他Pod也终止时，一个工作队列Job就被认为已经完成。这种设置需要Pods之间相互协调，确定每个Pods正在进行的工作，这样才能以协调的方式完成。例如，当队列中存储了固定但未知数量的工作项目时，并行的Pods可以逐个拾取这些项目进行工作。第一个检测到队列为空并成功退出的Pod表示Job完成。Job控制器也会等待所有其他Pod终止。由于一个Pod处理多个工作项目，这种Job类型是细化工作项目的最佳选择&ndash;当每个工作项目的一个Pod的开销是不合理的。</li>
-</ul>
-<p>如果你有无限的工作项流需要处理，其他控制器（如ReplicaSet）是管理处理这些工作项目的Pod的更好选择。</p>
+<p>CronJob是一个非常专业的基元，它只适用于工作单元具有时间维度的情况。即使CronJob不是一个通用的基元，它也是一个很好的例子，说明Kubernetes的能力是如何建立在彼此之上，并且也支持非云原生用例。</p>
 <h2 id="讨论">讨论</h2>
-<p>Job抽象是一个非常基本但也是基本的基元，其他基元（如 CronJobs）都是基于这个基元。Job有助于将孤立的工作单元转化为可靠和可扩展的执行单元。然而，Job 并不决定如何将可单独处理的工作项映射到 Jobs 或 Pods 中。这是你必须在考虑每个选项的利弊后确定的事情。</p>
-<ul>
-<li>One Job per work item<br>
-这个选项有创建Kubernetes Jobs的开销，也为平台管理大量消耗资源的Job。当每个工作项目都是一个复杂的任务时，必须记录、跟踪或缩放时，这个选项很有用。</li>
-<li>One Job for all work items<br>
-这个选项适用于大量的工作项目，这些项目不需要由平台独立跟踪和管理。在这种情况下，工作项目必须通过批处理框架从应用程序内部进行管理。</li>
-</ul>
-<p>Job 基元只为工作项目的调度提供了最基本的基础知识。任何复杂的实现都必须将Job基元与批处理应用框架（例如，在Java生态系统中，我们将Spring Batch和JBeret作为标准实现）结合起来，以达到预期的结果。</p>
-<p>不是所有的服务都必须一直运行。有些服务必须按需运行，有些必须在特定的时间运行，有些必须定期运行。使用Jobs可以只在需要的时候运行Pod，并且只在任务执行期间运行。Jobs被安排在具有所需容量的节点上，满足Pod调度策略和其他容器依赖性考虑。使用Jobs来执行短时任务，而不是使用长期运行的抽象（如ReplicaSet），可以为平台上的其他工作负载节省资源。所有这些都使得Jobs成为一个独特的基元，而Kubernetes则是一个支持多样化工作负载的平台。</p>
+<p>正如您所看到的，CronJob是一个非常简单的基元，它向现有的Job定义添加了集群、类似Cron的行为。但当它与其他基元（如 Pods、容器资源隔离）和其他 Kubernetes 特性（如 ，Automated Placement、Health Probe）相结合时，它往往会成为一个非常强大的 Job 调度系统。这使得开发者可以只关注问题域，实现一个只负责要执行的业务逻辑的容器化应用。调度是在应用之外进行的，作为平台的一部分，它具有所有的附加优势，如高可用性、弹性、容量和策略驱动的Pod调度。当然，与Job的实现类似，在实现CronJob容器时，你的应用必须考虑重复运行、不运行、并行运行或取消运行的所有角落和故障情况。</p>
 </div>
 	</section>
 
@@ -350,7 +316,7 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2744 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1735 words in this page.
 	</div>
 </div>
 
@@ -361,21 +327,14 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/automated-placement/">
+    <a class="flex-grow-0" href="/post/batch-job/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        K8s中自动调度设计模式
+        K8s中批量Job设计模式
     </a>
     
-    
-    <a class="flex-grow-0" href="/post/cronjob/">
-        K8s中定时Job设计模式
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
     
 </div>
 <div >
@@ -385,6 +344,8 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
 <div class="font-serif pb-2 flex align-start leading-loose">
 	<span class="heading pr-6 leading-loose">Related</span>
 	<span >
+		
+			<a href="/post/batch-job/">K8s中批量Job设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		
 			<a href="/post/automated-placement/">K8s中自动调度设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		

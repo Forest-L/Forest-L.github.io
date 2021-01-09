@@ -7,10 +7,58 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Sun, 03 Jan 2021 16:00:45 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 09 Jan 2021 17:44:37 +0800</lastBuildDate>
     
 	<atom:link href="https://Forest-L.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s中定时Job设计模式</title>
+      <link>https://Forest-L.github.io/post/cronjob/</link>
+      <pubDate>Sat, 09 Jan 2021 17:44:37 +0800</pubDate>
+      
+      <guid>https://Forest-L.github.io/post/cronjob/</guid>
+      <description>&lt;p&gt;定时Job模式通过添加时间维度扩展了批次Job模式，并允许由当时事件触发执行一个工作单元。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;在分布式系统和微服务的世界里，使用HTTP和轻量级消息传递的实时和事件驱动的应用交互是一个明显的趋势。然而，无论软件开发的最新趋势如何，Job调度有着悠久的历史，而且它仍然具有相关性。==定时Job通常用于自动化系统维护或管理任务==。它们也适用于需要定期执行特定任务的业务应用，这里的典型例子是通过文件传输进行业务对业务的集成，通过数据库轮询进行应用集成，发送新闻信邮件，以及清理和归档旧文件。&lt;/p&gt;
+&lt;p&gt;对于系统维护而言，传统方法处理周期性Job是使用专门的调度软件或Cron。然而，对于简单的用例来说，专门的软件可能会很昂贵，而且在单一服务器上运行的Cron作业很难维护，而且是一个单一的故障点。这就是为什么，很多时候，开发人员倾向于实现既能处理调度方面的问题，又能处理需要执行的业务逻辑的解决方案。例如，在Java世界中，Quartz、Spring Batch等库以及带有ScheduledThreadPoolExecutor类的自定义实现都可以运行时间性任务。但与Cron类似，这种方法的主要难点是使调度能力具有弹性和高可用，从而导致资源的高消耗。另外，采用这种方法，基于时间的任务调度器是应用程序的一部分，要使调度器高度可用，整个应用程序必须高度可用。通常情况下，这涉及到运行多个应用实例，同时要保证只有一个实例是活跃的，并调度作业&amp;ndash;这就涉及到领导者选举和其他分布式系统的挑战。&lt;/p&gt;
+&lt;p&gt;最后，一个简单的服务，每天要复制几个文件一次，最后可能需要多个节点，分布式的领导选举机制等等。Kubernetes CronJob的实现解决了这些问题，它允许使用著名的Cron格式对Job资源进行调度，让开发者只专注于实现要执行的工作，而不是时间调度方面。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;在Batch Job中，我们看到了Kubernetes Jobs的用例和功能。所有这些也适用于本章，因为CronJob基元建立在Job之上。CronJob实例类似于Unix crontab（cron表）的一行，管理Job的时间方面。它允许在指定的时间点周期性地执行一个Job。见例1-1的示例定义。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1-1. CronJob
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata: 
+  name: random-generator
+spec: 
+  # Every three minutes
+  schedule:&amp;quot;*/3****&amp;quot;
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - image: k8spatterns/random-generator:1.0
+            name: random-generator command: [ &amp;quot;java&amp;quot;, &amp;quot;-cp&amp;quot;, &amp;quot;/&amp;quot;, &amp;quot;RandomRunner&amp;quot;, &amp;quot;/numbers.txt&amp;quot;, &amp;quot;10000&amp;quot; ]
+          restartPolicy: OnFailure
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;除了Job规格外，CronJob还有额外的字段来定义它的时间方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;.spec.schedule&lt;br&gt;
+Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运行）。&lt;/li&gt;
+&lt;li&gt;.spec.startingDeadlineSeconds&lt;br&gt;
+如果任务错过了预定时间，启动任务的最后期限（以秒为单位）。在某些使用情况下，一个任务只有在一定的时间范围内执行才有效，如果执行晚了就没有用了。例如，如果一个Job因为缺乏计算资源或其他缺失的依赖关系而没有在预期的时间内执行，那么最好跳过一次执行，因为它应该处理的数据已经过时了。&lt;/li&gt;
+&lt;li&gt;.spec.concurrencyPolicy&lt;br&gt;
+指定如何管理同一 CronJob 创建的作业的并发执行。默认行为Allow会创建新的Job实例，即使之前的Job还没有完成。如果这不是所需的行为，可以在当前作业尚未完成的情况下，使用 Forbidor 跳过下一次运行，取消当前正在运行的作业，并使用 Replace 启动一个新的作业。&lt;/li&gt;
+&lt;li&gt;.spec.suspend&lt;br&gt;
+暂停所有后续执行，但不影响已经开始的执行。&lt;/li&gt;
+&lt;li&gt;.spec.successfulJobsHistoryLimit and .spec.failedJobsHistoryLimit&lt;br&gt;
+指定应保留多少个已完成和未完成的Job的字段，以便进行审计。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;CronJob是一个非常专业的基元，它只适用于工作单元具有时间维度的情况。即使CronJob不是一个通用的基元，它也是一个很好的例子，说明Kubernetes的能力是如何建立在彼此之上，并且也支持非云原生用例。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;正如您所看到的，CronJob是一个非常简单的基元，它向现有的Job定义添加了集群、类似Cron的行为。但当它与其他基元（如 Pods、容器资源隔离）和其他 Kubernetes 特性（如 ，Automated Placement、Health Probe）相结合时，它往往会成为一个非常强大的 Job 调度系统。这使得开发者可以只关注问题域，实现一个只负责要执行的业务逻辑的容器化应用。调度是在应用之外进行的，作为平台的一部分，它具有所有的附加优势，如高可用性、弹性、容量和策略驱动的Pod调度。当然，与Job的实现类似，在实现CronJob容器时，你的应用必须考虑重复运行、不运行、并行运行或取消运行的所有角落和故障情况。&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>K8s中批量Job设计模式</title>
