@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>centos on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/centos/</link>
+    <link>https://kubesphereio.com/tags/centos/</link>
     <description>Recent content in centos on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Sun, 22 Sep 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/centos/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/centos/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>K8s1.16在centos安装</title>
-      <link>https://Forest-L.github.io/post/k8s1.16-installed-on-centos-system/</link>
+      <link>https://kubesphereio.com/post/k8s1.16-installed-on-centos-system/</link>
       <pubDate>Sun, 22 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s1.16-installed-on-centos-system/</guid>
+      <guid>https://kubesphereio.com/post/k8s1.16-installed-on-centos-system/</guid>
       <description>&lt;h1 id=&#34;centos系统k8s-116版本安装&#34;&gt;centos系统k8s-1.16版本安装&lt;/h1&gt;
 &lt;p&gt;k8s1.16版本相对之前版本变化不小，亮点和升级参看&lt;a href=&#34;http://k8smeetup.com/article/N1lqGc0i8v&#34;&gt;v1.16说明&lt;/a&gt;。相关联的镜像和v1.16二进制包上传至百度云上，链接如下&lt;a href=&#34;https://pan.baidu.com/s/19khl0Hn5ZnZ8TvbO5HZVww&#34;&gt;k8s1.16介质，ftq5&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1准备&#34;&gt;1.准备&lt;/h2&gt;

@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>storage on 李林博客</title>
-    <link>https://Forest-L.github.io/categories/storage/</link>
+    <link>https://kubesphereio.com/categories/storage/</link>
     <description>Recent content in storage on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Tue, 06 Oct 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/categories/storage/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/categories/storage/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>存储总结</title>
-      <link>https://Forest-L.github.io/post/storage-summary/</link>
+      <link>https://kubesphereio.com/post/storage-summary/</link>
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/storage-summary/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -221,10 +221,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>k8s分布式存储总结</title>
-      <link>https://Forest-L.github.io/post/k8s-storage-summary/</link>
+      <link>https://kubesphereio.com/post/k8s-storage-summary/</link>
       <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/k8s-storage-summary/</guid>
       <description>&lt;h2 id=&#34;1pvpvc和sc来源&#34;&gt;1、pv、pvc和sc来源&lt;/h2&gt;
 &lt;p&gt;pv引入解耦了pod与底层存储；pvc引入分离声明与消费，分离开发与运维责任，存储由运维系统人员管理，开发人员只需要通过pvc声明需要存储的类型、大小和访问模式即可；sc引入使pv自动创建或删除，开发人员定义的pvc中声明stroageclassname以及大小等需求自动创建pv；运维人员只需要声明好sc以及quota配额即可，无需维护pv。&lt;/p&gt;
 &lt;ul&gt;
@@ -329,15 +329,15 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 &lt;li&gt;Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Pmem与块存储性能对比</title>
-      <link>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</link>
+      <link>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</guid>
+      <guid>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</guid>
       <description>&lt;h2 id=&#34;1pmem介绍&#34;&gt;1、Pmem介绍&lt;/h2&gt;
 &lt;p&gt;PMEM是硬件产品，Intel Optane DC持久存储模块，是一种具有大容量和数据持久性的创新存储技术。有2种运行模式。两级内存模式无需软件更改，DCPMM被视为更大的内存，并使用DRAM作为其缓存层。AppDirect模式将设备暴露为持久内存，支持软件栈，可用于加速不同的应用程序。在本文中，我们将使用AppDirect模式。&lt;/p&gt;
 &lt;h2 id=&#34;2环境信息&#34;&gt;2、环境信息&lt;/h2&gt;
@@ -616,10 +616,10 @@ Totals      82856.35        82.86     74487.86         2.45929         2.38300  
     
     <item>
       <title>netapp存储在kubesphere上的实践</title>
-      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
+      <link>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
+      <guid>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</guid>
       <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
 &lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
@@ -636,7 +636,7 @@ kubesphere: 2.0.2&lt;/p&gt;
 &lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
 &lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
 https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
@@ -704,7 +704,7 @@ EOF
 &lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
 &lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
 &lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
@@ -713,10 +713,10 @@ EOF
     
     <item>
       <title>netapp联合k8s在kubesphere应用</title>
-      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <link>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <guid>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</guid>
       <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
 &lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
 &lt;ul&gt;
@@ -792,7 +792,7 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;对接各个存储的协议证书
@@ -832,10 +832,10 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
     
     <item>
       <title>Kubesphere基于Velero做集群的迁移</title>
-      <link>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</link>
+      <link>https://kubesphereio.com/post/kubesphere-does-cluster-migration-based-on-velero/</link>
       <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
+      <guid>https://kubesphereio.com/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
       <description>&lt;p&gt;#Kubesphere基于Velero做集群的迁移
 使用Velero 快速完成云原生应用迁移至备份集群中。&lt;/p&gt;
 &lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
@@ -916,10 +916,10 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
     
     <item>
       <title>openebs基于k8s安装</title>
-      <link>https://Forest-L.github.io/post/k8s-openebs-install/</link>
+      <link>https://kubesphereio.com/post/k8s-openebs-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-openebs-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-openebs-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -1123,10 +1123,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>rook基于k8s安装</title>
-      <link>https://Forest-L.github.io/post/k8s-rook-install/</link>
+      <link>https://kubesphereio.com/post/k8s-rook-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-rook-install/</guid>
       <description>&lt;h2 id=&#34;rook介绍&#34;&gt;rook介绍&lt;/h2&gt;
 &lt;p&gt;Rook是目前开源中比较流行的云原生的存储编排系统，专注于如何实现把ceph运行在Kubernetes平台上。将之前手工执行部署、初始化、配置、扩展、升级、迁移、灾难恢复、监控以及资源管理等转变为自动触发。比如集群增加一块磁盘，rook能自动初始化为一个OSD，并自动加入到合适的故障中，这个osd在kubernetes中是以pod形式运行的。&lt;/p&gt;
 &lt;h2 id=&#34;1部署&#34;&gt;1、部署&lt;/h2&gt;
@@ -1341,10 +1341,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>基于cephadm安装ceph</title>
-      <link>https://Forest-L.github.io/post/k8s-ceph-install/</link>
+      <link>https://kubesphereio.com/post/k8s-ceph-install/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-ceph-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-ceph-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -1548,13 +1548,13 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>k8s-default-Storage-Class搭建</title>
-      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
+      <link>https://kubesphereio.com/post/k8s-default-storage-class-installer/</link>
       <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
+      <guid>https://kubesphereio.com/post/k8s-default-storage-class-installer/</guid>
       <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
 &lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-创建storageclass&#34;&gt;1. 创建storageClass&lt;/h2&gt;
 &lt;p&gt;要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
 nfs服务器参考博客&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs服务器搭建&lt;/a&gt;&lt;/p&gt;
@@ -1604,10 +1604,10 @@ nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
     
     <item>
       <title>glusterfs安装</title>
-      <link>https://Forest-L.github.io/post/k8s-glusterfs-install/</link>
+      <link>https://kubesphereio.com/post/k8s-glusterfs-install/</link>
       <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-glusterfs-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-glusterfs-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -1811,10 +1811,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>Linux中nfs搭建</title>
-      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
+      <link>https://kubesphereio.com/post/linux-nfs-install/</link>
       <pubDate>Sat, 13 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
+      <guid>https://kubesphereio.com/post/linux-nfs-install/</guid>
       <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
 &lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
 &lt;p&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。

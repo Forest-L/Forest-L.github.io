@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Certificate on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/certificate/</link>
+    <link>https://kubesphereio.com/tags/certificate/</link>
     <description>Recent content in Certificate on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Tue, 13 Aug 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/certificate/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/certificate/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>添加公网ip到kubernetes的apiserver操作指南</title>
-      <link>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</link>
+      <link>https://kubesphereio.com/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</guid>
+      <guid>https://kubesphereio.com/post/add-public-ip-to-kubernetes-apiserver-operation-guide/</guid>
       <description>&lt;p&gt;通常情况下，我们的kubernetes集群是内网环境，如果希望通过本地访问这个集群，怎么办呢？大家想到的是Kubeadm在初始化的时候会为管理员生成一个 Kubeconfig文件，把它下载下来 是不是就可以？事实证明这样不行， 因为这个集群是内网集群，Kubeconfig文件 中APIServer的地址是内网ip。解决方案很简单，把公网ip签到证书里面就可以，其中有apiServerCertSANs这个选项，只要把公网IP写到这里，再启动这个集群的时候，这个公网ip就会签到证书里。&lt;/p&gt;
 &lt;h2 id=&#34;1-环境信息&#34;&gt;1. 环境信息&lt;/h2&gt;
 &lt;ul&gt;

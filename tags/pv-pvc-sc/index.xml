@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>pv-pvc-sc on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/pv-pvc-sc/</link>
+    <link>https://kubesphereio.com/tags/pv-pvc-sc/</link>
     <description>Recent content in pv-pvc-sc on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Mon, 05 Oct 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/pv-pvc-sc/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/pv-pvc-sc/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>k8s分布式存储总结</title>
-      <link>https://Forest-L.github.io/post/k8s-storage-summary/</link>
+      <link>https://kubesphereio.com/post/k8s-storage-summary/</link>
       <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/k8s-storage-summary/</guid>
       <description>&lt;h2 id=&#34;1pvpvc和sc来源&#34;&gt;1、pv、pvc和sc来源&lt;/h2&gt;
 &lt;p&gt;pv引入解耦了pod与底层存储；pvc引入分离声明与消费，分离开发与运维责任，存储由运维系统人员管理，开发人员只需要通过pvc声明需要存储的类型、大小和访问模式即可；sc引入使pv自动创建或删除，开发人员定义的pvc中声明stroageclassname以及大小等需求自动创建pv；运维人员只需要声明好sc以及quota配额即可，无需维护pv。&lt;/p&gt;
 &lt;ul&gt;
@@ -122,7 +122,7 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 &lt;li&gt;Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -2,346 +2,346 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/</link>
+    <link>https://kubesphereio.com/tags/</link>
     <description>Recent content in Tags on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Sat, 09 Jan 2021 17:44:37 +0800</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>K8s</title>
-      <link>https://Forest-L.github.io/tags/k8s/</link>
+      <link>https://kubesphereio.com/tags/k8s/</link>
       <pubDate>Sat, 09 Jan 2021 17:44:37 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/k8s/</guid>
+      <guid>https://kubesphereio.com/tags/k8s/</guid>
       <description></description>
     </item>
     
     <item>
       <title>lvs</title>
-      <link>https://Forest-L.github.io/tags/lvs/</link>
+      <link>https://kubesphereio.com/tags/lvs/</link>
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/lvs/</guid>
+      <guid>https://kubesphereio.com/tags/lvs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>vg</title>
-      <link>https://Forest-L.github.io/tags/vg/</link>
+      <link>https://kubesphereio.com/tags/vg/</link>
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/vg/</guid>
+      <guid>https://kubesphereio.com/tags/vg/</guid>
       <description></description>
     </item>
     
     <item>
       <title>pv-pvc-sc</title>
-      <link>https://Forest-L.github.io/tags/pv-pvc-sc/</link>
+      <link>https://kubesphereio.com/tags/pv-pvc-sc/</link>
       <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/pv-pvc-sc/</guid>
+      <guid>https://kubesphereio.com/tags/pv-pvc-sc/</guid>
       <description></description>
     </item>
     
     <item>
       <title>ceph</title>
-      <link>https://Forest-L.github.io/tags/ceph/</link>
+      <link>https://kubesphereio.com/tags/ceph/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/ceph/</guid>
+      <guid>https://kubesphereio.com/tags/ceph/</guid>
       <description></description>
     </item>
     
     <item>
       <title>pmem</title>
-      <link>https://Forest-L.github.io/tags/pmem/</link>
+      <link>https://kubesphereio.com/tags/pmem/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/pmem/</guid>
+      <guid>https://kubesphereio.com/tags/pmem/</guid>
       <description></description>
     </item>
     
     <item>
       <title>CKA</title>
-      <link>https://Forest-L.github.io/tags/cka/</link>
+      <link>https://kubesphereio.com/tags/cka/</link>
       <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/cka/</guid>
+      <guid>https://kubesphereio.com/tags/cka/</guid>
       <description></description>
     </item>
     
     <item>
       <title>iptables</title>
-      <link>https://Forest-L.github.io/tags/iptables/</link>
+      <link>https://kubesphereio.com/tags/iptables/</link>
       <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/iptables/</guid>
+      <guid>https://kubesphereio.com/tags/iptables/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Linux tools</title>
-      <link>https://Forest-L.github.io/tags/linux-tools/</link>
+      <link>https://kubesphereio.com/tags/linux-tools/</link>
       <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/linux-tools/</guid>
+      <guid>https://kubesphereio.com/tags/linux-tools/</guid>
       <description></description>
     </item>
     
     <item>
       <title>chart</title>
-      <link>https://Forest-L.github.io/tags/chart/</link>
+      <link>https://kubesphereio.com/tags/chart/</link>
       <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/chart/</guid>
+      <guid>https://kubesphereio.com/tags/chart/</guid>
       <description></description>
     </item>
     
     <item>
       <title>helm</title>
-      <link>https://Forest-L.github.io/tags/helm/</link>
+      <link>https://kubesphereio.com/tags/helm/</link>
       <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/helm/</guid>
+      <guid>https://kubesphereio.com/tags/helm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>netapp</title>
-      <link>https://Forest-L.github.io/tags/netapp/</link>
+      <link>https://kubesphereio.com/tags/netapp/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/netapp/</guid>
+      <guid>https://kubesphereio.com/tags/netapp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>ontap</title>
-      <link>https://Forest-L.github.io/tags/ontap/</link>
+      <link>https://kubesphereio.com/tags/ontap/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/ontap/</guid>
+      <guid>https://kubesphereio.com/tags/ontap/</guid>
       <description></description>
     </item>
     
     <item>
       <title>trident</title>
-      <link>https://Forest-L.github.io/tags/trident/</link>
+      <link>https://kubesphereio.com/tags/trident/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/trident/</guid>
+      <guid>https://kubesphereio.com/tags/trident/</guid>
       <description></description>
     </item>
     
     <item>
       <title>velero</title>
-      <link>https://Forest-L.github.io/tags/velero/</link>
+      <link>https://kubesphereio.com/tags/velero/</link>
       <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/velero/</guid>
+      <guid>https://kubesphereio.com/tags/velero/</guid>
       <description></description>
     </item>
     
     <item>
       <title>amd</title>
-      <link>https://Forest-L.github.io/tags/amd/</link>
+      <link>https://kubesphereio.com/tags/amd/</link>
       <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/amd/</guid>
+      <guid>https://kubesphereio.com/tags/amd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>arm</title>
-      <link>https://Forest-L.github.io/tags/arm/</link>
+      <link>https://kubesphereio.com/tags/arm/</link>
       <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/arm/</guid>
+      <guid>https://kubesphereio.com/tags/arm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>buildx</title>
-      <link>https://Forest-L.github.io/tags/buildx/</link>
+      <link>https://kubesphereio.com/tags/buildx/</link>
       <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/buildx/</guid>
+      <guid>https://kubesphereio.com/tags/buildx/</guid>
       <description></description>
     </item>
     
     <item>
       <title>apt-get</title>
-      <link>https://Forest-L.github.io/tags/apt-get/</link>
+      <link>https://kubesphereio.com/tags/apt-get/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/apt-get/</guid>
+      <guid>https://kubesphereio.com/tags/apt-get/</guid>
       <description></description>
     </item>
     
     <item>
       <title>yum</title>
-      <link>https://Forest-L.github.io/tags/yum/</link>
+      <link>https://kubesphereio.com/tags/yum/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/yum/</guid>
+      <guid>https://kubesphereio.com/tags/yum/</guid>
       <description></description>
     </item>
     
     <item>
       <title>centos</title>
-      <link>https://Forest-L.github.io/tags/centos/</link>
+      <link>https://kubesphereio.com/tags/centos/</link>
       <pubDate>Sun, 22 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/centos/</guid>
+      <guid>https://kubesphereio.com/tags/centos/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Certificate</title>
-      <link>https://Forest-L.github.io/tags/certificate/</link>
+      <link>https://kubesphereio.com/tags/certificate/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/certificate/</guid>
+      <guid>https://kubesphereio.com/tags/certificate/</guid>
       <description></description>
     </item>
     
     <item>
       <title>etcdctl</title>
-      <link>https://Forest-L.github.io/tags/etcdctl/</link>
+      <link>https://kubesphereio.com/tags/etcdctl/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/etcdctl/</guid>
+      <guid>https://kubesphereio.com/tags/etcdctl/</guid>
       <description></description>
     </item>
     
     <item>
       <title>mysql</title>
-      <link>https://Forest-L.github.io/tags/mysql/</link>
+      <link>https://kubesphereio.com/tags/mysql/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/mysql/</guid>
+      <guid>https://kubesphereio.com/tags/mysql/</guid>
       <description></description>
     </item>
     
     <item>
       <title>openebs</title>
-      <link>https://Forest-L.github.io/tags/openebs/</link>
+      <link>https://kubesphereio.com/tags/openebs/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/openebs/</guid>
+      <guid>https://kubesphereio.com/tags/openebs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>rook</title>
-      <link>https://Forest-L.github.io/tags/rook/</link>
+      <link>https://kubesphereio.com/tags/rook/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/rook/</guid>
+      <guid>https://kubesphereio.com/tags/rook/</guid>
       <description></description>
     </item>
     
     <item>
       <title>cephadm</title>
-      <link>https://Forest-L.github.io/tags/cephadm/</link>
+      <link>https://kubesphereio.com/tags/cephadm/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/cephadm/</guid>
+      <guid>https://kubesphereio.com/tags/cephadm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>osd</title>
-      <link>https://Forest-L.github.io/tags/osd/</link>
+      <link>https://kubesphereio.com/tags/osd/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/osd/</guid>
+      <guid>https://kubesphereio.com/tags/osd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>nfs</title>
-      <link>https://Forest-L.github.io/tags/nfs/</link>
+      <link>https://kubesphereio.com/tags/nfs/</link>
       <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/nfs/</guid>
+      <guid>https://kubesphereio.com/tags/nfs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>nfs-client-provisioner</title>
-      <link>https://Forest-L.github.io/tags/nfs-client-provisioner/</link>
+      <link>https://kubesphereio.com/tags/nfs-client-provisioner/</link>
       <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/nfs-client-provisioner/</guid>
+      <guid>https://kubesphereio.com/tags/nfs-client-provisioner/</guid>
       <description></description>
     </item>
     
     <item>
       <title>glusterfs</title>
-      <link>https://Forest-L.github.io/tags/glusterfs/</link>
+      <link>https://kubesphereio.com/tags/glusterfs/</link>
       <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/glusterfs/</guid>
+      <guid>https://kubesphereio.com/tags/glusterfs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>css</title>
-      <link>https://Forest-L.github.io/tags/css/</link>
+      <link>https://kubesphereio.com/tags/css/</link>
       <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/css/</guid>
+      <guid>https://kubesphereio.com/tags/css/</guid>
       <description></description>
     </item>
     
     <item>
       <title>html</title>
-      <link>https://Forest-L.github.io/tags/html/</link>
+      <link>https://kubesphereio.com/tags/html/</link>
       <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/html/</guid>
+      <guid>https://kubesphereio.com/tags/html/</guid>
       <description></description>
     </item>
     
     <item>
       <title>markdown</title>
-      <link>https://Forest-L.github.io/tags/markdown/</link>
+      <link>https://kubesphereio.com/tags/markdown/</link>
       <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/markdown/</guid>
+      <guid>https://kubesphereio.com/tags/markdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>themes</title>
-      <link>https://Forest-L.github.io/tags/themes/</link>
+      <link>https://kubesphereio.com/tags/themes/</link>
       <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/themes/</guid>
+      <guid>https://kubesphereio.com/tags/themes/</guid>
       <description></description>
     </item>
     
     <item>
       <title>asciinema</title>
-      <link>https://Forest-L.github.io/tags/asciinema/</link>
+      <link>https://kubesphereio.com/tags/asciinema/</link>
       <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/asciinema/</guid>
+      <guid>https://kubesphereio.com/tags/asciinema/</guid>
       <description></description>
     </item>
     
     <item>
       <title>index</title>
-      <link>https://Forest-L.github.io/tags/index/</link>
+      <link>https://kubesphereio.com/tags/index/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/tags/index/</guid>
+      <guid>https://kubesphereio.com/tags/index/</guid>
       <description></description>
     </item>
     

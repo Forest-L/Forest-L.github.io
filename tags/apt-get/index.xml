@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>apt-get on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/apt-get/</link>
+    <link>https://kubesphereio.com/tags/apt-get/</link>
     <description>Recent content in apt-get on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Thu, 10 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/apt-get/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/apt-get/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>centos、ubuntu和pip离线依赖包的制作和使用方法</title>
-      <link>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
+      <link>https://kubesphereio.com/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</guid>
+      <guid>https://kubesphereio.com/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</guid>
       <description>&lt;p&gt;*介绍centos、ubuntu和pip三大核心系统的离线依赖源的制作方法及制作完成之后如何使用&lt;/p&gt;
 &lt;h2 id=&#34;1pip安装离线本地包pip版本1923&#34;&gt;1、pip安装离线本地包,pip版本（19.2.3）&lt;/h2&gt;
 &lt;ul&gt;

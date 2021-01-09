@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>trident on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/trident/</link>
+    <link>https://kubesphereio.com/tags/trident/</link>
     <description>Recent content in trident on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Fri, 13 Dec 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/trident/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/trident/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>netapp存储在kubesphere上的实践</title>
-      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
+      <link>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
+      <guid>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</guid>
       <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
 &lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
@@ -34,7 +34,7 @@ kubesphere: 2.0.2&lt;/p&gt;
 &lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
 &lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
 https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
@@ -102,7 +102,7 @@ EOF
 &lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
 &lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
 &lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
@@ -111,10 +111,10 @@ EOF
     
     <item>
       <title>netapp联合k8s在kubesphere应用</title>
-      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <link>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <guid>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</guid>
       <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
 &lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
 &lt;ul&gt;
@@ -190,7 +190,7 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;对接各个存储的协议证书

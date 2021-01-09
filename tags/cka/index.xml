@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>CKA on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/cka/</link>
+    <link>https://kubesphereio.com/tags/cka/</link>
     <description>Recent content in CKA on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Sat, 11 Jul 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/cka/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/cka/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>CkA考试经验</title>
-      <link>https://Forest-L.github.io/post/cka-test-experience/</link>
+      <link>https://kubesphereio.com/post/cka-test-experience/</link>
       <pubDate>Sat, 11 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/cka-test-experience/</guid>
+      <guid>https://kubesphereio.com/post/cka-test-experience/</guid>
       <description>&lt;h1 id=&#34;cka考试经验&#34;&gt;CKA考试经验&lt;/h1&gt;
 &lt;p&gt;CKA: Kubernetes管理员认证（CKA）旨在确保认证持有者具备履行Kubernetes管理员职责的技能，知识和能力。如果企业想要申请 KCSP ，条件之一是：至少需要三名员工拥有CKA认证。
-&lt;img src=&#34;https://Forest-L.github.io/img/cka.jpg&#34; alt=&#34;CKA图片.jpg&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/cka.jpg&#34; alt=&#34;CKA图片.jpg&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-考试报名&#34;&gt;1. 考试报名&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;%5Bhttps://www.cncf.io/certification/cka/%5D&#34;&gt;CKA报名地址&lt;/a&gt;&lt;/li&gt;
@@ -66,7 +66,7 @@
 &lt;li&gt;尽量在官网中拷贝yaml文件到答题环境中。&lt;/li&gt;
 &lt;li&gt;很多指令记得不清楚，请使用-h，比如etcdctl,node不能调度等。&lt;/li&gt;
 &lt;li&gt;特别重要，根据个人考试，然后在浏览器中收藏的记录为：
-&lt;img src=&#34;https://Forest-L.github.io/img/content.png&#34; alt=&#34;CKA考试相关内容.png&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/content.png&#34; alt=&#34;CKA考试相关内容.png&#34;&gt;&lt;/li&gt;
 &lt;/ul&gt;</description>
     </item>
     

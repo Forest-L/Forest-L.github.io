@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>ontap on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/ontap/</link>
+    <link>https://kubesphereio.com/tags/ontap/</link>
     <description>Recent content in ontap on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Fri, 13 Dec 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/ontap/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/ontap/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>netapp联合k8s在kubesphere应用</title>
-      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <link>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <guid>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</guid>
       <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
 &lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
 &lt;ul&gt;
@@ -93,7 +93,7 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;对接各个存储的协议证书

@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Themes Guide on 李林博客</title>
-    <link>https://Forest-L.github.io/series/themes-guide/</link>
+    <link>https://kubesphereio.com/series/themes-guide/</link>
     <description>Recent content in Themes Guide on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Sat, 09 Jan 2021 17:44:37 +0800</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/series/themes-guide/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/series/themes-guide/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>K8s中定时Job设计模式</title>
-      <link>https://Forest-L.github.io/post/cronjob/</link>
+      <link>https://kubesphereio.com/post/cronjob/</link>
       <pubDate>Sat, 09 Jan 2021 17:44:37 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/cronjob/</guid>
+      <guid>https://kubesphereio.com/post/cronjob/</guid>
       <description>&lt;p&gt;定时Job模式通过添加时间维度扩展了批次Job模式，并允许由当时事件触发执行一个工作单元。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;在分布式系统和微服务的世界里，使用HTTP和轻量级消息传递的实时和事件驱动的应用交互是一个明显的趋势。然而，无论软件开发的最新趋势如何，Job调度有着悠久的历史，而且它仍然具有相关性。==定时Job通常用于自动化系统维护或管理任务==。它们也适用于需要定期执行特定任务的业务应用，这里的典型例子是通过文件传输进行业务对业务的集成，通过数据库轮询进行应用集成，发送新闻信邮件，以及清理和归档旧文件。&lt;/p&gt;
@@ -62,10 +62,10 @@ Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运�
     
     <item>
       <title>K8s中批量Job设计模式</title>
-      <link>https://Forest-L.github.io/post/batch-job/</link>
+      <link>https://kubesphereio.com/post/batch-job/</link>
       <pubDate>Sun, 03 Jan 2021 16:00:45 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/batch-job/</guid>
+      <guid>https://kubesphereio.com/post/batch-job/</guid>
       <description>&lt;p&gt;Batch Job模式适合管理孤立的原子工作单元。它基于Job抽象，在分布式环境中可靠地运行短暂的Pod，直到完成。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;Kubernetes中管理和运行容器的主要基元是Pod。创建Pod的方式有不同的特点。&lt;/p&gt;
@@ -144,10 +144,10 @@ Job应该运行五个Pods来完成，这五个Pods必须全部成功。
     
     <item>
       <title>K8s中自动调度设计模式</title>
-      <link>https://Forest-L.github.io/post/automated-placement/</link>
+      <link>https://kubesphereio.com/post/automated-placement/</link>
       <pubDate>Sat, 02 Jan 2021 18:15:51 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/automated-placement/</guid>
+      <guid>https://kubesphereio.com/post/automated-placement/</guid>
       <description>&lt;p&gt;Automated Placement是Kubernetes调度器的核心功能，用于将新的Pod分配给满足容器资源请求的节点，并遵从调度策略。该模式描述了Kubernetes的调度算法的原理以及从外部影响调度决策的方式。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;一个合理规模的基于微服务的系统由几十个甚至几百个独立的进程组成。容器和Pods确实为打包和部署提供了很好的抽象实例，但并不能解决将这些进程调度在合适节点上的问题。随着微服务数量的庞大和不断增长，将它们单独分配和调度到节点上并不是一个可以管理的活动。&lt;/p&gt;
@@ -335,10 +335,10 @@ Taints和tolerations允许节点控制哪些Pods应该或不应该被调度在�
     
     <item>
       <title>K8s中生命周期管理设计模式</title>
-      <link>https://Forest-L.github.io/post/managed-lifecycle/</link>
+      <link>https://kubesphereio.com/post/managed-lifecycle/</link>
       <pubDate>Wed, 30 Dec 2020 20:32:48 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/managed-lifecycle/</guid>
+      <guid>https://kubesphereio.com/post/managed-lifecycle/</guid>
       <description>&lt;p&gt;由云原生平台管理的容器化应用对其生命周期没有控制权，要想成为优秀的云原生化 ，它们必须监听管理平台发出的事件，并相应地调整其生命周期。托管生命周期模式描述了应用程序如何能够并且应该对这些生命周期事件做出反应。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;健康探针我们解释了为什么容器要为不同的健康检查提供API。健康检查API是平台不断探查以获取应用洞察力的只读endpoints。它是平台从应用中提取信息的一种机制。&lt;/p&gt;
@@ -409,10 +409,10 @@ spec:
     
     <item>
       <title>K8s中健康检查设计模式</title>
-      <link>https://Forest-L.github.io/post/health-probe/</link>
+      <link>https://kubesphereio.com/post/health-probe/</link>
       <pubDate>Tue, 29 Dec 2020 13:34:44 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/health-probe/</guid>
+      <guid>https://kubesphereio.com/post/health-probe/</guid>
       <description>&lt;p&gt;健康探针模式是关于应用程序如何将其健康状态传达给Kubernetes。为了实现完全自动化，云原生应用必须具有高度的可观察性，允许推断其状态，以便Kubernetes能够检测应用是否已经启动，是否准备好服务的请求。这些观察结果会影响Pods的生命周期管理以及流量被路由到应用程序的方式。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;Kubernetes会定期检查容器进程状态，如果发现问题就会重新启动。然而，从实践中我们知道，检查进程状态并不足以决定应用程序的健康状况。在很多情况下，一个应用程序挂起了，但它的进程仍然在运行。例如，一个Java应用程序可能会抛出一个OutOfMemoryError，但JVM进程仍在运行。或者，一个应用程序可能会因为运行到一个无限循环、死锁或一些冲击（缓存、堆、进程）而冻结。为了检测这类情况，Kubernetes需要一种可靠的方法来检查应用程序的健康状况。也就是说，并不是要了解应用的内部工作情况，而是一种检查，表明应用是否按照预期运行，是否能够为消费者提供服务。&lt;/p&gt;
@@ -477,10 +477,10 @@ spec:
     
     <item>
       <title>K8s中声明式的部署设计模式</title>
-      <link>https://Forest-L.github.io/post/declarative-deployment/</link>
+      <link>https://kubesphereio.com/post/declarative-deployment/</link>
       <pubDate>Sun, 27 Dec 2020 19:08:06 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/declarative-deployment/</guid>
+      <guid>https://kubesphereio.com/post/declarative-deployment/</guid>
       <description>&lt;p&gt;声明式Deployment模式的核心是Kubernetes 的Deployment资源。这个抽象封装了一组容器的升级和回滚过程，并使其执行成为一种可重复和自动化的活动。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;我们可以以自助服务的方式将隔离的环境作为命名空间进行调配，并通过调度器将服务调度在这些环境中，只需最少的人工干预。但是随着微服务的数量越来越多，不断地用新的版本更新和更换也成了越来越大的负担。&lt;/p&gt;
@@ -570,10 +570,10 @@ spec:
     
     <item>
       <title>K8s中可预测的需求设计模式</title>
-      <link>https://Forest-L.github.io/post/predictable-demands/</link>
+      <link>https://kubesphereio.com/post/predictable-demands/</link>
       <pubDate>Sat, 26 Dec 2020 15:38:59 +0800</pubDate>
       
-      <guid>https://Forest-L.github.io/post/predictable-demands/</guid>
+      <guid>https://kubesphereio.com/post/predictable-demands/</guid>
       <description>&lt;p&gt;在共享云环境中成功部署、管理和共存应用的基础，取决于识别和声明应用资源需求和运行时依赖性。这个Predictable Demands模式是关于你应该如何声明应用需求，无论是硬性的运行时依赖还是资源需求。声明你的需求对于Kubernetes在集群中为你的应用找到合适的位置至关重要。&lt;/p&gt;
 &lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
 &lt;p&gt;Kubernetes可以管理用不同编程语言编写的应用，只要该应用可以在容器中运行。然而，不同的语言有不同的资源需求。通常情况下，编译后的语言运行速度更快，而且经常是
@@ -701,10 +701,10 @@ Container  Memory    250Mi  2Gi  500Mi          250Mi            4
     
     <item>
       <title>存储总结</title>
-      <link>https://Forest-L.github.io/post/storage-summary/</link>
+      <link>https://kubesphereio.com/post/storage-summary/</link>
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/storage-summary/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -908,10 +908,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>k8s分布式存储总结</title>
-      <link>https://Forest-L.github.io/post/k8s-storage-summary/</link>
+      <link>https://kubesphereio.com/post/k8s-storage-summary/</link>
       <pubDate>Mon, 05 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/k8s-storage-summary/</guid>
       <description>&lt;h2 id=&#34;1pvpvc和sc来源&#34;&gt;1、pv、pvc和sc来源&lt;/h2&gt;
 &lt;p&gt;pv引入解耦了pod与底层存储；pvc引入分离声明与消费，分离开发与运维责任，存储由运维系统人员管理，开发人员只需要通过pvc声明需要存储的类型、大小和访问模式即可；sc引入使pv自动创建或删除，开发人员定义的pvc中声明stroageclassname以及大小等需求自动创建pv；运维人员只需要声明好sc以及quota配额即可，无需维护pv。&lt;/p&gt;
 &lt;ul&gt;
@@ -1016,15 +1016,15 @@ Node Service运行在所有的Node节点，用于实现把volume挂载在当前N
 &lt;li&gt;Ceph通过RGW实现对象存储接口，RGW兼容AWS S3 API，因此Pod可以和使用S3一样使用Ceph RGW，比如Python可以使用boto3 SDK对桶和对象进行操作。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;4各个存储fio性能测试供参考&#34;&gt;4、各个存储fio性能测试，供参考。&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storage-fio.png&#34; alt=&#34;存储性能对比&#34;&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Pmem与块存储性能对比</title>
-      <link>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</link>
+      <link>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</guid>
+      <guid>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</guid>
       <description>&lt;h2 id=&#34;1pmem介绍&#34;&gt;1、Pmem介绍&lt;/h2&gt;
 &lt;p&gt;PMEM是硬件产品，Intel Optane DC持久存储模块，是一种具有大容量和数据持久性的创新存储技术。有2种运行模式。两级内存模式无需软件更改，DCPMM被视为更大的内存，并使用DRAM作为其缓存层。AppDirect模式将设备暴露为持久内存，支持软件栈，可用于加速不同的应用程序。在本文中，我们将使用AppDirect模式。&lt;/p&gt;
 &lt;h2 id=&#34;2环境信息&#34;&gt;2、环境信息&lt;/h2&gt;
@@ -1303,10 +1303,10 @@ Totals      82856.35        82.86     74487.86         2.45929         2.38300  
     
     <item>
       <title>netapp存储在kubesphere上的实践</title>
-      <link>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</link>
+      <link>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-stored-on-kubesphere-practice/</guid>
+      <guid>https://kubesphereio.com/post/netapp-stored-on-kubesphere-practice/</guid>
       <description>&lt;p&gt;&lt;strong&gt;NetApp&lt;/strong&gt;是向目前的数据密集型企业提供统一存储解决方案的居世界最前列的公司，其 Data ONTAP是全球首屈一指的存储操作系统。NetApp 的存储解决方案涵盖了专业化的硬件、软件和服务，为开放网络环境提供了无缝的存储管理。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Ontap&lt;/strong&gt;数据管理软件支持高速闪存、低成本旋转介质和基于云的对象存储等存储配置，为通过块或文件访问协议读写数据的应用程序提供统一存储。
 &lt;strong&gt;Trident&lt;/strong&gt;是一个由NetApp维护的完全支持的开源项目。以帮助您满足容器化应用程序的复杂&lt;strong&gt;持久性&lt;/strong&gt;需求。
@@ -1323,7 +1323,7 @@ kubesphere: 2.0.2&lt;/p&gt;
 &lt;h4 id=&#34;31-ontap搭建及配置&#34;&gt;3.1 ontap搭建及配置&lt;/h4&gt;
 &lt;p&gt;在VMware Workstation上Simulate_ONTAP_9.5P6_Installation_and_Setup_Guide运行，ontap启动之后，按下面操作配置，其中以cluster base license、feature licenses for the non-ESX build配置证书、e0c、ip address：192.168.*.20、netmask:255.255.255.0、集群名:cluster1、密码等信息。
 https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;32-trident搭建及配置&#34;&gt;3.2 Trident搭建及配置&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;下载安装包trident-installer-19.07.0.tar.gz，解压进入trident-installer目录，执行trident安装指令:
@@ -1391,7 +1391,7 @@ EOF
 &lt;p&gt;访问 KubeSphere UI 界面。&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/kubesphere.png&#34; alt=&#34;kubesphere&#34;&gt;&lt;/p&gt;
 &lt;h4 id=&#34;参考文档&#34;&gt;参考文档&lt;/h4&gt;
 &lt;p&gt;&lt;a href=&#34;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&#34;&gt;http://docs.netapp.com/ontap-9/index.jsp?lang=zh_CN&lt;/a&gt;
 &lt;a href=&#34;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&#34;&gt;https://netapp-trident.readthedocs.io/en/stable-v19.07/introduction.html&lt;/a&gt;
@@ -1400,10 +1400,10 @@ EOF
     
     <item>
       <title>netapp联合k8s在kubesphere应用</title>
-      <link>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</link>
+      <link>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</link>
       <pubDate>Fri, 13 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/netapp-works-with-k8s-in-kubesphere/</guid>
+      <guid>https://kubesphereio.com/post/netapp-works-with-k8s-in-kubesphere/</guid>
       <description>&lt;h1 id=&#34;netapp联合k8s在kubesphere应用&#34;&gt;netapp联合k8s在kubesphere应用&lt;/h1&gt;
 &lt;h4 id=&#34;配置说明&#34;&gt;配置说明&lt;/h4&gt;
 &lt;ul&gt;
@@ -1479,7 +1479,7 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;https://IP address,以上设置的iP地址，用户名和密码：
-&lt;img src=&#34;https://Forest-L.github.io/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://kubesphereio.com/img/netapp.png&#34; alt=&#34;netapp&#34;&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;对接各个存储的协议证书
@@ -1519,10 +1519,10 @@ Enter the cluster base license key:SMKQROWJNQYQSDAAAAAAAAAAAAAA
     
     <item>
       <title>Kubesphere基于Velero做集群的迁移</title>
-      <link>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</link>
+      <link>https://kubesphereio.com/post/kubesphere-does-cluster-migration-based-on-velero/</link>
       <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
+      <guid>https://kubesphereio.com/post/kubesphere-does-cluster-migration-based-on-velero/</guid>
       <description>&lt;p&gt;#Kubesphere基于Velero做集群的迁移
 使用Velero 快速完成云原生应用迁移至备份集群中。&lt;/p&gt;
 &lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
@@ -1603,10 +1603,10 @@ wordpress-v1-65d58448f8-g5bh8    1/1     Running   0          22s
     
     <item>
       <title>构建arm-x86架构的docker-image操作指南</title>
-      <link>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
+      <link>https://kubesphereio.com/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
       <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
+      <guid>https://kubesphereio.com/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
       <description>&lt;h1 id=&#34;构建armx86架构的docker-image操作指南&#34;&gt;构建arm/x86架构的docker image操作指南&lt;/h1&gt;
 &lt;p&gt;由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。&lt;/p&gt;
 &lt;h2 id=&#34;1启动一台ubuntu的机器并安装docker-1903&#34;&gt;1.	启动一台ubuntu的机器，并安装docker 19.03&lt;/h2&gt;
@@ -1707,10 +1707,10 @@ docker manifest push lilinlinlin/ks-installer:v3.0.0&lt;/li&gt;
     
     <item>
       <title>openebs基于k8s安装</title>
-      <link>https://Forest-L.github.io/post/k8s-openebs-install/</link>
+      <link>https://kubesphereio.com/post/k8s-openebs-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-openebs-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-openebs-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -1914,10 +1914,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>rook基于k8s安装</title>
-      <link>https://Forest-L.github.io/post/k8s-rook-install/</link>
+      <link>https://kubesphereio.com/post/k8s-rook-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-rook-install/</guid>
       <description>&lt;h2 id=&#34;rook介绍&#34;&gt;rook介绍&lt;/h2&gt;
 &lt;p&gt;Rook是目前开源中比较流行的云原生的存储编排系统，专注于如何实现把ceph运行在Kubernetes平台上。将之前手工执行部署、初始化、配置、扩展、升级、迁移、灾难恢复、监控以及资源管理等转变为自动触发。比如集群增加一块磁盘，rook能自动初始化为一个OSD，并自动加入到合适的故障中，这个osd在kubernetes中是以pod形式运行的。&lt;/p&gt;
 &lt;h2 id=&#34;1部署&#34;&gt;1、部署&lt;/h2&gt;
@@ -2132,10 +2132,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>基于cephadm安装ceph</title>
-      <link>https://Forest-L.github.io/post/k8s-ceph-install/</link>
+      <link>https://kubesphereio.com/post/k8s-ceph-install/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-ceph-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-ceph-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -2339,13 +2339,13 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>k8s-default-Storage-Class搭建</title>
-      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
+      <link>https://kubesphereio.com/post/k8s-default-storage-class-installer/</link>
       <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
+      <guid>https://kubesphereio.com/post/k8s-default-storage-class-installer/</guid>
       <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
 &lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-创建storageclass&#34;&gt;1. 创建storageClass&lt;/h2&gt;
 &lt;p&gt;要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
 nfs服务器参考博客&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs服务器搭建&lt;/a&gt;&lt;/p&gt;
@@ -2395,10 +2395,10 @@ nfs-client (default)cluster.local/my-release-nfs-client-provisioner 2h
     
     <item>
       <title>glusterfs安装</title>
-      <link>https://Forest-L.github.io/post/k8s-glusterfs-install/</link>
+      <link>https://kubesphereio.com/post/k8s-glusterfs-install/</link>
       <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-glusterfs-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-glusterfs-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -2602,10 +2602,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>Linux中nfs搭建</title>
-      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
+      <link>https://kubesphereio.com/post/linux-nfs-install/</link>
       <pubDate>Sat, 13 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
+      <guid>https://kubesphereio.com/post/linux-nfs-install/</guid>
       <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
 &lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
 &lt;p&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
@@ -2729,10 +2729,10 @@ fi
     
     <item>
       <title>Markdown语法入门</title>
-      <link>https://Forest-L.github.io/post/markdown-syntax/</link>
+      <link>https://kubesphereio.com/post/markdown-syntax/</link>
       <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/markdown-syntax/</guid>
+      <guid>https://kubesphereio.com/post/markdown-syntax/</guid>
       <description>&lt;p&gt;This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.&lt;/p&gt;
 &lt;h2 id=&#34;headings&#34;&gt;Headings&lt;/h2&gt;
 &lt;p&gt;The following HTML &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt;—&lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; elements represent six levels of section headings. &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; is the highest section level while &lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; is the lowest.&lt;/p&gt;

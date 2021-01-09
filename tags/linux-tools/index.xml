@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Linux tools on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/linux-tools/</link>
+    <link>https://kubesphereio.com/tags/linux-tools/</link>
     <description>Recent content in Linux tools on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Tue, 07 Jul 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/linux-tools/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/linux-tools/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>iptables指令将容器内部端口映射到外部宿主机端口指南</title>
-      <link>https://Forest-L.github.io/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</link>
+      <link>https://kubesphereio.com/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</link>
       <pubDate>Tue, 07 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</guid>
+      <guid>https://kubesphereio.com/post/the-iptables-directive-is-a-guide-to-mapping-ports-inside-containers-to-ports-on-external-hosts/</guid>
       <description>&lt;h4 id=&#34;背景&#34;&gt;背景：&lt;/h4&gt;
 &lt;p&gt;docker run 某个容器，忘记了-p/-P 映射端口操作时，怎么把容器端口映射到主机上呢？以下描述的是如何通过iptables指令把容器端口映射到外部宿主机端口操作，防止容器重新创建。
 宿主机docker启了一个容器，在容器里面又部署了一个pod，而部署pod这个服务是后续操作的，宿主机docker启容器时没有把端口映射出来，如何通过宿主机去访问pod服务。&lt;/p&gt;
@@ -115,10 +115,10 @@ iptables -A DOCKER -j ACCEPT -p tcp --destination ${CONTAINERIP} --dport ${YOURP
     
     <item>
       <title>ipv6地址搭建K8s</title>
-      <link>https://Forest-L.github.io/post/ipv6-address-setup-k8s/</link>
+      <link>https://kubesphereio.com/post/ipv6-address-setup-k8s/</link>
       <pubDate>Tue, 14 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/ipv6-address-setup-k8s/</guid>
+      <guid>https://kubesphereio.com/post/ipv6-address-setup-k8s/</guid>
       <description>&lt;h1 id=&#34;ipv6地址搭建k8s&#34;&gt;ipv6地址搭建K8s&lt;/h1&gt;
 &lt;h3 id=&#34;环境&#34;&gt;环境&lt;/h3&gt;
 &lt;p&gt;centos: 7.7
@@ -297,10 +297,10 @@ curl -6g [2402:e7c0:0:a00:ffff:ffff:fffe:fffb]:32012
     
     <item>
       <title>centos、ubuntu和pip离线依赖包的制作和使用方法</title>
-      <link>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
+      <link>https://kubesphereio.com/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</link>
       <pubDate>Thu, 10 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</guid>
+      <guid>https://kubesphereio.com/post/methods-of-making-and-using-centos-ubuntu-pip-offline-dependent-packages/</guid>
       <description>&lt;p&gt;*介绍centos、ubuntu和pip三大核心系统的离线依赖源的制作方法及制作完成之后如何使用&lt;/p&gt;
 &lt;h2 id=&#34;1pip安装离线本地包pip版本1923&#34;&gt;1、pip安装离线本地包,pip版本（19.2.3）&lt;/h2&gt;
 &lt;ul&gt;
@@ -359,10 +359,10 @@ ubuntu: &lt;a href=&#34;https://www.cnblogs.com/gzxbkk/p/7809296.html&#34;&gt;ht
     
     <item>
       <title>k8s之etcd数据的备份与恢复</title>
-      <link>https://Forest-L.github.io/post/backup-and-restore-etcd-data-of-k8s/</link>
+      <link>https://kubesphereio.com/post/backup-and-restore-etcd-data-of-k8s/</link>
       <pubDate>Wed, 09 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/backup-and-restore-etcd-data-of-k8s/</guid>
+      <guid>https://kubesphereio.com/post/backup-and-restore-etcd-data-of-k8s/</guid>
       <description>&lt;h1 id=&#34;k8s之etcd备份与恢复&#34;&gt;k8s之etcd备份与恢复&lt;/h1&gt;
 &lt;p&gt;etcd是一款开源的分布式一致性键值存储。目前有版本为V3以上，但是它的API又有v2和v3之分，以至于操作指令也不一样。
 查看etcd版本&lt;code&gt;etcdctl --version&lt;/code&gt;&lt;/p&gt;
@@ -454,10 +454,10 @@ etcdctl snapshot restore /var/backups/kube_etcd/etcd-******/snapshot.db \
     
     <item>
       <title>k8s1.15.3在ubuntu系统部署</title>
-      <link>https://Forest-L.github.io/post/k8s1-15-3-install-on-the-ubuntu/</link>
+      <link>https://kubesphereio.com/post/k8s1-15-3-install-on-the-ubuntu/</link>
       <pubDate>Mon, 02 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s1-15-3-install-on-the-ubuntu/</guid>
+      <guid>https://kubesphereio.com/post/k8s1-15-3-install-on-the-ubuntu/</guid>
       <description>&lt;h1 id=&#34;k8s1153在ubuntu系统部署&#34;&gt;k8s1.15.3在ubuntu系统部署&lt;/h1&gt;
 &lt;p&gt;国内环境下，k8s1.15.3在ubuntu系统部署，相关的镜像以及docker的deb包和k8s核心组件的deb包在以下百度链接下。
 &lt;a href=&#34;https://pan.baidu.com/s/1FqfkBiRfa03xaKbmKnqI2w&#34;&gt;k8s介质&lt;/a&gt;
@@ -566,10 +566,10 @@ EOF
     
     <item>
       <title>docker部署mysql5.7</title>
-      <link>https://Forest-L.github.io/post/docker-deploy-mysql5-7/</link>
+      <link>https://kubesphereio.com/post/docker-deploy-mysql5-7/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/docker-deploy-mysql5-7/</guid>
+      <guid>https://kubesphereio.com/post/docker-deploy-mysql5-7/</guid>
       <description>&lt;h1 id=&#34;docker部署mysql57&#34;&gt;docker部署mysql5.7&lt;/h1&gt;
 &lt;p&gt;越来越多服务容器化，下面以mysql5.7版本为例容器化部署。按三种方式：最简单、配置文件映射和数据映射来展开。&lt;/p&gt;
 &lt;h2 id=&#34;准备条件&#34;&gt;准备条件&lt;/h2&gt;
@@ -627,10 +627,10 @@ pid-file=/var/run/mariadb/mariadb.pid
     
     <item>
       <title>k8s之helm部署及用法</title>
-      <link>https://Forest-L.github.io/post/helm-deployment-and-guide/</link>
+      <link>https://kubesphereio.com/post/helm-deployment-and-guide/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/helm-deployment-and-guide/</guid>
+      <guid>https://kubesphereio.com/post/helm-deployment-and-guide/</guid>
       <description>&lt;h1 id=&#34;k8s之helm部署及用法&#34;&gt;k8s之helm部署及用法&lt;/h1&gt;
 &lt;p&gt;Helm是Kubernetes的一个包管理工具，用来简化Kubernetes应用的部署和管理。可以把Helm比作CentOS的yum工具。所以可以把该包在不同环境下部署起来,前提需要部署k8s环境。&lt;/p&gt;
 &lt;h2 id=&#34;1-helm部署&#34;&gt;1. helm部署&lt;/h2&gt;
@@ -727,19 +727,19 @@ hello-test/
     
     <item>
       <title>kubekey源码解读</title>
-      <link>https://Forest-L.github.io/post/kubekey-source-code-interpretation/</link>
+      <link>https://kubesphereio.com/post/kubekey-source-code-interpretation/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubekey-source-code-interpretation/</guid>
+      <guid>https://kubesphereio.com/post/kubekey-source-code-interpretation/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kubernetes一致性认证的提交操作指南</title>
-      <link>https://Forest-L.github.io/post/kubernetes-compliance-certification-submission-instructions/</link>
+      <link>https://kubesphereio.com/post/kubernetes-compliance-certification-submission-instructions/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubernetes-compliance-certification-submission-instructions/</guid>
+      <guid>https://kubesphereio.com/post/kubernetes-compliance-certification-submission-instructions/</guid>
       <description>&lt;p&gt;软件一致性尤为重要，它可以避免分裂，使众厂商将精力聚焦于共同推动软件发展而不是自成一家。2017年CNCF启动了Kubernetes一致性认证计划，CNCF提供一套测试工具，各厂商按照操作指导进行测试自身的产品，将测试报告上传给CNCF社区，CNCF审核测试报告后，会给符合条件的企业颁发一个证书。
 大致流程：&lt;img src=&#34;https://ww1.sinaimg.cn/large/006bbiLEgy1gfsyxpcmmej30mx09zwew.jpg&#34; alt=&#34;操作流程图.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-环境信息&#34;&gt;1. 环境信息&lt;/h2&gt;
@@ -818,10 +818,10 @@ sonobuoy项目的安装方法
     
     <item>
       <title>tcpdump抓包实战教程</title>
-      <link>https://Forest-L.github.io/post/tcpdump-package-capture-tutorial/</link>
+      <link>https://kubesphereio.com/post/tcpdump-package-capture-tutorial/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/tcpdump-package-capture-tutorial/</guid>
+      <guid>https://kubesphereio.com/post/tcpdump-package-capture-tutorial/</guid>
       <description>&lt;h1 id=&#34;tcpdump抓包实战教程&#34;&gt;tcpdump抓包实战教程&lt;/h1&gt;
 &lt;p&gt;做 web 开发，接口对接过程中，分析 http 请求报文数据包格式是否正确，定位问题，省去无用的甩锅过程，再比如抓取 tcp/udp 报文，分析 tcp 连接过程中的三次握手和四次挥手。windows使用wireshark工具，Linux使用的是tcpdump工具，也可以生成.pcap文件在wireshark图形化工具上分析。&lt;/p&gt;
 &lt;h3 id=&#34;命令行&#34;&gt;命令行&lt;/h3&gt;
@@ -896,10 +896,10 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
     
     <item>
       <title>ubuntu快速安装wecenter</title>
-      <link>https://Forest-L.github.io/post/ubuntu-quickly-installs-wecenter/</link>
+      <link>https://kubesphereio.com/post/ubuntu-quickly-installs-wecenter/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/ubuntu-quickly-installs-wecenter/</guid>
+      <guid>https://kubesphereio.com/post/ubuntu-quickly-installs-wecenter/</guid>
       <description>&lt;h1 id=&#34;ubuntu快速安装wecenter&#34;&gt;ubuntu快速安装wecenter&lt;/h1&gt;
 &lt;p&gt;以镜像的形式安装wecenter，简化了nginx和php环境的单独安装。WeCenter（wecenter.com）是一款建立知识社区的开源程序（免费版），专注于企业和行业社区内容的整理、归类、检索和分享，是知识化问答社区的首选软件。后台使用PHP开发，MVC架构，前端使用Bootstrap框架。&lt;/p&gt;
 &lt;h2 id=&#34;准备&#34;&gt;准备&lt;/h2&gt;
@@ -922,10 +922,10 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
     
     <item>
       <title>基于keepalived-haproxy部署kubesphere高可用方案</title>
-      <link>https://Forest-L.github.io/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</link>
+      <link>https://kubesphereio.com/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</guid>
+      <guid>https://kubesphereio.com/post/deploy-kubesphere-high-availability-solution-based-on-keepalived-haproxy/</guid>
       <description>&lt;h1 id=&#34;基于keepalivedhaproxy部署kubesphere高可用方案&#34;&gt;基于keepalived+haproxy部署kubesphere高可用方案&lt;/h1&gt;
 &lt;p&gt;通过keepalived + haproxy实现的，其中keepalived提供一个VIP，通过VIP关联所有的Master节点；然后haproxy提供端口转发功能。由于VIP还是存在Master的机器上的，默认配置API Server的端口是6443，所以我们需要将另外一个端口关联到这个VIP上，一般用8443。&lt;/p&gt;
 &lt;h4 id=&#34;环境信息&#34;&gt;环境信息：&lt;/h4&gt;
@@ -1058,10 +1058,10 @@ Escape character is &#39;^]&#39;.
     
     <item>
       <title>排查linux服务器的工具</title>
-      <link>https://Forest-L.github.io/post/tools-to-troubleshoot-linux-servers/</link>
+      <link>https://kubesphereio.com/post/tools-to-troubleshoot-linux-servers/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/tools-to-troubleshoot-linux-servers/</guid>
+      <guid>https://kubesphereio.com/post/tools-to-troubleshoot-linux-servers/</guid>
       <description>&lt;p&gt;当服务器遇到问题，或者提前查看服务器质量怎么样，一般可以通过以下几点分析：服务器整体情况，CPU使用情况，内存，磁盘，磁盘io，网络io等。&lt;/p&gt;
 &lt;h3 id=&#34;不同环境插件安装&#34;&gt;不同环境插件安装&lt;/h3&gt;
 &lt;ul&gt;
@@ -1232,10 +1232,10 @@ Average:      docker0      0.00      0.00      0.00      0.00      0.00      0.0
     
     <item>
       <title>提前预防K8s集群资源不足的处理方式配置</title>
-      <link>https://Forest-L.github.io/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</link>
+      <link>https://kubesphereio.com/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</guid>
+      <guid>https://kubesphereio.com/post/prevent-the-configuration-of-the-k8s-cluster-from-under-resourcing-in-advance/</guid>
       <description>&lt;h1 id=&#34;提前预防k8s集群资源不足的处理方式配置&#34;&gt;提前预防K8s集群资源不足的处理方式配置&lt;/h1&gt;
 &lt;p&gt;在管理集群的时候我们常常会遇到资源不足的情况，在这种情况下我们要保证整个集群可用，并且尽可能减少应用的损失。根据该问题提出以下两种方案：一种为优化kubelet参数，另一种为脚本化诊断处理。&lt;/p&gt;
 &lt;h2 id=&#34;概念解释&#34;&gt;概念解释&lt;/h2&gt;
@@ -1435,10 +1435,10 @@ Pod 的 requests 和 limits 是如何对应到这三个 QoS 等级上的，可�
     
     <item>
       <title>测量网络速度工具之iperf认知</title>
-      <link>https://Forest-L.github.io/post/iperf-cognition-as-a-network-speed-measurement-tool/</link>
+      <link>https://kubesphereio.com/post/iperf-cognition-as-a-network-speed-measurement-tool/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/iperf-cognition-as-a-network-speed-measurement-tool/</guid>
+      <guid>https://kubesphereio.com/post/iperf-cognition-as-a-network-speed-measurement-tool/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;iperf工具是测量服务器网络速度工具，它通过测量服务器可以处理的最大网络吞吐量来测试网络速度，在遇到网络问题时特别有用。&lt;/li&gt;
 &lt;/ul&gt;
@@ -1502,10 +1502,10 @@ TCP window size: 45.0 KByte (default)
     
     <item>
       <title>脚本化触发Kubernetes集群事件的工具-Shell-operator</title>
-      <link>https://Forest-L.github.io/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</link>
+      <link>https://kubesphereio.com/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</guid>
+      <guid>https://kubesphereio.com/post/scripting-the-tool-shell-operator-that-triggers-kubernetes-cluster-events/</guid>
       <description>&lt;p&gt;Shell-operator是用于在Kubernetes集群中运行事件驱动脚本工具。Shell-operator通过脚本作为事件触发的钩子（hook），在Kubernetes集群事件和Shell脚本之间提供了一个转化层。触发钩子包含add, update和delete。以pod add为例通俗的话说，当新创建了一个pod时，会自动触发脚本中else部分。&lt;/p&gt;
 &lt;h4 id=&#34;shell-operator特点&#34;&gt;Shell-operator特点：&lt;/h4&gt;
 &lt;ul&gt;
@@ -1649,10 +1649,10 @@ kubectl delete clusterrolebinding monitor-pods
     
     <item>
       <title>基于cephadm安装ceph</title>
-      <link>https://Forest-L.github.io/post/k8s-ceph-install/</link>
+      <link>https://kubesphereio.com/post/k8s-ceph-install/</link>
       <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-ceph-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-ceph-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -1856,19 +1856,19 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>k8s-service-认知</title>
-      <link>https://Forest-L.github.io/post/k8s-service-cognize/</link>
+      <link>https://kubesphereio.com/post/k8s-service-cognize/</link>
       <pubDate>Mon, 29 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-service-cognize/</guid>
+      <guid>https://kubesphereio.com/post/k8s-service-cognize/</guid>
       <description></description>
     </item>
     
     <item>
       <title>k8s-ConfigMap认知</title>
-      <link>https://Forest-L.github.io/post/k8s-configmap-cognize/</link>
+      <link>https://kubesphereio.com/post/k8s-configmap-cognize/</link>
       <pubDate>Fri, 26 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-configmap-cognize/</guid>
+      <guid>https://kubesphereio.com/post/k8s-configmap-cognize/</guid>
       <description>&lt;h1 id=&#34;k8s-configmap-认知&#34;&gt;k8s configMap 认知&lt;/h1&gt;
 &lt;p&gt;许多应用程序会从配置文件、命令行参数或环境变量中读取配置信息，而ConfigMap作用是保存配置信息，格式为键值对，可以单独一个key/value使用，也可以多个key/value构成的文件使用。数据不包含敏感信息的字符串。ConfigMap必须在Pod引用它之前创建;Pod只能使用同一个命名空间内的ConfigMap。&lt;/p&gt;
 &lt;h2 id=&#34;1-常见configmap创建方式&#34;&gt;1 常见configMap创建方式&lt;/h2&gt;
@@ -1988,10 +1988,10 @@ spec:
     
     <item>
       <title>glusterfs安装</title>
-      <link>https://Forest-L.github.io/post/k8s-glusterfs-install/</link>
+      <link>https://kubesphereio.com/post/k8s-glusterfs-install/</link>
       <pubDate>Sun, 14 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-glusterfs-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-glusterfs-install/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;
@@ -2195,10 +2195,10 @@ e972d3d3f13a        ceph/ceph:v15                &amp;quot;/usr/bin/ceph-mon -�
     
     <item>
       <title>Linux中nfs搭建</title>
-      <link>https://Forest-L.github.io/post/linux-nfs-install/</link>
+      <link>https://kubesphereio.com/post/linux-nfs-install/</link>
       <pubDate>Sat, 13 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/linux-nfs-install/</guid>
+      <guid>https://kubesphereio.com/post/linux-nfs-install/</guid>
       <description>&lt;h1 id=&#34;linux-下nfs-服务器的搭建及配置&#34;&gt;Linux 下NFS 服务器的搭建及配置&lt;/h1&gt;
 &lt;p&gt;nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。&lt;/p&gt;
 &lt;p&gt;演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
@@ -2322,10 +2322,10 @@ fi
     
     <item>
       <title>终端录屏软件入门</title>
-      <link>https://Forest-L.github.io/post/asciinema/</link>
+      <link>https://kubesphereio.com/post/asciinema/</link>
       <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/asciinema/</guid>
+      <guid>https://kubesphereio.com/post/asciinema/</guid>
       <description>&lt;h2 id=&#34;1-asciinema-终端录屏&#34;&gt;1. asciinema 终端录屏&lt;/h2&gt;
 &lt;p&gt;asciinema是一个在终端下非常棒的录制分享软件，基于文本的录屏工具，对终端输入输出进行捕捉， 然后以文本的形式来记录和回放！对多种系统都支持。&lt;/p&gt;
 &lt;h2 id=&#34;2-asciinema安装&#34;&gt;2. asciinema安装&lt;/h2&gt;
@@ -2375,7 +2375,7 @@ View the recording at:
     https://asciinema.org/a/M1K9rrUHl5D0q3TOVDhtRcJIn
 &lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;4浏览器访问效果&#34;&gt;4.浏览器访问效果&lt;/h2&gt;
 &lt;p&gt;双击对应的一个录屏，有share  download settings，且settings可以设置参数
-&lt;img src=&#34;https://Forest-L.github.io/img/asciinema.png&#34; alt=&#34;asciinema-demo效果图&#34;&gt;&lt;/p&gt;</description>
+&lt;img src=&#34;https://kubesphereio.com/img/asciinema.png&#34; alt=&#34;asciinema-demo效果图&#34;&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

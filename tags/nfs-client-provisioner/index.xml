@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>nfs-client-provisioner on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/nfs-client-provisioner/</link>
+    <link>https://kubesphereio.com/tags/nfs-client-provisioner/</link>
     <description>Recent content in nfs-client-provisioner on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Thu, 01 Aug 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/nfs-client-provisioner/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/nfs-client-provisioner/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>k8s-default-Storage-Class搭建</title>
-      <link>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</link>
+      <link>https://kubesphereio.com/post/k8s-default-storage-class-installer/</link>
       <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-default-storage-class-installer/</guid>
+      <guid>https://kubesphereio.com/post/k8s-default-storage-class-installer/</guid>
       <description>&lt;h1 id=&#34;k8s-default-storage-class搭建&#34;&gt;k8s default Storage Class搭建&lt;/h1&gt;
 &lt;p&gt;在k8s中，StorageClass为动态存储，存储大小设置不确定，对存储并发要求高和读写速度要求高等方面有很大优势；pv为静态存储，存储大小要确定。而default Storage Class的作用为pvc文件没有标识任何和storageclass相关联的信息，但通过annotations属性关联起来。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://Forest-L.github.io/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://kubesphereio.com/img/storageclass.png&#34; alt=&#34;storageClass&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;1-创建storageclass&#34;&gt;1. 创建storageClass&lt;/h2&gt;
 &lt;p&gt;要使用 StorageClass，我们就得安装对应的自动配置程序，比如我们这里存储后端使用的是 nfs，那么我们就需要使用到一个 nfs-client 的自动配置程序，我们也叫它 Provisioner，这个程序使用我们已经配置好的 nfs 服务器，来自动创建持久卷，也就是自动帮我们创建 PV。
 nfs服务器参考博客&lt;a href=&#34;https://kubesphereio.com/post/linux-nfs-install/&#34;&gt;nfs服务器搭建&lt;/a&gt;&lt;/p&gt;

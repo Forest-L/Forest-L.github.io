@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>pmem on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/pmem/</link>
+    <link>https://kubesphereio.com/tags/pmem/</link>
     <description>Recent content in pmem on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/pmem/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/pmem/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Pmem与块存储性能对比</title>
-      <link>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</link>
+      <link>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/pmem-versus-block-storage-performance/</guid>
+      <guid>https://kubesphereio.com/post/pmem-versus-block-storage-performance/</guid>
       <description>&lt;h2 id=&#34;1pmem介绍&#34;&gt;1、Pmem介绍&lt;/h2&gt;
 &lt;p&gt;PMEM是硬件产品，Intel Optane DC持久存储模块，是一种具有大容量和数据持久性的创新存储技术。有2种运行模式。两级内存模式无需软件更改，DCPMM被视为更大的内存，并使用DRAM作为其缓存层。AppDirect模式将设备暴露为持久内存，支持软件栈，可用于加速不同的应用程序。在本文中，我们将使用AppDirect模式。&lt;/p&gt;
 &lt;h2 id=&#34;2环境信息&#34;&gt;2、环境信息&lt;/h2&gt;

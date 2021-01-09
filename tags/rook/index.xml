@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>rook on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/rook/</link>
+    <link>https://kubesphereio.com/tags/rook/</link>
     <description>Recent content in rook on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Wed, 07 Aug 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/rook/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/rook/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>rook基于k8s安装</title>
-      <link>https://Forest-L.github.io/post/k8s-rook-install/</link>
+      <link>https://kubesphereio.com/post/k8s-rook-install/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/k8s-rook-install/</guid>
+      <guid>https://kubesphereio.com/post/k8s-rook-install/</guid>
       <description>&lt;h2 id=&#34;rook介绍&#34;&gt;rook介绍&lt;/h2&gt;
 &lt;p&gt;Rook是目前开源中比较流行的云原生的存储编排系统，专注于如何实现把ceph运行在Kubernetes平台上。将之前手工执行部署、初始化、配置、扩展、升级、迁移、灾难恢复、监控以及资源管理等转变为自动触发。比如集群增加一块磁盘，rook能自动初始化为一个OSD，并自动加入到合适的故障中，这个osd在kubernetes中是以pod形式运行的。&lt;/p&gt;
 &lt;h2 id=&#34;1部署&#34;&gt;1、部署&lt;/h2&gt;

@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>arm on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/arm/</link>
+    <link>https://kubesphereio.com/tags/arm/</link>
     <description>Recent content in arm on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Sun, 13 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/arm/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/arm/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>构建arm-x86架构的docker-image操作指南</title>
-      <link>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
+      <link>https://kubesphereio.com/post/docker-image-operation-guide-for-building-arm-x86-architecture/</link>
       <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
+      <guid>https://kubesphereio.com/post/docker-image-operation-guide-for-building-arm-x86-architecture/</guid>
       <description>&lt;h1 id=&#34;构建armx86架构的docker-image操作指南&#34;&gt;构建arm/x86架构的docker image操作指南&lt;/h1&gt;
 &lt;p&gt;由于arm环境越来越受欢迎，镜像不单单满足x86结构的docker镜像，还需要arm操作系统的镜像，以下说明在x86机器上如何build一个arm结构的镜像，使用buildx指令来同时构建arm/x86结构的镜像。&lt;/p&gt;
 &lt;h2 id=&#34;1启动一台ubuntu的机器并安装docker-1903&#34;&gt;1.	启动一台ubuntu的机器，并安装docker 19.03&lt;/h2&gt;

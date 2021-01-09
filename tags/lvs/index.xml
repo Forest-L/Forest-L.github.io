@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>lvs on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/lvs/</link>
+    <link>https://kubesphereio.com/tags/lvs/</link>
     <description>Recent content in lvs on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Tue, 06 Oct 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/lvs/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/lvs/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>存储总结</title>
-      <link>https://Forest-L.github.io/post/storage-summary/</link>
+      <link>https://kubesphereio.com/post/storage-summary/</link>
       <pubDate>Tue, 06 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/storage-summary/</guid>
+      <guid>https://kubesphereio.com/post/storage-summary/</guid>
       <description>&lt;h2 id=&#34;ceph介绍&#34;&gt;ceph介绍&lt;/h2&gt;
 &lt;p&gt;ceph为块存储，以下通过cephadm安装ceph集群，ceph主要有三个基本角色：&lt;/p&gt;
 &lt;ul&gt;

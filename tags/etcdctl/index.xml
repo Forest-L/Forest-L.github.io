@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>etcdctl on 李林博客</title>
-    <link>https://Forest-L.github.io/tags/etcdctl/</link>
+    <link>https://kubesphereio.com/tags/etcdctl/</link>
     <description>Recent content in etcdctl on 李林博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
     <lastBuildDate>Tue, 13 Aug 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://Forest-L.github.io/tags/etcdctl/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://kubesphereio.com/tags/etcdctl/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>kubesphere2-1-HA环境，一个master或者两个master宕机恢复</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</link>
+      <link>https://kubesphereio.com/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</guid>
+      <guid>https://kubesphereio.com/post/kubesphere2-1-ha-environment-one-master-or-two-masters-down-to-recover/</guid>
       <description>&lt;h1 id=&#34;kubesphere21-ha环境一个master或者两个master宕机恢复&#34;&gt;kubesphere2.1-HA环境，一个master或者两个master宕机恢复&lt;/h1&gt;
 &lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而很多事情都有意外，当其中一个master或者两个master卡住了，或者重启都不能自动恢复的情况下，那么怎么恢复呢，以下分一个master宕机和两个master宕机的恢复方法。&lt;/p&gt;
 &lt;h3 id=&#34;验证环境信息&#34;&gt;验证环境信息&lt;/h3&gt;
@@ -160,10 +160,10 @@ docker ps | grep tomcat
     
     <item>
       <title>kubesphere2-1-HA环境，某台master或者master的etcd宕机，新加机器恢复方法</title>
-      <link>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</link>
+      <link>https://kubesphereio.com/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</link>
       <pubDate>Tue, 13 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://Forest-L.github.io/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</guid>
+      <guid>https://kubesphereio.com/post/kubesphere2-1-ha-environment-a-master-or-master-etcd-down-a-new-machine-recovery-method/</guid>
       <description>&lt;p&gt;kubesphere2.1版本提供了master节点的高可用功能，为生产环境保驾护航。然而在生产环境中，为了业务更正常运行，当以下两种情形发生时，告诉大家怎么恢复。第一种情形是：其中某台master机器的etcd服务不能正常提供服务，而需要在另外一台机器上部署一个etcd服务加入到现etcd集群中；第二种情形是：其中某台master宕机，需要在另外一台机器上部署master，并加入到现master集群中。&lt;/p&gt;
 &lt;h3 id=&#34;环境信息&#34;&gt;环境信息&lt;/h3&gt;
 &lt;pre&gt;&lt;code&gt;os: centos7.5
