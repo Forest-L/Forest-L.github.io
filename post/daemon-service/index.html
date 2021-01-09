@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>李林博客  | K8s中定时Job设计模式</title>
+	<title>李林博客  | K8s中Daemon服务设计模式</title>
 	<meta name="viewport" content="width=device-width,minimum-scale=1">
 	<meta name="generator" content="Hugo 0.74.3" />
 	
@@ -142,7 +142,7 @@ onload='renderMathInElement(document.body);'></script>
 		<a href="https://kubesphereio.com/" title="李林博客" class="heading font-cursive icon">李林博客</a>
 	</h2>
 </div>
-<h1 class="pt-2">K8s中定时Job设计模式</h1>
+<h1 class="pt-2">K8s中Daemon服务设计模式</h1>
 
 <div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
 	
@@ -169,7 +169,7 @@ onload='renderMathInElement(document.body);'></script>
 	
 	
 </div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
-		datetime="2021-01-09T17:44:37&#43;08:00">2021-1-9 17:44</time>
+		datetime="2021-01-09T18:30:33&#43;08:00">2021-1-9 18:30</time>
 </div>
 
 <details class="toc" open>
@@ -196,45 +196,69 @@ onload='renderMathInElement(document.body);'></script>
 
 <article>
 	<section class="mx-auto content">
-		<div class="c-rich-text"><p>定时Job模式通过添加时间维度扩展了批次Job模式，并允许由当时事件触发执行一个工作单元。</p>
+		<div class="c-rich-text"><p>Daemon Service模式允许在目标节点上调度和运行优先级高的、专注于基础设施的Pod。管理员主要使用它来运行特定于节点的Pods，以增强Kubernetes平台的功能。</p>
 <h2 id="存在问题">存在问题</h2>
-<p>在分布式系统和微服务的世界里，使用HTTP和轻量级消息传递的实时和事件驱动的应用交互是一个明显的趋势。然而，无论软件开发的最新趋势如何，Job调度有着悠久的历史，而且它仍然具有相关性。==定时Job通常用于自动化系统维护或管理任务==。它们也适用于需要定期执行特定任务的业务应用，这里的典型例子是通过文件传输进行业务对业务的集成，通过数据库轮询进行应用集成，发送新闻信邮件，以及清理和归档旧文件。</p>
-<p>对于系统维护而言，传统方法处理周期性Job是使用专门的调度软件或Cron。然而，对于简单的用例来说，专门的软件可能会很昂贵，而且在单一服务器上运行的Cron作业很难维护，而且是一个单一的故障点。这就是为什么，很多时候，开发人员倾向于实现既能处理调度方面的问题，又能处理需要执行的业务逻辑的解决方案。例如，在Java世界中，Quartz、Spring Batch等库以及带有ScheduledThreadPoolExecutor类的自定义实现都可以运行时间性任务。但与Cron类似，这种方法的主要难点是使调度能力具有弹性和高可用，从而导致资源的高消耗。另外，采用这种方法，基于时间的任务调度器是应用程序的一部分，要使调度器高度可用，整个应用程序必须高度可用。通常情况下，这涉及到运行多个应用实例，同时要保证只有一个实例是活跃的，并调度作业&ndash;这就涉及到领导者选举和其他分布式系统的挑战。</p>
-<p>最后，一个简单的服务，每天要复制几个文件一次，最后可能需要多个节点，分布式的领导选举机制等等。Kubernetes CronJob的实现解决了这些问题，它允许使用著名的Cron格式对Job资源进行调度，让开发者只专注于实现要执行的工作，而不是时间调度方面。</p>
+<p>软件系统中守护进程的概念存在于许多层面。在操作系统的层面上，守护进程是一个长期运行、自我恢复的计算机程序，它作为后台进程运行。在Unix中，守护进程的名称以 &ldquo;d &ldquo;结尾，如httpd、named和sshd。在其他操作系统中，则使用服务启动的任务和幽灵作业等替代术语。</p>
+<p>不管它们被称为什么，这些程序的共同特点是它们作为进程运行，通常不与显示器、键盘和鼠标交互，并且在系统启动时启动。在应用程序层面也存在类似的概念。例如，在JVM中守护线程在后台运行，为用户线程提供支持服务。这些守护线程的优先级较低，在后台运行，在应用程序的生命周期没有发言权，执行任务类似垃圾收集或结束。</p>
+<p>同样，Kubernetes中也有DaemonSet的概念。考虑到Kubernetes是一个分布式平台，分布在多个节点上，以管理应用Pods为主要目标，因此DaemonSet由运行在集群节点上的Pods代表，并为集群的其他节点提供一些后台功能。</p>
 <h2 id="解决方案">解决方案</h2>
-<p>在Batch Job中，我们看到了Kubernetes Jobs的用例和功能。所有这些也适用于本章，因为CronJob基元建立在Job之上。CronJob实例类似于Unix crontab（cron表）的一行，管理Job的时间方面。它允许在指定的时间点周期性地执行一个Job。见例1-1的示例定义。</p>
-<pre><code>1-1. CronJob
-apiVersion: batch/v1beta1
-kind: CronJob
+<p>ReplicaSet和它的前身ReplicationController是负责确保特定数量的Pods运行的控制结构。这些控制器不断地监控运行中的Pod的列表，并确保实际的Pod数量总是与期望的数量相匹配。在这方面，DaemonSet是一个类似的结构，负责确保一定数量的Pods始终在运行。不同的是，前两者运行特定数量的Pod，通常是由高可用性和用户负载的应用需求驱动，而不考虑节点数量。</p>
+<p>另一方面，DaemonSet不是由消费者负载驱动决定运行多少个Pod实例和在哪里运行时。它的主要目的是在每个节点或特定节点上保持运行一个Pod。接下来让我们在例1-1中看到这样一个DaemonSet的定义。</p>
+<pre><code>1.1 DaemonSet 实例
+apiVersion: extensions/v1beta1
+kind: DaemonSet
 metadata: 
-  name: random-generator
-spec: 
-  # Every three minutes
-  schedule:&quot;*/3****&quot;
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - image: k8spatterns/random-generator:1.0
-            name: random-generator command: [ &quot;java&quot;, &quot;-cp&quot;, &quot;/&quot;, &quot;RandomRunner&quot;, &quot;/numbers.txt&quot;, &quot;10000&quot; ]
-          restartPolicy: OnFailure
-</code></pre><p>除了Job规格外，CronJob还有额外的字段来定义它的时间方面：</p>
+  name: random-refresher
+spec:
+  selector:
+    matchLabels:
+      app: random-refresher
+  template:
+    metadata:
+      labels:
+        app: random-refresher
+    spec: 
+      nodeSelector:
+        feature: hw-rng 
+      containers:
+      - image: k8spatterns/random-generator:1.0
+        name: random-generator
+        command:
+        - sh
+        - -c
+        - &gt;-
+          &quot;while true; do
+          java -cp / RandomRunner /host_dev/random 100000;
+          sleep 30; done&quot;
+        volumeMounts:
+        - mountPath: /host_dev
+          name: devices
+        volumes:
+        - name: devices
+          hostPath:
+            path: /dev
+</code></pre><p>考虑到这种行为，DaemonSet的主要候选者通常是与基础设施相关的进程，如日志收集器、度量导出器，甚至是kube-proxy，这些进程会执行整个集群的操作。DaemonSet和ReplicaSet的管理方式有很多不同，但主要有以下几点：</p>
 <ul>
-<li>.spec.schedule<br>
-Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运行）。</li>
-<li>.spec.startingDeadlineSeconds<br>
-如果任务错过了预定时间，启动任务的最后期限（以秒为单位）。在某些使用情况下，一个任务只有在一定的时间范围内执行才有效，如果执行晚了就没有用了。例如，如果一个Job因为缺乏计算资源或其他缺失的依赖关系而没有在预期的时间内执行，那么最好跳过一次执行，因为它应该处理的数据已经过时了。</li>
-<li>.spec.concurrencyPolicy<br>
-指定如何管理同一 CronJob 创建的作业的并发执行。默认行为Allow会创建新的Job实例，即使之前的Job还没有完成。如果这不是所需的行为，可以在当前作业尚未完成的情况下，使用 Forbidor 跳过下一次运行，取消当前正在运行的作业，并使用 Replace 启动一个新的作业。</li>
-<li>.spec.suspend<br>
-暂停所有后续执行，但不影响已经开始的执行。</li>
-<li>.spec.successfulJobsHistoryLimit and .spec.failedJobsHistoryLimit<br>
-指定应保留多少个已完成和未完成的Job的字段，以便进行审计。</li>
+<li>默认情况下，DaemonSet会给每个节点调度一个Pod实例。这可以通过使用nodeSelector字段来控制和限制节点的子集。</li>
+<li>DaemonSet创建的Pod已经指定了nodeName。因此，DaemonSet不需要Kubernetes调度器的存在就可以运行容器。这也允许使用DaemonSet来运行和管理Kubernetes组件。</li>
+<li>由DaemonSet创建的Pod可以在调度器启动之前运行，这使得它们可以在任何其他Pod被调度在节点上之前运行。</li>
+<li>由DaemonSet管理的Pods应该只在目标节点上运行，因此，被许多控制器以更高的优先级和不同的方式对待。例如，descheduler会避免驱逐这类Pod，集群autoscaler会单独管理它们等等。</li>
 </ul>
-<p>CronJob是一个非常专业的基元，它只适用于工作单元具有时间维度的情况。即使CronJob不是一个通用的基元，它也是一个很好的例子，说明Kubernetes的能力是如何建立在彼此之上，并且也支持非云原生用例。</p>
+<p>通常，一个DaemonSet会在每个节点或节点子集上创建一个单一的Pod。鉴于此，DaemonSets管理的Pod有几种方式可以到达。</p>
+<ul>
+<li>Service<br>
+创建一个与DaemonSet相同的Pod选择器的Service，并使用该Service到达一个守护者Pod负载均衡到随机节点。</li>
+<li>DNS<br>
+创建一个无头服务，其Pod选择器与DaemonSet相同，可用于从DNS中检索包含所有Pod IP和端口的多个A记录。</li>
+<li>NodeIP with HostPort<br>
+在DaemonSet中的Pod可以指定一个hostPort，并通过节点IP地址和指定的端口进行访问。由于hostIp和hostPort以及协议的组合必须是唯一的，所以Pod可以被调度的地方数量是有限的。</li>
+<li>Push<br>
+DaemonSets Pods中的应用可以将数据推送到Pods外部的指定位置或服务。不需要消费者到达DaemonSets Pods。</li>
+</ul>
+<p>另一种类似于DaemonSet运行容器的方式是通过静态Pods机制。Kubelet除了与Kubernetes APIServer对话并获取Pod清单外，还可以从本地目录获取资源定义。这样定义的Pod只由Kubelet管理，并且只在一个节点上运行。API服务并不观察这些Pod，也没有控制器，也没有对它们进行健康检查。Kubelet观察这样的Pod，并在它们崩溃时重新启动它们。同样，Kubelet也会定期扫描配置的目录，查看Pod定义的变化，并相应地添加或删除Pod。</p>
+<p>静态Pods可以用来分拆Kubernetes系统进程或其他容器的容器化版本。但DaemonSets与平台的其他部分集成度更好，推荐使用DaemonSets，而不是静态Pods。</p>
 <h2 id="讨论">讨论</h2>
-<p>正如您所看到的，CronJob是一个非常简单的基元，它向现有的Job定义添加了集群、类似Cron的行为。但当它与其他基元（如 Pods、容器资源隔离）和其他 Kubernetes 特性（如 ，Automated Placement、Health Probe）相结合时，它往往会成为一个非常强大的 Job 调度系统。这使得开发者可以只关注问题域，实现一个只负责要执行的业务逻辑的容器化应用。调度是在应用之外进行的，作为平台的一部分，它具有所有的附加优势，如高可用性、弹性、容量和策略驱动的Pod调度。当然，与Job的实现类似，在实现CronJob容器时，你的应用必须考虑重复运行、不运行、并行运行或取消运行的所有角落和故障情况。</p>
+<p>我们描述的模式和Kubernetes特性主要是由开发者而不是平台管理员使用的。DaemonSet介于两者之间，更倾向于管理员工具箱，但我们把它包括在这里，因为它对应用开发者也有适用性。DaemonSets和CronJobs也是Kubernetes如何将Crontab和守护脚本等单节点概念转化为管理分布式系统的多节点集群基元的完美例子。这些都是开发人员也必须熟悉的新的分布式概念。</p>
 </div>
 	</section>
 
@@ -316,7 +340,7 @@ Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运�
 	<div class="text-sm text-gray-500 leading-tight a-gray">
 		Copyright © 2008–2020
 		<br />
-		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 1735 words in this page.
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 2163 words in this page.
 	</div>
 </div>
 
@@ -327,21 +351,14 @@ Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运�
 <hr class="double-line" />
 <div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
     
-    <a class="flex-grow-0" href="/post/batch-job/">
+    <a class="flex-grow-0" href="/post/cronjob/">
         <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
             height="24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
-        K8s中批量Job设计模式
+        K8s中定时Job设计模式
     </a>
     
-    
-    <a class="flex-grow-0" href="/post/daemon-service/">
-        K8s中Daemon服务设计模式
-        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
-            height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" /></svg></a>
     
 </div>
 <div >
@@ -351,6 +368,8 @@ Crontab 条目用于指定Job的计划（例如，0 * * * * 表示每小时运�
 <div class="font-serif pb-2 flex align-start leading-loose">
 	<span class="heading pr-6 leading-loose">Related</span>
 	<span >
+		
+			<a href="/post/cronjob/">K8s中定时Job设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		
 			<a href="/post/batch-job/">K8s中批量Job设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
 		

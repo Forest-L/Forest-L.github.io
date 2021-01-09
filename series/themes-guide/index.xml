@@ -7,10 +7,82 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Sat, 09 Jan 2021 17:44:37 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 09 Jan 2021 18:30:33 +0800</lastBuildDate>
     
 	<atom:link href="https://kubesphereio.com/series/themes-guide/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s中Daemon服务设计模式</title>
+      <link>https://kubesphereio.com/post/daemon-service/</link>
+      <pubDate>Sat, 09 Jan 2021 18:30:33 +0800</pubDate>
+      
+      <guid>https://kubesphereio.com/post/daemon-service/</guid>
+      <description>&lt;p&gt;Daemon Service模式允许在目标节点上调度和运行优先级高的、专注于基础设施的Pod。管理员主要使用它来运行特定于节点的Pods，以增强Kubernetes平台的功能。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;软件系统中守护进程的概念存在于许多层面。在操作系统的层面上，守护进程是一个长期运行、自我恢复的计算机程序，它作为后台进程运行。在Unix中，守护进程的名称以 &amp;ldquo;d &amp;ldquo;结尾，如httpd、named和sshd。在其他操作系统中，则使用服务启动的任务和幽灵作业等替代术语。&lt;/p&gt;
+&lt;p&gt;不管它们被称为什么，这些程序的共同特点是它们作为进程运行，通常不与显示器、键盘和鼠标交互，并且在系统启动时启动。在应用程序层面也存在类似的概念。例如，在JVM中守护线程在后台运行，为用户线程提供支持服务。这些守护线程的优先级较低，在后台运行，在应用程序的生命周期没有发言权，执行任务类似垃圾收集或结束。&lt;/p&gt;
+&lt;p&gt;同样，Kubernetes中也有DaemonSet的概念。考虑到Kubernetes是一个分布式平台，分布在多个节点上，以管理应用Pods为主要目标，因此DaemonSet由运行在集群节点上的Pods代表，并为集群的其他节点提供一些后台功能。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;ReplicaSet和它的前身ReplicationController是负责确保特定数量的Pods运行的控制结构。这些控制器不断地监控运行中的Pod的列表，并确保实际的Pod数量总是与期望的数量相匹配。在这方面，DaemonSet是一个类似的结构，负责确保一定数量的Pods始终在运行。不同的是，前两者运行特定数量的Pod，通常是由高可用性和用户负载的应用需求驱动，而不考虑节点数量。&lt;/p&gt;
+&lt;p&gt;另一方面，DaemonSet不是由消费者负载驱动决定运行多少个Pod实例和在哪里运行时。它的主要目的是在每个节点或特定节点上保持运行一个Pod。接下来让我们在例1-1中看到这样一个DaemonSet的定义。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1.1 DaemonSet 实例
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata: 
+  name: random-refresher
+spec:
+  selector:
+    matchLabels:
+      app: random-refresher
+  template:
+    metadata:
+      labels:
+        app: random-refresher
+    spec: 
+      nodeSelector:
+        feature: hw-rng 
+      containers:
+      - image: k8spatterns/random-generator:1.0
+        name: random-generator
+        command:
+        - sh
+        - -c
+        - &amp;gt;-
+          &amp;quot;while true; do
+          java -cp / RandomRunner /host_dev/random 100000;
+          sleep 30; done&amp;quot;
+        volumeMounts:
+        - mountPath: /host_dev
+          name: devices
+        volumes:
+        - name: devices
+          hostPath:
+            path: /dev
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;考虑到这种行为，DaemonSet的主要候选者通常是与基础设施相关的进程，如日志收集器、度量导出器，甚至是kube-proxy，这些进程会执行整个集群的操作。DaemonSet和ReplicaSet的管理方式有很多不同，但主要有以下几点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;默认情况下，DaemonSet会给每个节点调度一个Pod实例。这可以通过使用nodeSelector字段来控制和限制节点的子集。&lt;/li&gt;
+&lt;li&gt;DaemonSet创建的Pod已经指定了nodeName。因此，DaemonSet不需要Kubernetes调度器的存在就可以运行容器。这也允许使用DaemonSet来运行和管理Kubernetes组件。&lt;/li&gt;
+&lt;li&gt;由DaemonSet创建的Pod可以在调度器启动之前运行，这使得它们可以在任何其他Pod被调度在节点上之前运行。&lt;/li&gt;
+&lt;li&gt;由DaemonSet管理的Pods应该只在目标节点上运行，因此，被许多控制器以更高的优先级和不同的方式对待。例如，descheduler会避免驱逐这类Pod，集群autoscaler会单独管理它们等等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通常，一个DaemonSet会在每个节点或节点子集上创建一个单一的Pod。鉴于此，DaemonSets管理的Pod有几种方式可以到达。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Service&lt;br&gt;
+创建一个与DaemonSet相同的Pod选择器的Service，并使用该Service到达一个守护者Pod负载均衡到随机节点。&lt;/li&gt;
+&lt;li&gt;DNS&lt;br&gt;
+创建一个无头服务，其Pod选择器与DaemonSet相同，可用于从DNS中检索包含所有Pod IP和端口的多个A记录。&lt;/li&gt;
+&lt;li&gt;NodeIP with HostPort&lt;br&gt;
+在DaemonSet中的Pod可以指定一个hostPort，并通过节点IP地址和指定的端口进行访问。由于hostIp和hostPort以及协议的组合必须是唯一的，所以Pod可以被调度的地方数量是有限的。&lt;/li&gt;
+&lt;li&gt;Push&lt;br&gt;
+DaemonSets Pods中的应用可以将数据推送到Pods外部的指定位置或服务。不需要消费者到达DaemonSets Pods。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;另一种类似于DaemonSet运行容器的方式是通过静态Pods机制。Kubelet除了与Kubernetes APIServer对话并获取Pod清单外，还可以从本地目录获取资源定义。这样定义的Pod只由Kubelet管理，并且只在一个节点上运行。API服务并不观察这些Pod，也没有控制器，也没有对它们进行健康检查。Kubelet观察这样的Pod，并在它们崩溃时重新启动它们。同样，Kubelet也会定期扫描配置的目录，查看Pod定义的变化，并相应地添加或删除Pod。&lt;/p&gt;
+&lt;p&gt;静态Pods可以用来分拆Kubernetes系统进程或其他容器的容器化版本。但DaemonSets与平台的其他部分集成度更好，推荐使用DaemonSets，而不是静态Pods。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;我们描述的模式和Kubernetes特性主要是由开发者而不是平台管理员使用的。DaemonSet介于两者之间，更倾向于管理员工具箱，但我们把它包括在这里，因为它对应用开发者也有适用性。DaemonSets和CronJobs也是Kubernetes如何将Crontab和守护脚本等单节点概念转化为管理分布式系统的多节点集群基元的完美例子。这些都是开发人员也必须熟悉的新的分布式概念。&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>K8s中定时Job设计模式</title>
