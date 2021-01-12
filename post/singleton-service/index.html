@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>李林博客  | K8s中单体服务设计模式</title>
+	<meta name="viewport" content="width=device-width,minimum-scale=1">
+	<meta name="generator" content="Hugo 0.74.3" />
+	
+	
+	<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+	
+
+	
+	
+	<link href="/dist/app.css" rel="stylesheet">
+	
+
+	
+
+	
+	
+<link rel="shortcut icon" href="/img/K8s.png" type="image/png" />
+
+	
+
+	
+	
+	
+	
+	
+	
+
+
+
+<link rel="stylesheet" href='https://kubesphereio.com/lib/katex.min.css' integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src='https://kubesphereio.com/lib/katex.min.js' integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+
+
+<script defer src='https://kubesphereio.com/lib/contrib/auto-render.min.js' integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+crossorigin="anonymous"
+onload='renderMathInElement(document.body);'></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+	
+	
+	
+	<script>
+		(function (u, c) {
+			var d = document,
+				t = 'script',
+				o = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			o.src = u;
+			if (c) {
+				o.addEventListener('load', function (e) {
+					c(e);
+				});
+			}
+			s.parentNode.insertBefore(o, s);
+		})('https:\/\/kubesphereio.com\/lib\/pangu.min.js', function () {
+			pangu.spacingPage();
+		});
+	</script>
+	
+	
+	<style type="text/css" media="screen, print">
+		@font-face {
+			font-family: "FancyTitleFont";
+			font-style: normal;
+			font-display: swap;
+			src: url('https://kubesphereio.com/fonts/exampleFont.woff2') format('woff2'),
+				url('https://kubesphereio.com/fonts/exampleFont.woff') format('woff');
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 300;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Light'), local('NotoSerifCJK-Light'),
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff2') format('woff2'),
+				 
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-300.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 400;
+			font-display: swap;
+			src: local('Noto Serif CJK SC'), local('NotoSerifCJK-Regular'),
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff2') format('woff2'),
+				 
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-regular.woff') format('woff');
+			 
+		}
+
+		 
+		@font-face {
+			font-family: 'Noto Serif CJK SC';
+			font-style: normal;
+			font-weight: 500;
+			font-display: swap;
+			src: local('Noto Serif CJK SC Medium'), local('NotoSerifCJK-Medium'),
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff2') format('woff2'),
+				 
+				url('https://kubesphereio.com/fonts/noto-serif-sc-v7-latin_chinese-simplified-500.woff') format('woff');
+			 
+		}
+	</style>
+	
+	
+</head>
+
+<body class="bg-gray-100 text-gray-700 font-sans">
+	<div class="p-6 sm:p-10 md:p-16 flex flex-wrap">
+		<header class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-1 md:order-1 max-w-2xl">
+			<div
+				class="z-50 bg-gray-100 bg-opacity-75 bg-opacity-custom lg:min-w-0.7 max-w-xl md:float-right md:text-right leading-loose tracking-tight md:sticky md:top-0 pt-2">
+				
+<div>
+	<h2>
+		<a href="https://kubesphereio.com/" title="李林博客" class="heading font-cursive icon">李林博客</a>
+	</h2>
+</div>
+<h1 class="pt-2">K8s中单体服务设计模式</h1>
+
+<div class="flex flex-wrap justify-end pt-2 "><div class="md:flex-grow-0 font-light">
+	
+	
+	
+	
+	<a class="post-taxonomy-category text-medium-red-violet-600 hover:text-medium-red-violet-400"
+		href='/categories/kubernetes'>Kubernetes</a>
+	
+	
+	
+
+	
+	&nbsp;&nbsp;
+	
+
+	
+	
+	
+	
+	<a class="post-taxonomy-tag text-eucalyptus-500"
+		href='/tags/k8s'>K8s</a>
+	
+	
+	
+</div><time class="text-eucalyptus-500 md:text-right md:flex-grow font-light pl-4"
+		datetime="2021-01-12T20:03:26&#43;08:00">2021-1-12 20:03</time>
+</div>
+
+<details class="toc" open>
+<summary>
+    <hr />
+</summary>
+<div class="inline toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#存在问题">存在问题</a></li>
+    <li><a href="#解决方案">解决方案</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#讨论">讨论</a></li>
+  </ul>
+</nav>
+</div>
+</details>
+
+<hr />
+
+			</div>
+		</header>
+		<main role="main" class="w-full md:w-3/5 xl:w-1/2 max-w-3xl order-2 md:order-2 min-h-70vh pt-2 pb-4">
+			
+
+<article>
+	<section class="mx-auto content">
+		<div class="c-rich-text"><p>Singleton服务模式确保了应用的一个实例同时只有一个是激活的，但又是高度可用的。这种模式可以从应用内部实现，也可以完全委托给Kubernetes。</p>
+<h2 id="存在问题">存在问题</h2>
+<p>Kubernetes提供的主要功能之一是能够轻松透明地扩展应用。Pods可以通过单一命令（如kubectl scale）强制扩展，或通过控制器定义（如ReplicaSet）声明性扩展，甚至可以根据应用负载Elastic Scale动态扩展。通过运行同一服务的多个实例（不是Kubernetes服务，而是以Pod为代表的分布式应用的一个组件），系统通常会增加吞吐量和可用性。可用性增加的原因是，如果一个服务实例变得不健康，请求调度器会将未来的请求转发给其他健康的实例。在Kubernetes中，多个实例是一个Pod的复本，Service资源负责请求调度。</p>
+<p>但是，在某些情况下，一次只允许运行一个服务的实例。 例如，如果一个服务中有一个周期性执行的任务，而同一服务又有多个实例，那么每个实例都会在预定的时间间隔内触发任务，导致重复，而不是像预期的那样只有一个任务被触发。另一个例子是对特定资源（文件系统或数据库）执行轮询的服务，我们要确保只有一个实例，甚至可能只有一个线程执行轮询和处理。第三种情况发生在我们要用一个单线程的消费者从消息经纪人那里依次消费消息，这个消费者也是一个单人服务。</p>
+<p>在所有这些和类似的情况下，我们需要对每一次一个激活的服务多少个实例（通常只需要一个）进行一些控制，不管有多少个实例被启动并保持运行。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>运行同一个Pod的多个副本会创建一个主-主的拓扑，其中一个服务的所有实例都是主的。我们需要的是一种主-被（或主从）拓扑，其中只有一个实例是主的，而其他所有实例都是被的。从根本上说，这可以在两个可能的层次上实现：应用外锁定和应用内锁定。</p>
+<h4 id="应用外锁">应用外锁</h4>
+<p>顾名思义，这种机制依赖于应用程序之外的管理进程，以确保应用程序只有一个实例在运行。应用程序的实现本身并不知道这个约束，而是作为一个单体实例运行。从这个角度来看，它类似于拥有一个Java类，它只被管理运行时（如Spring框架）实例化一次。类的实现并不知道它是作为单例运行的，也不知道它包含任何代码构造来防止实例化多个实例。图1-1显示了如何借助StatefulSet或ReplicaSet控制器与一个副本实现应用外锁定。</p>
+<p><img src="out-of-application-locking.png" alt="out-of-application-locking.png"></p>
+<p>在Kubernetes中实现的方法是用一个副本启动一个Pod。单单这个活动并不能保证单体Pod的高可用。我们要做的是还要用一个控制器（比如ReplicaSet）来支持Pod，将单体Pod变成一个高可用的单体。这种拓扑结构并不完全是主-动（没有被动实例），但效果是一样的，因为Kubernetes保证了Pod的一个实例一直在运行。此外，单体Pod实例是高度可用的，这要归功于控制器在Pod出现故障时执行健康检查、HealthProbe和愈合。</p>
+<p>这种方式主要需要注意的是副本数，不要一不小心就增加了，因为没有平台级的机制来防止副本数的变化。</p>
+<p>任何时候都只有一个实例在运行，这并不完全正确，尤其是当事情出错时。Kubernetes 基元（如 ReplicaSet）倾向于可用性而非一致性&ndash;这是为了实现高可用和可扩展的分布式系统而做出的慎重决定。这意味着ReplicaSet对其副本采用 &ldquo;至少 &ldquo;而非 &ldquo;最多 &ldquo;的语义。如果我们将ReplicaSet配置为具有副本的单例：1，控制器确保至少有一个实例一直在运行，但偶尔也可以有更多的实例。</p>
+<p>这里最常见的情况是，当一个带有控制器管理的Pod的节点变得不健康并与Kubernetes集群的其他节点断开连接时。在这种情况下，ReplicaSet控制器会在一个健康的节点上启动另一个Pod实例（假设有足够的容量），而不确保断开连接的节点上的Pod被关闭。同样，当改变副本数量或将Pod迁移到不同节点时，Pod的数量可能会暂时超过所需数量。这种临时增加的目的是为了确保高可用性和避免中断，这是无状态和可扩展应用的需要。</p>
+<p>单例可以具有弹性和恢复能力，但根据定义，它不是高可用的。单子通常倾向于一致性而非可用性。Kubernetes资源同样倾向于一致性而非可用性，并提供所需的严格单例保证是StatefulSet。如果ReplicaSets不能为你的应用提供所需的保证，而你又有严格的单例要求，StatefulSets可能是答案。StatefulSets旨在为有状态的应用程序提供许多特性，包括更强的单例保证，但它们也增加了复杂性。我们将讨论有关单例的问题，并在第后续章Stateful Service中更详细地介绍StatefulSets。</p>
+<p>通常情况下，在Kubernetes上的Pod中运行的单体应用会打开与消息中介、关系型数据库、文件服务器或其他Pod上运行的系统或外部系统的传出连接。然而，偶尔，你的单例Pod可能需要接受传入连接，在Kubernetes上启用的方式是通过Service资源。</p>
+<p>我们在下面章 &ldquo;服务发现 &ldquo;中对Kubernetes服务进行了深入的介绍，但我们在这里简单讨论一下适用于单体的部分。一个普通的Service（类型为：ClusterIP）会创建一个虚拟IP，并在其选择器匹配的所有Pod实例中执行负载均衡。但是通过StatefulSet管理的单例Pod只有一个Pod和一个稳定的网络身份。在这种情况下，最好创建一个无头服务(通过设置type: ClusterIP和clusterIP: None)。之所以称为无头，是因为这样的Service没有虚拟IP地址，kube-proxy不处理这些Service，平台也不执行代理。</p>
+<p>然而，这样的服务仍然是有用的，因为带有选择器的无头服务在API服务器中创建端点记录，并为匹配的Pod生成DNS A记录，这样，服务的DNS查询就不会返回它的虚拟IP，而是返回支持Pod的IP地址。这样就可以通过服务的DNS记录直接访问单例Pod，而不需要通过服务的虚拟IP。例如，如果我们创建了一个名为my-singleton的无头服务，我们可以使用my-singleton.default.svc.cluster.local来直接访问Pod的IP地址。</p>
+<p>综上所述，对于非严格的单例来说，一个有一个副本的ReplicaSet和一个普通的Service就足够了。对于严格的单例和性能更好的服务发现，最好使用StatefulSet和无头Service。你可以在后面章Stateful Service中找到一个完整的例子，在这里你必须将副本的数量改为一个，使其成为一个单例。</p>
+<h4 id="应用内锁">应用内锁</h4>
+<p>在分布式环境中，控制服务实例数量的方法之一是通过分布式锁，如图1-2所示。每当一个服务实例或实例内部的组件被激活时，它都可以尝试获取一个锁，如果成功了，服务就会成为活动状态。任何后续的服务实例如果未能获取锁，则会等待并不断尝试获取锁，以防当前激活的服务释放锁。</p>
+<p>许多现有的分布式框架使用这种机制来实现高可用性和弹性。例如，消息中间件Apache ActiveMQ可以在一个高可用的主-被拓扑中运行，其中数据源提供共享锁。第一个启动的中间件实例获得锁并成为主，随后启动的其他实例则成为被，等待锁被释放。这种策略可以确保有一个单一的主中间件实例，同时也能抵御故障的发生。
+图1-2所示应用内锁</p>
+<p><img src="application-in-lock.png" alt="application-in-lock.png"></p>
+<p>我们可以将这种策略与面向对象中的经典单例进行比较：单例是一个存储在静态类变量中的对象实例。在这个实例中，该类意识到自己是一个单例，而且它的编写方式不允许为同一个进程实例化多个实例。在分布式系统中，这意味着容器化应用程序本身必须以一种不允许同时有多个活动实例的方式来编写，无论启动的Pod实例数量有多少。要在分布式环境中实现这一点，首先，我们需要一个分布式锁的实现，比如Apache ZooKeeper、HashiCorp的Consul、Redis或Etcd提供的锁。</p>
+<p>ZooKeeper的典型实现是使用临时节点，只要有客户端会话就存在，一旦会话结束就会被删除。第一个启动的服务实例在ZooKeeper服务器上发起一个会话，并创建一个临时节点成为活动节点。同一个集群的所有其他服务实例都会变成被的，必须等待临时节点被释放。这就是基于ZooKeeper的实现如何确保整个集群中只有一个主服务实例，确保主/被的故障转移行为。</p>
+<p>在Kubernetes的世界里，与其仅仅为了锁定功能而管理ZooKeeper集群，不如使用通过Kubernetes API暴露的、运行在主节点上的Etcd功能。Etcd是一个分布式键值存储，它使用Raft协议来维护其副本状态。最重要的是，它为实现领导者选举提供了必要的构件，一些客户端库已经实现了这个功能。例如，Apache Camel有一个Kubernetes连接器，它也提供了领导者选举和单人能力。这个连接器更进一步，它没有直接访问Etcd API，而是使用Kubernetes API来利用ConfigMaps作为分布式锁。它依靠Kubernetes乐观的锁定保证来编辑ConfigMaps等资源，一次只能更新一个Pod的ConfigMap。</p>
+<p>Camel的实现使用这个保证来确保只有一个Camel路由实例是活动的，其他实例必须等待并获得锁才能激活。这是对锁的自定义实现，但实现了同样的目标：当有多个Pods使用同一个Camel应用时，只有其中一个成为主单体，其他单体在从模式下等待。</p>
+<p>使用ZooKeeper、Etcd或其他任何分布式锁的实现将与所述的类似：只有一个应用实例成为领导者并激活自己，其他从实例等待锁。这就保证了即使启动了多个Pod副本，并且都是健康的、启动的、运行的，也只有一个服务是主动的，并作为单例执行业务功能，其他实例都在等待获取锁，以防主控失败或关闭。</p>
+<h4 id="pod中断的安排">Pod中断的安排</h4>
+<p>单体服务和领导者选举试图限制一个服务同时运行的最大实例数量，而Kubernetes的Pod DisruptionBudget功能则提供了一个互补的、有点相反的功能&ndash;限制同时停机维护的实例数量。</p>
+<p>在它的核心，PodDisruptionBudget确保一定数量或百分比的Pod不会在任何一个时间点上自愿从一个节点上被驱逐。这里的自愿是指可以延迟特定时间的驱逐，例如，当它是由维护或升级的节点耗尽（kubectl drain），或集群缩减触发的，而不是节点变得不健康，这无法预测或控制。</p>
+<p>例1-1中的PodDisruptionBudget适用于与其选择器相匹配的Pod，并确保两个Pod必须一直可用。</p>
+<pre><code>例1-1 PodDisruptionBudget
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: random-generator-pdb
+spec:
+  selector:
+    matchLabels:
+      app: reandom-generator
+  minAvailable: 2
+</code></pre><p>除了.spec.minAvailable，还有一个选项是使用.spec.maxUnavailable，它指定了该集的Pods数量，可以在驱逐后不可用。但是你不能同时指定这两个字段，PodDisruptionBudget通常只适用于由控制器管理的Pod。对于不由控制器管理的花苞（也被称为裸露或裸露的Pods），应该考虑围绕PodDisruptionBudget的其他限制。</p>
+<p>该功能对于基于法定人数的应用非常有用，这些应用要求在任何时候都有最少数量的副本运行以确保法定人数。或者当一个应用程序正在服务于关键流量，而这些流量永远不应该低于实例总数的某个百分比。这是Kubernetes另一个控制和影响运行时实例管理的基元，在本章值得一提。</p>
+<h2 id="讨论">讨论</h2>
+<p>如果你的用例需要强大的单例保证，你就不能依赖ReplicaSets的应用外锁定机制。Kubernetes ReplicaSets的设计是为了维护其Pod的可用性，而不是为了确保Pod的最多单例语义。因此，有很多故障场景（例如，当运行单体Pod的节点与集群的其他节点分区时，例如用新的Pod实例替换删除的Pod实例时），一个Pod的两个副本在短时间内并发运行。如果不能接受，请使用StatefulSets或研究应用程序中的锁定选项，这些选项可以为您提供更多的控制领导者选举过程，并提供更强的保证。后者还可以防止通过改变副本数量来意外扩展Pod。</p>
+<p>在其他情况下，容器化应用程序中只有一部分应该是单例。例如，可能有一个容器化应用程序提供了一个HTTP端点，该端点可以安全地扩展到多个实例，但也有一个轮询组件必须是一个单例。使用应用外锁定的方法将防止对整个服务进行扩展。同时，作为结果，我们要么在其部署单元中拆分单体人组件，使其保持单体身份（理论上是好的，但并不总是实用的，值得开销），要么使用应用内锁定机制，只锁定必须是单体的组件。这将允许我们透明地扩展整个应用，让HTTP端点进行扩展，并让其他部分作为主-被单体。</p>
+</div>
+	</section>
+
+
+</article>
+
+		</main>
+		<aside role="contentinfo"
+			class="w-full md:w-2/5 xl:w-1/2 md:pr-12 lg:pr-20 xl:pr-24 order-4 md:order-3 md:sticky md:bottom-0 self-end max-w-2xl">
+			<div class="md:float-right md:text-right leading-loose tracking-tight md:mb-2">
+				
+	<div class="md:max-w-xs  flex flex-col md:items-end">
+	<ul class="font-serif flex-grow-0 flex justify-between flex-wrap md:flex-col">
+	
+	
+	<li class="px-1 md:px-0">
+		<a href="/tags/" title="标签 page" >
+			标签
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/categories/" title="分类 page" >
+			分类
+		</a>
+	</li>
+	
+	<li class="px-1 md:px-0">
+		<a href="/about/" title="关于 page" >
+			关于
+		</a>
+	</li>
+	
+	
+	
+	
+	<div id="fastSearch" class="m-0">
+		<input id="searchInput" type="text" size=10 
+			class="bg-gray-100 focus:outline-none border-b border-gray-100 focus:border-eucalyptus-300 md:text-right
+			placeholder-java-500 min-w-0 max-w-xxxs"
+			placeholder="搜索" />
+		<ul id="searchResults" class="bg-gray-200 px-2 divide-y divide-gray-400">
+		</ul>
+	</div>
+	
+</ul>
+	
+
+<div class="flex flex-wrap-reverse md:justify-end content-end md:content-start justify-start items-start   max-h-16">
+	
+	<a href='https://github.com/Forest-L/Forest-L.github.io' target="_blank" class="github icon pl-1 text-eucalyptus-400 hover:text-java-400" title="github link" rel="noopener"
+		aria-label="follow on github——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path fill-rule="nonzero" d="M5.883 18.653c-.3-.2-.558-.455-.86-.816a50.32 50.32 0 0 1-.466-.579c-.463-.575-.755-.84-1.057-.949a1 1 0 0 1 .676-1.883c.752.27 1.261.735 1.947 1.588-.094-.117.34.427.433.539.19.227.33.365.44.438.204.137.587.196 1.15.14.023-.382.094-.753.202-1.095C5.38 15.31 3.7 13.396 3.7 9.64c0-1.24.37-2.356 1.058-3.292-.218-.894-.185-1.975.302-3.192a1 1 0 0 1 .63-.582c.081-.024.127-.035.208-.047.803-.123 1.937.17 3.415 1.096A11.731 11.731 0 0 1 12 3.315c.912 0 1.818.104 2.684.308 1.477-.933 2.613-1.226 3.422-1.096.085.013.157.03.218.05a1 1 0 0 1 .616.58c.487 1.216.52 2.297.302 3.19.691.936 1.058 2.045 1.058 3.293 0 3.757-1.674 5.665-4.642 6.392.125.415.19.879.19 1.38a300.492 300.492 0 0 1-.012 2.716 1 1 0 0 1-.019 1.958c-1.139.228-1.983-.532-1.983-1.525l.002-.446.005-.705c.005-.708.007-1.338.007-1.998 0-.697-.183-1.152-.425-1.36-.661-.57-.326-1.655.54-1.752 2.967-.333 4.337-1.482 4.337-4.66 0-.955-.312-1.744-.913-2.404a1 1 0 0 1-.19-1.045c.166-.414.237-.957.096-1.614l-.01.003c-.491.139-1.11.44-1.858.949a1 1 0 0 1-.833.135A9.626 9.626 0 0 0 12 5.315c-.89 0-1.772.119-2.592.35a1 1 0 0 1-.83-.134c-.752-.507-1.374-.807-1.868-.947-.144.653-.073 1.194.092 1.607a1 1 0 0 1-.189 1.045C6.016 7.89 5.7 8.694 5.7 9.64c0 3.172 1.371 4.328 4.322 4.66.865.097 1.201 1.177.544 1.748-.192.168-.429.732-.429 1.364v3.15c0 .986-.835 1.725-1.96 1.528a1 1 0 0 1-.04-1.962v-.99c-.91.061-1.662-.088-2.254-.485z"/>
+    </g>
+</svg>
+
+		</div>
+	</a>
+	
+	<a href='lilin13297@gmail.com' target="_blank" class="mail icon pl-1 text-eucalyptus-400 hover:text-java-400" title="mail link" rel="noopener"
+		aria-label="follow on mail——Opens in a new window">
+		
+		<div class="fill-current h-8 w-8">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <path fill="none" d="M0 0h24v24H0z"/>
+        <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/>
+    </g>
+</svg>
+		</div>
+	</a>
+	
+</div>
+	<div class="text-sm text-gray-500 leading-tight a-gray">
+		Copyright © 2008–2020
+		<br />
+		Built with Hugo and theme <a href="https://github.com/heyeshuang/hugo-theme-tokiwa">Tokiwa</a>. 5150 words in this page.
+	</div>
+</div>
+
+			</div>
+		</aside>
+		<footer class="w-full md:w-3/5 xl:w-1/2 order-3 max-w-3xl md:order-4 pt-2">
+			
+<hr class="double-line" />
+<div class="flex flex-wrap justify-between pb-2 leading-loose font-serif">
+    
+    <a class="flex-grow-0" href="/post/daemon-service/">
+        <svg class="fill-current inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
+            height="24">
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" /></svg>
+        K8s中Daemon服务设计模式
+    </a>
+    
+    
+</div>
+<div >
+
+
+
+<div class="font-serif pb-2 flex align-start leading-loose">
+	<span class="heading pr-6 leading-loose">Related</span>
+	<span >
+		
+			<a href="/post/daemon-service/">K8s中Daemon服务设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/cronjob/">K8s中定时Job设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/batch-job/">K8s中批量Job设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/automated-placement/">K8s中自动调度设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/managed-lifecycle/">K8s中生命周期管理设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/health-probe/">K8s中健康检查设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/declarative-deployment/">K8s中声明式的部署设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/predictable-demands/">K8s中可预测的需求设计模式</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/cka-test-experience/">CkA考试经验</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1-15-install/">k8s1.15安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/k8s1.16-installed-on-centos-system/">K8s1.16在centos安装</a>&nbsp;&nbsp;&#47;&nbsp;
+		
+			<a href="/post/add-public-ip-to-kubernetes-apiserver-operation-guide/">添加公网ip到kubernetes的apiserver操作指南</a>
+		
+</span>
+</div>
+
+</div>
+<hr />
+<div class="pb-2">
+    
+</div>
+<hr />
+
+		</footer>
+		
+
+<script src="/dist/app.js"></script>
+
+
+<script src="/lib/fuse.min.js"></script> 
+<script src="/lib/fastsearch.js"></script>
+
+	</div>
+</body>
+
+</html>

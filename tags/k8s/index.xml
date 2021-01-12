@@ -7,10 +7,67 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>Copyright © 2008–2020</copyright>
-    <lastBuildDate>Sat, 09 Jan 2021 18:30:33 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 12 Jan 2021 20:03:26 +0800</lastBuildDate>
     
 	<atom:link href="https://kubesphereio.com/tags/k8s/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>K8s中单体服务设计模式</title>
+      <link>https://kubesphereio.com/post/singleton-service/</link>
+      <pubDate>Tue, 12 Jan 2021 20:03:26 +0800</pubDate>
+      
+      <guid>https://kubesphereio.com/post/singleton-service/</guid>
+      <description>&lt;p&gt;Singleton服务模式确保了应用的一个实例同时只有一个是激活的，但又是高度可用的。这种模式可以从应用内部实现，也可以完全委托给Kubernetes。&lt;/p&gt;
+&lt;h2 id=&#34;存在问题&#34;&gt;存在问题&lt;/h2&gt;
+&lt;p&gt;Kubernetes提供的主要功能之一是能够轻松透明地扩展应用。Pods可以通过单一命令（如kubectl scale）强制扩展，或通过控制器定义（如ReplicaSet）声明性扩展，甚至可以根据应用负载Elastic Scale动态扩展。通过运行同一服务的多个实例（不是Kubernetes服务，而是以Pod为代表的分布式应用的一个组件），系统通常会增加吞吐量和可用性。可用性增加的原因是，如果一个服务实例变得不健康，请求调度器会将未来的请求转发给其他健康的实例。在Kubernetes中，多个实例是一个Pod的复本，Service资源负责请求调度。&lt;/p&gt;
+&lt;p&gt;但是，在某些情况下，一次只允许运行一个服务的实例。 例如，如果一个服务中有一个周期性执行的任务，而同一服务又有多个实例，那么每个实例都会在预定的时间间隔内触发任务，导致重复，而不是像预期的那样只有一个任务被触发。另一个例子是对特定资源（文件系统或数据库）执行轮询的服务，我们要确保只有一个实例，甚至可能只有一个线程执行轮询和处理。第三种情况发生在我们要用一个单线程的消费者从消息经纪人那里依次消费消息，这个消费者也是一个单人服务。&lt;/p&gt;
+&lt;p&gt;在所有这些和类似的情况下，我们需要对每一次一个激活的服务多少个实例（通常只需要一个）进行一些控制，不管有多少个实例被启动并保持运行。&lt;/p&gt;
+&lt;h2 id=&#34;解决方案&#34;&gt;解决方案&lt;/h2&gt;
+&lt;p&gt;运行同一个Pod的多个副本会创建一个主-主的拓扑，其中一个服务的所有实例都是主的。我们需要的是一种主-被（或主从）拓扑，其中只有一个实例是主的，而其他所有实例都是被的。从根本上说，这可以在两个可能的层次上实现：应用外锁定和应用内锁定。&lt;/p&gt;
+&lt;h4 id=&#34;应用外锁&#34;&gt;应用外锁&lt;/h4&gt;
+&lt;p&gt;顾名思义，这种机制依赖于应用程序之外的管理进程，以确保应用程序只有一个实例在运行。应用程序的实现本身并不知道这个约束，而是作为一个单体实例运行。从这个角度来看，它类似于拥有一个Java类，它只被管理运行时（如Spring框架）实例化一次。类的实现并不知道它是作为单例运行的，也不知道它包含任何代码构造来防止实例化多个实例。图1-1显示了如何借助StatefulSet或ReplicaSet控制器与一个副本实现应用外锁定。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;out-of-application-locking.png&#34; alt=&#34;out-of-application-locking.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在Kubernetes中实现的方法是用一个副本启动一个Pod。单单这个活动并不能保证单体Pod的高可用。我们要做的是还要用一个控制器（比如ReplicaSet）来支持Pod，将单体Pod变成一个高可用的单体。这种拓扑结构并不完全是主-动（没有被动实例），但效果是一样的，因为Kubernetes保证了Pod的一个实例一直在运行。此外，单体Pod实例是高度可用的，这要归功于控制器在Pod出现故障时执行健康检查、HealthProbe和愈合。&lt;/p&gt;
+&lt;p&gt;这种方式主要需要注意的是副本数，不要一不小心就增加了，因为没有平台级的机制来防止副本数的变化。&lt;/p&gt;
+&lt;p&gt;任何时候都只有一个实例在运行，这并不完全正确，尤其是当事情出错时。Kubernetes 基元（如 ReplicaSet）倾向于可用性而非一致性&amp;ndash;这是为了实现高可用和可扩展的分布式系统而做出的慎重决定。这意味着ReplicaSet对其副本采用 &amp;ldquo;至少 &amp;ldquo;而非 &amp;ldquo;最多 &amp;ldquo;的语义。如果我们将ReplicaSet配置为具有副本的单例：1，控制器确保至少有一个实例一直在运行，但偶尔也可以有更多的实例。&lt;/p&gt;
+&lt;p&gt;这里最常见的情况是，当一个带有控制器管理的Pod的节点变得不健康并与Kubernetes集群的其他节点断开连接时。在这种情况下，ReplicaSet控制器会在一个健康的节点上启动另一个Pod实例（假设有足够的容量），而不确保断开连接的节点上的Pod被关闭。同样，当改变副本数量或将Pod迁移到不同节点时，Pod的数量可能会暂时超过所需数量。这种临时增加的目的是为了确保高可用性和避免中断，这是无状态和可扩展应用的需要。&lt;/p&gt;
+&lt;p&gt;单例可以具有弹性和恢复能力，但根据定义，它不是高可用的。单子通常倾向于一致性而非可用性。Kubernetes资源同样倾向于一致性而非可用性，并提供所需的严格单例保证是StatefulSet。如果ReplicaSets不能为你的应用提供所需的保证，而你又有严格的单例要求，StatefulSets可能是答案。StatefulSets旨在为有状态的应用程序提供许多特性，包括更强的单例保证，但它们也增加了复杂性。我们将讨论有关单例的问题，并在第后续章Stateful Service中更详细地介绍StatefulSets。&lt;/p&gt;
+&lt;p&gt;通常情况下，在Kubernetes上的Pod中运行的单体应用会打开与消息中介、关系型数据库、文件服务器或其他Pod上运行的系统或外部系统的传出连接。然而，偶尔，你的单例Pod可能需要接受传入连接，在Kubernetes上启用的方式是通过Service资源。&lt;/p&gt;
+&lt;p&gt;我们在下面章 &amp;ldquo;服务发现 &amp;ldquo;中对Kubernetes服务进行了深入的介绍，但我们在这里简单讨论一下适用于单体的部分。一个普通的Service（类型为：ClusterIP）会创建一个虚拟IP，并在其选择器匹配的所有Pod实例中执行负载均衡。但是通过StatefulSet管理的单例Pod只有一个Pod和一个稳定的网络身份。在这种情况下，最好创建一个无头服务(通过设置type: ClusterIP和clusterIP: None)。之所以称为无头，是因为这样的Service没有虚拟IP地址，kube-proxy不处理这些Service，平台也不执行代理。&lt;/p&gt;
+&lt;p&gt;然而，这样的服务仍然是有用的，因为带有选择器的无头服务在API服务器中创建端点记录，并为匹配的Pod生成DNS A记录，这样，服务的DNS查询就不会返回它的虚拟IP，而是返回支持Pod的IP地址。这样就可以通过服务的DNS记录直接访问单例Pod，而不需要通过服务的虚拟IP。例如，如果我们创建了一个名为my-singleton的无头服务，我们可以使用my-singleton.default.svc.cluster.local来直接访问Pod的IP地址。&lt;/p&gt;
+&lt;p&gt;综上所述，对于非严格的单例来说，一个有一个副本的ReplicaSet和一个普通的Service就足够了。对于严格的单例和性能更好的服务发现，最好使用StatefulSet和无头Service。你可以在后面章Stateful Service中找到一个完整的例子，在这里你必须将副本的数量改为一个，使其成为一个单例。&lt;/p&gt;
+&lt;h4 id=&#34;应用内锁&#34;&gt;应用内锁&lt;/h4&gt;
+&lt;p&gt;在分布式环境中，控制服务实例数量的方法之一是通过分布式锁，如图1-2所示。每当一个服务实例或实例内部的组件被激活时，它都可以尝试获取一个锁，如果成功了，服务就会成为活动状态。任何后续的服务实例如果未能获取锁，则会等待并不断尝试获取锁，以防当前激活的服务释放锁。&lt;/p&gt;
+&lt;p&gt;许多现有的分布式框架使用这种机制来实现高可用性和弹性。例如，消息中间件Apache ActiveMQ可以在一个高可用的主-被拓扑中运行，其中数据源提供共享锁。第一个启动的中间件实例获得锁并成为主，随后启动的其他实例则成为被，等待锁被释放。这种策略可以确保有一个单一的主中间件实例，同时也能抵御故障的发生。
+图1-2所示应用内锁&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;application-in-lock.png&#34; alt=&#34;application-in-lock.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我们可以将这种策略与面向对象中的经典单例进行比较：单例是一个存储在静态类变量中的对象实例。在这个实例中，该类意识到自己是一个单例，而且它的编写方式不允许为同一个进程实例化多个实例。在分布式系统中，这意味着容器化应用程序本身必须以一种不允许同时有多个活动实例的方式来编写，无论启动的Pod实例数量有多少。要在分布式环境中实现这一点，首先，我们需要一个分布式锁的实现，比如Apache ZooKeeper、HashiCorp的Consul、Redis或Etcd提供的锁。&lt;/p&gt;
+&lt;p&gt;ZooKeeper的典型实现是使用临时节点，只要有客户端会话就存在，一旦会话结束就会被删除。第一个启动的服务实例在ZooKeeper服务器上发起一个会话，并创建一个临时节点成为活动节点。同一个集群的所有其他服务实例都会变成被的，必须等待临时节点被释放。这就是基于ZooKeeper的实现如何确保整个集群中只有一个主服务实例，确保主/被的故障转移行为。&lt;/p&gt;
+&lt;p&gt;在Kubernetes的世界里，与其仅仅为了锁定功能而管理ZooKeeper集群，不如使用通过Kubernetes API暴露的、运行在主节点上的Etcd功能。Etcd是一个分布式键值存储，它使用Raft协议来维护其副本状态。最重要的是，它为实现领导者选举提供了必要的构件，一些客户端库已经实现了这个功能。例如，Apache Camel有一个Kubernetes连接器，它也提供了领导者选举和单人能力。这个连接器更进一步，它没有直接访问Etcd API，而是使用Kubernetes API来利用ConfigMaps作为分布式锁。它依靠Kubernetes乐观的锁定保证来编辑ConfigMaps等资源，一次只能更新一个Pod的ConfigMap。&lt;/p&gt;
+&lt;p&gt;Camel的实现使用这个保证来确保只有一个Camel路由实例是活动的，其他实例必须等待并获得锁才能激活。这是对锁的自定义实现，但实现了同样的目标：当有多个Pods使用同一个Camel应用时，只有其中一个成为主单体，其他单体在从模式下等待。&lt;/p&gt;
+&lt;p&gt;使用ZooKeeper、Etcd或其他任何分布式锁的实现将与所述的类似：只有一个应用实例成为领导者并激活自己，其他从实例等待锁。这就保证了即使启动了多个Pod副本，并且都是健康的、启动的、运行的，也只有一个服务是主动的，并作为单例执行业务功能，其他实例都在等待获取锁，以防主控失败或关闭。&lt;/p&gt;
+&lt;h4 id=&#34;pod中断的安排&#34;&gt;Pod中断的安排&lt;/h4&gt;
+&lt;p&gt;单体服务和领导者选举试图限制一个服务同时运行的最大实例数量，而Kubernetes的Pod DisruptionBudget功能则提供了一个互补的、有点相反的功能&amp;ndash;限制同时停机维护的实例数量。&lt;/p&gt;
+&lt;p&gt;在它的核心，PodDisruptionBudget确保一定数量或百分比的Pod不会在任何一个时间点上自愿从一个节点上被驱逐。这里的自愿是指可以延迟特定时间的驱逐，例如，当它是由维护或升级的节点耗尽（kubectl drain），或集群缩减触发的，而不是节点变得不健康，这无法预测或控制。&lt;/p&gt;
+&lt;p&gt;例1-1中的PodDisruptionBudget适用于与其选择器相匹配的Pod，并确保两个Pod必须一直可用。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;例1-1 PodDisruptionBudget
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: random-generator-pdb
+spec:
+  selector:
+    matchLabels:
+      app: reandom-generator
+  minAvailable: 2
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;除了.spec.minAvailable，还有一个选项是使用.spec.maxUnavailable，它指定了该集的Pods数量，可以在驱逐后不可用。但是你不能同时指定这两个字段，PodDisruptionBudget通常只适用于由控制器管理的Pod。对于不由控制器管理的花苞（也被称为裸露或裸露的Pods），应该考虑围绕PodDisruptionBudget的其他限制。&lt;/p&gt;
+&lt;p&gt;该功能对于基于法定人数的应用非常有用，这些应用要求在任何时候都有最少数量的副本运行以确保法定人数。或者当一个应用程序正在服务于关键流量，而这些流量永远不应该低于实例总数的某个百分比。这是Kubernetes另一个控制和影响运行时实例管理的基元，在本章值得一提。&lt;/p&gt;
+&lt;h2 id=&#34;讨论&#34;&gt;讨论&lt;/h2&gt;
+&lt;p&gt;如果你的用例需要强大的单例保证，你就不能依赖ReplicaSets的应用外锁定机制。Kubernetes ReplicaSets的设计是为了维护其Pod的可用性，而不是为了确保Pod的最多单例语义。因此，有很多故障场景（例如，当运行单体Pod的节点与集群的其他节点分区时，例如用新的Pod实例替换删除的Pod实例时），一个Pod的两个副本在短时间内并发运行。如果不能接受，请使用StatefulSets或研究应用程序中的锁定选项，这些选项可以为您提供更多的控制领导者选举过程，并提供更强的保证。后者还可以防止通过改变副本数量来意外扩展Pod。&lt;/p&gt;
+&lt;p&gt;在其他情况下，容器化应用程序中只有一部分应该是单例。例如，可能有一个容器化应用程序提供了一个HTTP端点，该端点可以安全地扩展到多个实例，但也有一个轮询组件必须是一个单例。使用应用外锁定的方法将防止对整个服务进行扩展。同时，作为结果，我们要么在其部署单元中拆分单体人组件，使其保持单体身份（理论上是好的，但并不总是实用的，值得开销），要么使用应用内锁定机制，只锁定必须是单体的组件。这将允许我们透明地扩展整个应用，让HTTP端点进行扩展，并让其他部分作为主-被单体。&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>K8s中Daemon服务设计模式</title>
